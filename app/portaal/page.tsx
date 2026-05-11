@@ -219,22 +219,22 @@ function DashboardView() {
           {label:'Deze week', value:stats?.week??'—', sub:'afspraken', green:false},
           {label:'Klanten', value:stats?.totalCustomers??'—', sub:'uniek totaal', green:false},
         ].map(c=>(
-          <div key={c.label} className={`rounded-2xl p-5 shadow-sm border ${c.green?'bg-brand border-brand-dark':'bg-white border-gray-100'}`}>
-            <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${c.green?'text-green-200':'text-gray-600'}`}>{c.label}</p>
+          <div key={c.label} className={`rounded-2xl p-5 shadow-md border ${c.green?'bg-brand border-brand-dark':'bg-white border-gray-200'}`}>
+            <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${c.green?'text-blue-100':'text-gray-600'}`}>{c.label}</p>
             <p className={`text-3xl font-black ${c.green?'text-white':'text-gray-900'}`}>{c.value}</p>
-            <p className={`text-xs font-semibold mt-0.5 ${c.green?'text-green-200':'text-gray-600'}`}>{c.sub}</p>
+            <p className={`text-xs font-semibold mt-0.5 ${c.green?'text-blue-100':'text-gray-600'}`}>{c.sub}</p>
           </div>
         ))}
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Aankomende afspraken */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-            <span className="text-lg">🕐</span>
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+          <div className="flex items-center gap-3 px-5 py-4 bg-brand">
+            <span className="text-xl">🕐</span>
             <div>
-              <h2 className="font-black text-gray-900 text-base">Aankomende afspraken</h2>
-              <p className="text-xs text-gray-600">Volgende {upcoming.length} afspraken</p>
+              <h2 className="font-black text-white text-base">Aankomende afspraken</h2>
+              <p className="text-xs text-blue-100">Volgende {upcoming.length} afspraken</p>
             </div>
           </div>
           {upcoming.length===0 ? (
@@ -258,12 +258,12 @@ function DashboardView() {
         </div>
 
         {/* Vandaag schema */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-            <span className="text-lg">📅</span>
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+          <div className="flex items-center gap-3 px-5 py-4 bg-brand">
+            <span className="text-xl">📅</span>
             <div>
-              <h2 className="font-black text-gray-900 text-base">Schema vandaag</h2>
-              <p className="text-xs text-gray-600 capitalize">{formatLongDate(today)}</p>
+              <h2 className="font-black text-white text-base">Schema vandaag</h2>
+              <p className="text-xs text-blue-100 capitalize">{formatLongDate(today)}</p>
             </div>
           </div>
           <div className="overflow-y-auto max-h-72">
