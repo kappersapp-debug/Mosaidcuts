@@ -271,20 +271,19 @@ function DashboardView() {
               const b = stats?.todayBookings?.find(b=>b.time===slot)
               const isPause = isBreak(slot, breakEnabled, breakStart, breakEnd)
               return (
-                <div key={slot} className={`flex items-center gap-3 px-4 py-2 border-b border-gray-50 ${b?'bg-brand-light':isPause?'bg-amber-50':''}`}>
-                  <span className={`font-black text-xs w-10 shrink-0 ${isPause?'text-amber-500':'text-brand'}`}>{slot}</span>
+                <div key={slot} className={`flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 ${b?'bg-brand-light':isPause?'bg-amber-50':'bg-gray-50/60'}`}>
+                  <span className={`font-black text-xs w-14 text-center shrink-0 px-2 py-1 rounded-lg ${b?'bg-brand text-white':isPause?'bg-amber-100 text-amber-700':'bg-white text-brand border border-brand/20'}`}>{slot}</span>
                   {isPause ? (
-                    <span className="text-amber-500 text-xs font-semibold">☕ Pauze</span>
+                    <span className="text-amber-700 text-xs font-bold">☕ Pauze</span>
                   ) : b ? (
                     <>
-                      <div className="w-2 h-2 rounded-full bg-brand shrink-0"/>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="font-bold text-gray-900 text-sm truncate">{b.name}</p>
                         <p className="text-xs text-gray-600 truncate">{b.service}</p>
                       </div>
-                      <span className="ml-auto text-brand font-bold text-sm shrink-0">€{b.price}</span>
+                      <span className="ml-auto bg-brand text-white font-bold text-xs px-2 py-1 rounded-lg shrink-0">€{b.price}</span>
                     </>
-                  ) : <span className="text-gray-500 text-xs">Vrij</span>}
+                  ) : <span className="text-gray-500 text-xs font-medium">Vrij</span>}
                 </div>
               )
             })}
@@ -425,13 +424,10 @@ function CalendarView() {
               const b = dayBookings.find(b=>b.time===slot)
               const isPause = isBreak(slot, breakEnabled, breakStart, breakEnd)
               return (
-                <div key={slot} className={`flex items-center gap-3 px-4 py-2.5 border-b border-gray-50 ${b?'bg-brand-light':isPause?'bg-amber-50':''}`}>
-                  <div className="flex items-center gap-2 shrink-0 w-16">
-                    <div className={`w-2 h-2 rounded-full shrink-0 ${b?'bg-brand':isPause?'bg-amber-400':'bg-gray-200'}`}/>
-                    <span className={`font-black text-xs ${isPause?'text-amber-500':'text-brand'}`}>{slot}</span>
-                  </div>
+                <div key={slot} className={`flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 ${b?'bg-brand-light':isPause?'bg-amber-50':'bg-gray-50/60'}`}>
+                  <span className={`font-black text-xs w-14 text-center shrink-0 px-2 py-1 rounded-lg ${b?'bg-brand text-white':isPause?'bg-amber-100 text-amber-700':'bg-white text-brand border border-brand/20'}`}>{slot}</span>
                   {isPause ? (
-                    <span className="text-amber-500 text-xs font-semibold">☕ Pauze</span>
+                    <span className="text-amber-700 text-xs font-bold">☕ Pauze</span>
                   ) : b ? (
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-gray-900 text-sm truncate">{b.name}</p>
