@@ -18,21 +18,25 @@ interface MailOptions {
 
 export async function sendMail({ to, subject, html }: MailOptions): Promise<void> {
   if (process.env.BREVO_API_KEY) {
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': process.env.BREVO_API_KEY,
-      },
-      body: JSON.stringify({
-        sender: { name: 'MoSaidCuts', email: process.env.GMAIL_USER },
-        to: [{ email: to }],
-        subject,
-        htmlContent: html,
-      }),
-    })
-    if (!res.ok) throw new Error(`Brevo: ${await res.text()}`)
-    return
+    try {
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': process.env.BREVO_API_KEY,
+        },
+        body: JSON.stringify({
+          sender: { name: 'MoSaidCuts', email: process.env.GMAIL_USER },
+          to: [{ email: to }],
+          subject,
+          htmlContent: html,
+        }),
+      })
+      if (res.ok) return
+      console.warn('[MoSaidCuts] Brevo fout:', res.status, await res.text())
+    } catch (err) {
+      console.warn('[MoSaidCuts] Brevo niet bereikbaar, Gmail fallback:', err instanceof Error ? err.message : err)
+    }
   }
 
   // Fallback: Gmail SMTP
