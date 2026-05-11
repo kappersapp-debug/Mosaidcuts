@@ -1,0 +1,141 @@
+import { supabaseAdmin } from '@/lib/supabase'
+import { transporter } from '@/lib/mailer'
+
+function generateCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let code = 'MSC'
+  for (let i = 0; i < 5; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return code
+}
+
+const NL_DAYS = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag']
+const NL_MONTHS = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december']
+
+function formatDateNL(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00')
+  return `${NL_DAYS[d.getDay()]} ${d.getDate()} ${NL_MONTHS[d.getMonth()]} ${d.getFullYear()}`
+}
+
+export async function POST(request: Request) {
+  const body = await request.json()
+  const { name, phone, email, service, price, duration, date, time } = body
+
+  if (!name || !phone || !email || !service || !date || !time) {
+    return Response.json({ error: 'Alle velden zijn vereist' }, { status: 400 })
+  }
+  if (name.length > 100 || phone.length > 30 || email.length > 254 || service.length > 100) {
+    return Response.json({ error: 'Ongeldige invoer' }, { status: 400 })
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) {
+    return Response.json({ error: 'Ongeldige datum of tijd' }, { status: 400 })
+  }
+
+  // Check again if slot is still available
+  const { data: existing } = await supabaseAdmin
+    .from('bookings')
+    .select('time, duration')
+    .eq('date', date)
+
+  const [th, tm] = time.split(':').map(Number)
+  const tStart = th * 60 + tm
+  const tEnd = tStart + duration
+
+  for (const b of existing ?? []) {
+    const [bh, bm] = b.time.split(':').map(Number)
+    const bStart = bh * 60 + bm
+    const bEnd = bStart + b.duration
+    if (bStart < tEnd && tStart < bEnd) {
+      return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
+    }
+  }
+
+  // Generate unique booking code
+  let code = generateCode()
+  let attempt = 0
+  while (attempt < 5) {
+    const { data: exists } = await supabaseAdmin.from('bookings').select('id').eq('code', code).single()
+    if (!exists) break
+    code = generateCode()
+    attempt++
+  }
+
+  const { error } = await supabaseAdmin.from('bookings').insert({
+    code, name, phone,
+    email: email.toLowerCase(),
+    service, price, duration, date, time,
+  })
+
+  if (error) return Response.json({ error: 'Boeking kon niet worden opgeslagen' }, { status: 500 })
+
+  // Send confirmation email via Gmail
+  const cancelUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'}/?annuleer=${code}`
+
+  try {
+    await transporter.sendMail({
+      from: `MoSaidCuts ✂ <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: `Afspraak bevestigd – ${code}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;">
+          <div style="background:#2d7a4f;padding:24px 32px;border-radius:12px 12px 0 0;">
+            <h1 style="color:#fff;margin:0;font-size:24px;">✂ MoSaidCuts</h1>
+          </div>
+          <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;">
+            <h2 style="color:#2d7a4f;margin-top:0;">Afspraak bevestigd!</h2>
+            <p>Hallo <strong>${name}</strong>, uw afspraak is bevestigd.</p>
+            <div style="background:#e8f4ed;border-radius:10px;padding:20px;margin:20px 0;">
+              <p style="margin:6px 0;"><strong>Boekingscode:</strong> <span style="font-size:18px;font-weight:800;color:#2d7a4f;">${code}</span></p>
+              <p style="margin:6px 0;"><strong>Dienst:</strong> ${service}</p>
+              <p style="margin:6px 0;"><strong>Datum:</strong> ${formatDateNL(date)}</p>
+              <p style="margin:6px 0;"><strong>Tijd:</strong> ${time}</p>
+              <p style="margin:6px 0;"><strong>Prijs:</strong> €${price}</p>
+            </div>
+            <div style="text-align:center;margin:24px 0;">
+              <a href="${cancelUrl}"
+                style="display:inline-block;background:#dc2626;color:#fff;font-weight:700;padding:12px 28px;border-radius:10px;text-decoration:none;font-size:15px;">
+                Afspraak annuleren
+              </a>
+            </div>
+            <p style="color:#888;font-size:12px;text-align:center;">Of gebruik boekingscode <strong>${code}</strong> op de website.</p>
+          </div>
+        </div>
+      `,
+    })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.warn('[MoSaidCuts] Bevestigingsmail mislukt:', msg)
+  }
+
+  // Stuur melding naar kapper als instelling aan staat
+  const { data: notifSetting } = await supabaseAdmin
+    .from('settings').select('value').eq('key', 'notifications_new_booking').single()
+
+  if (notifSetting?.value === 'true' && process.env.GMAIL_USER) {
+    try {
+      await transporter.sendMail({
+        from: `MoSaidCuts ✂ <${process.env.GMAIL_USER}>`,
+        to: process.env.GMAIL_USER,
+        subject: `🔔 Nieuwe afspraak – ${name}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;">
+            <div style="background:#2d7a4f;padding:20px 28px;border-radius:10px 10px 0 0;">
+              <h2 style="color:#fff;margin:0;">✂ Nieuwe afspraak</h2>
+            </div>
+            <div style="background:#f9fafb;padding:24px 28px;border-radius:0 0 10px 10px;border:1px solid #e5e7eb;">
+              <p style="margin:6px 0;"><strong>Naam:</strong> ${name}</p>
+              <p style="margin:6px 0;"><strong>Dienst:</strong> ${service}</p>
+              <p style="margin:6px 0;"><strong>Datum:</strong> ${formatDateNL(date)}</p>
+              <p style="margin:6px 0;"><strong>Tijd:</strong> ${time}</p>
+              <p style="margin:6px 0;"><strong>Tel:</strong> ${phone}</p>
+              <p style="margin:6px 0;"><strong>Code:</strong> ${code}</p>
+            </div>
+          </div>
+        `,
+      })
+    } catch { /* non-fatal */ }
+  }
+
+  return Response.json({ success: true, code, service, price, duration, date, time, name })
+}
