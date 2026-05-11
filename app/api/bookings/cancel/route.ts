@@ -62,11 +62,13 @@ export async function POST(request: Request) {
   attempts.delete(ip)
   await supabaseAdmin.from('bookings').delete().eq('id', booking.id)
 
-  transporter.sendMail({
-    to: booking.email,
-    subject: `Afspraak geannuleerd – ${booking.code}`,
-    html: cancelMailHtml(booking),
-  }).catch(() => {})
+  try {
+    await transporter.sendMail({
+      to: booking.email,
+      subject: `Afspraak geannuleerd – ${booking.code}`,
+      html: cancelMailHtml(booking),
+    })
+  } catch { /* non-fatal */ }
 
   return Response.json({ success: true })
 }

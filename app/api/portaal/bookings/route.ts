@@ -57,11 +57,13 @@ export async function DELETE(request: Request) {
   if (error) return Response.json({ error: 'Fout bij verwijderen' }, { status: 500 })
 
   if (booking) {
-    transporter.sendMail({
-      to: booking.email,
-      subject: `Afspraak geannuleerd – ${booking.code}`,
-      html: cancelMailHtml(booking),
-    }).catch(() => {})
+    try {
+      await transporter.sendMail({
+        to: booking.email,
+        subject: `Afspraak geannuleerd – ${booking.code}`,
+        html: cancelMailHtml(booking),
+      })
+    } catch { /* non-fatal */ }
   }
 
   return Response.json({ success: true })
