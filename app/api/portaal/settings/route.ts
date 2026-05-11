@@ -1,6 +1,7 @@
-import { verifyPortalAuth } from '@/lib/auth'
+import { verifyPortalAuth, makeSessionToken } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { makeSessionToken } from '@/lib/auth'
+import { transporter } from '@/lib/mailer'
+import { cancelMailHtml } from '@/app/api/bookings/cancel/route'
 import { cookies } from 'next/headers'
 
 export async function GET() {
@@ -21,6 +22,34 @@ export async function POST(request: Request) {
 
   const { key, value } = await request.json()
   if (!key) return Response.json({ error: 'key vereist' }, { status: 400 })
+
+  // Auto-cancel bookings on newly blocked dates
+  if (key === 'blocked_dates') {
+    const newDates: string[] = JSON.parse(value ?? '[]')
+    const { data: existing } = await supabaseAdmin.from('settings').select('value').eq('key', 'blocked_dates').single()
+    const oldDates: string[] = existing ? JSON.parse(existing.value ?? '[]') : []
+    const added = newDates.filter(d => !oldDates.includes(d))
+
+    if (added.length > 0) {
+      const { data: affected } = await supabaseAdmin
+        .from('bookings')
+        .select('id, email, name, code, service, date, time')
+        .in('date', added)
+
+      if (affected && affected.length > 0) {
+        await supabaseAdmin.from('bookings').delete().in('date', added)
+        for (const booking of affected) {
+          try {
+            await transporter.sendMail({
+              to: booking.email,
+              subject: `Afspraak geannuleerd – ${booking.code}`,
+              html: cancelMailHtml(booking),
+            })
+          } catch { /* non-fatal */ }
+        }
+      }
+    }
+  }
 
   await supabaseAdmin.from('settings').upsert(
     { key, value, updated_at: new Date().toISOString() },
