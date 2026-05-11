@@ -110,7 +110,7 @@ function Calendar({ value, onChange, availability, blockedDates }: {
       </div>
       <div className="grid grid-cols-7 mb-1">
         {NL_DAYS_SHORT.map(d => (
-          <div key={d} className="text-center text-xs font-semibold text-gray-400 py-1">{d}</div>
+          <div key={d} className="text-center text-xs font-semibold text-gray-500 py-1">{d}</div>
         ))}
       </div>
       <div className="grid grid-cols-7">
@@ -161,11 +161,11 @@ function Progress({ step }: { step: number }) {
             )}
             <div className={[
               'w-8 h-8 rounded-full flex items-center justify-center text-xs font-black mb-1 relative z-10 transition-all',
-              done ? 'bg-brand text-white' : active ? 'bg-brand text-white ring-4 ring-brand/20' : 'bg-gray-200 text-gray-400',
+              done ? 'bg-brand text-white' : active ? 'bg-brand text-white ring-4 ring-brand/20' : 'bg-gray-200 text-gray-500',
             ].join(' ')}>
               {done ? '✓' : n}
             </div>
-            <span className={`text-xs hidden sm:block font-semibold ${active || done ? 'text-brand' : 'text-gray-400'}`}>{label}</span>
+            <span className={`text-xs hidden sm:block font-semibold ${active || done ? 'text-brand' : 'text-gray-500'}`}>{label}</span>
           </div>
         )
       })}
@@ -388,7 +388,7 @@ export default function BookingPage() {
               <div className="text-6xl mb-4">🚫</div>
               <h2 className="text-2xl font-black text-gray-900 mb-2">Toegang Geblokkeerd</h2>
               <p className="text-gray-500 mb-1">Uw e-mailadres is geblokkeerd voor het maken van afspraken.</p>
-              <p className="text-gray-400 text-sm">Neem contact op met de barbershop voor meer informatie.</p>
+              <p className="text-gray-500 text-sm">Neem contact op met de barbershop voor meer informatie.</p>
             </div>
           )}
 
@@ -397,7 +397,7 @@ export default function BookingPage() {
               <div className="text-center mb-6">
                 <div className="w-16 h-16 bg-brand rounded-full flex items-center justify-center mx-auto mb-3 text-3xl text-white shadow-lg">✓</div>
                 <h2 className="text-2xl font-black text-gray-900">Afspraak Bevestigd!</h2>
-                <p className="text-gray-400 text-sm mt-1">U ontvangt een bevestiging per e-mail</p>
+                <p className="text-gray-500 text-sm mt-1">U ontvangt een bevestiging per e-mail</p>
               </div>
               <div className="bg-brand-light rounded-xl p-5 mb-5 text-center">
                 <p className="text-xs font-bold text-brand uppercase tracking-widest mb-1">Boekingscode</p>
@@ -457,7 +457,7 @@ export default function BookingPage() {
               {step === 1 && (
                 <div>
                   <h2 className="text-xl font-black text-gray-900 mb-1">Kies een dienst</h2>
-                  <p className="text-gray-400 text-sm mb-5">Selecteer de gewenste behandeling</p>
+                  <p className="text-gray-500 text-sm mb-5">Selecteer de gewenste behandeling</p>
                   <div className="space-y-3">
                     {services.map(s => (
                       <button key={s.id} onClick={() => { setService(s); setStep(2) }}
@@ -465,7 +465,7 @@ export default function BookingPage() {
                           service?.id === s.id ? 'border-brand bg-brand-light' : 'border-gray-200 hover:border-brand hover:bg-brand-light/50'].join(' ')}>
                         <div>
                           <p className="font-bold text-gray-900">{s.name}</p>
-                          <p className="text-sm text-gray-400">{s.desc}</p>
+                          <p className="text-sm text-gray-500">{s.desc}</p>
                         </div>
                         <p className="text-2xl font-black text-brand ml-4">€{s.price}</p>
                       </button>
@@ -477,7 +477,7 @@ export default function BookingPage() {
               {step === 2 && (
                 <div>
                   <h2 className="text-xl font-black text-gray-900 mb-1">Kies een datum</h2>
-                  <p className="text-gray-400 text-sm mb-5">Selecteer een beschikbare dag</p>
+                  <p className="text-gray-500 text-sm mb-5">Selecteer een beschikbare dag</p>
                   <Calendar value={date} availability={availability} blockedDates={blockedDates} onChange={d => setDate(d)} />
                   <div className="flex gap-3 mt-6">
                     <button onClick={() => setStep(1)} className="flex-1 py-3 rounded-xl border-2 border-gray-200 font-bold text-gray-600 hover:bg-gray-50">‹ Terug</button>
@@ -492,13 +492,13 @@ export default function BookingPage() {
               {step === 3 && (
                 <div>
                   <h2 className="text-xl font-black text-gray-900 mb-1">Kies een tijd</h2>
-                  <p className="text-gray-400 text-sm mb-5 capitalize">{date ? formatDateNL(date) : ''}</p>
+                  <p className="text-gray-500 text-sm mb-5 capitalize">{date ? formatDateNL(date) : ''}</p>
                   {slotsLoading ? (
                     <div className="flex justify-center py-8">
                       <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" />
                     </div>
                   ) : slots.length === 0 ? (
-                    <p className="text-center text-gray-400 py-8 font-medium">Geen beschikbare tijden op deze dag</p>
+                    <p className="text-center text-gray-500 py-8 font-medium">Geen beschikbare tijden op deze dag</p>
                   ) : (
                     <div className="grid grid-cols-4 gap-2">
                       {slots.map(slot => (
@@ -527,7 +527,7 @@ export default function BookingPage() {
               {step === 4 && (
                 <form onSubmit={handleContactSubmit}>
                   <h2 className="text-xl font-black text-gray-900 mb-1">Uw gegevens</h2>
-                  <p className="text-gray-400 text-sm mb-5">Vul uw contactinformatie in</p>
+                  <p className="text-gray-500 text-sm mb-5">Vul uw contactinformatie in</p>
                   <div className="space-y-4">
                     {[
                       { label: 'Naam', key: 'name', type: 'text', placeholder: 'Uw volledige naam', autoComplete: 'name' },
@@ -588,7 +588,7 @@ export default function BookingPage() {
                     className="w-full py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:text-gray-300 text-brand hover:underline">
                     {resendCooldown > 0 ? `Code opnieuw sturen (${resendCooldown}s)` : 'Code opnieuw sturen'}
                   </button>
-                  <button onClick={() => setStep(4)} className="w-full py-2 text-gray-400 text-sm hover:underline mt-1">‹ Terug</button>
+                  <button onClick={() => setStep(4)} className="w-full py-2 text-gray-500 text-sm hover:underline mt-1">‹ Terug</button>
                 </div>
               )}
             </div>
@@ -606,7 +606,7 @@ export default function BookingPage() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-black text-gray-900">🔍 Afspraak opzoeken</h3>
-              <button onClick={()=>{setLookup(false);setLookupResult(null);setLookupError('');setLookupCode('')}} className="text-gray-400 hover:text-gray-600 text-lg font-bold">×</button>
+              <button onClick={()=>{setLookup(false);setLookupResult(null);setLookupError('');setLookupCode('')}} className="text-gray-500 hover:text-gray-600 text-lg font-bold">×</button>
             </div>
             <form onSubmit={handleLookup} className="space-y-2 mb-4">
               <input value={lookupCode} onChange={e=>setLookupCode(e.target.value.toUpperCase())}
@@ -644,7 +644,7 @@ export default function BookingPage() {
         )}
       </div>
 
-      <footer className="text-center text-gray-400 text-xs py-4 pb-8">
+      <footer className="text-center text-gray-500 text-xs py-4 pb-8">
         © {new Date().getFullYear()} MoSaidCuts Barbershop
       </footer>
     </div>

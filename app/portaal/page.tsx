@@ -90,7 +90,7 @@ function LoginScreen({onLogin}: {onLogin:()=>void}) {
             <div className="relative">
               <input type={show?'text':'password'} value={pw} onChange={e=>setPw(e.target.value)} required
                 className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 pr-12 font-medium focus:outline-none focus:border-brand transition-colors"/>
-              <button type="button" onClick={()=>setShow(s=>!s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">{show?'🙈':'👁️'}</button>
+              <button type="button" onClick={()=>setShow(s=>!s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg">{show?'🙈':'👁️'}</button>
             </div>
           </div>
           <button type="submit" disabled={loading} className="w-full py-3 rounded-xl bg-brand text-white font-bold hover:bg-brand-hover disabled:opacity-50 transition-colors">
@@ -220,9 +220,9 @@ function DashboardView() {
           {label:'Klanten', value:stats?.totalCustomers??'—', sub:'uniek totaal', green:false},
         ].map(c=>(
           <div key={c.label} className={`rounded-2xl p-5 shadow-sm border ${c.green?'bg-brand border-brand-dark':'bg-white border-gray-100'}`}>
-            <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${c.green?'text-green-200':'text-gray-400'}`}>{c.label}</p>
+            <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${c.green?'text-green-200':'text-gray-500'}`}>{c.label}</p>
             <p className={`text-3xl font-black ${c.green?'text-white':'text-gray-900'}`}>{c.value}</p>
-            <p className={`text-xs font-semibold mt-0.5 ${c.green?'text-green-200':'text-gray-400'}`}>{c.sub}</p>
+            <p className={`text-xs font-semibold mt-0.5 ${c.green?'text-green-200':'text-gray-500'}`}>{c.sub}</p>
           </div>
         ))}
       </div>
@@ -234,11 +234,11 @@ function DashboardView() {
             <span className="text-lg">🕐</span>
             <div>
               <h2 className="font-black text-gray-900 text-base">Aankomende afspraken</h2>
-              <p className="text-xs text-gray-400">Volgende {upcoming.length} afspraken</p>
+              <p className="text-xs text-gray-500">Volgende {upcoming.length} afspraken</p>
             </div>
           </div>
           {upcoming.length===0 ? (
-            <p className="text-center text-gray-400 py-8 text-sm font-medium">Geen aankomende afspraken</p>
+            <p className="text-center text-gray-500 py-8 text-sm font-medium">Geen aankomende afspraken</p>
           ) : (
             <div className="divide-y divide-gray-50">
               {upcoming.map(b=>(
@@ -249,7 +249,7 @@ function DashboardView() {
                   </div>
                   <div className="min-w-0">
                     <p className="font-black text-gray-900 truncate">{b.name}</p>
-                    <p className="text-xs text-gray-400 font-medium">{b.service}</p>
+                    <p className="text-xs text-gray-500 font-medium">{b.service}</p>
                   </div>
                 </div>
               ))}
@@ -263,7 +263,7 @@ function DashboardView() {
             <span className="text-lg">📅</span>
             <div>
               <h2 className="font-black text-gray-900 text-base">Schema vandaag</h2>
-              <p className="text-xs text-gray-400 capitalize">{formatLongDate(today)}</p>
+              <p className="text-xs text-gray-500 capitalize">{formatLongDate(today)}</p>
             </div>
           </div>
           <div className="overflow-y-auto max-h-72">
@@ -284,7 +284,7 @@ function DashboardView() {
                       </div>
                       <span className="ml-auto text-brand font-bold text-sm shrink-0">€{b.price}</span>
                     </>
-                  ) : <span className="text-gray-300 text-xs">Vrij</span>}
+                  ) : <span className="text-gray-400 text-xs">Vrij</span>}
                 </div>
               )
             })}
@@ -349,7 +349,7 @@ function CalendarView() {
   return (
     <div>
       <h1 className="text-2xl font-black text-gray-900 mb-2">📅 Agenda</h1>
-      <p className="text-gray-400 text-sm mb-6">Klik op een dag om het rooster te zien</p>
+      <p className="text-gray-500 text-sm mb-6">Klik op een dag om het rooster te zien</p>
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Month */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
@@ -363,7 +363,7 @@ function CalendarView() {
               className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-light text-brand font-bold text-xl">›</button>
           </div>
           <div className="grid grid-cols-7 mb-1">
-            {NL_DAYS_SHORT.map(d=><div key={d} className="text-center text-xs font-bold text-gray-400 py-1">{d}</div>)}
+            {NL_DAYS_SHORT.map(d=><div key={d} className="text-center text-xs font-bold text-gray-500 py-1">{d}</div>)}
           </div>
           <div className="grid grid-cols-7">
             {cells.map((day,i)=>{
@@ -412,14 +412,14 @@ function CalendarView() {
             {blockedDates.includes(selectedDay) ? (
               <p className="text-xs text-red-500 font-bold">🔒 Geblokkeerd — geen boekingen mogelijk</p>
             ) : !dayCfg?.open ? (
-              <p className="text-xs text-gray-400 font-bold">Gesloten</p>
+              <p className="text-xs text-gray-500 font-bold">Gesloten</p>
             ) : (
-              <p className="text-xs text-gray-400">{dayBookings.length} afspraken · {dayCfg.start}–{dayCfg.end}</p>
+              <p className="text-xs text-gray-500">{dayBookings.length} afspraken · {dayCfg.start}–{dayCfg.end}</p>
             )}
           </div>
           <div className="overflow-y-auto max-h-96">
             {slots.length === 0 ? (
-              <p className="text-center text-gray-300 text-sm font-medium py-10">Geen rooster beschikbaar</p>
+              <p className="text-center text-gray-400 text-sm font-medium py-10">Geen rooster beschikbaar</p>
             ) : null}
             {slots.map(slot=>{
               const b = dayBookings.find(b=>b.time===slot)
@@ -437,7 +437,7 @@ function CalendarView() {
                       <p className="font-bold text-gray-900 text-sm truncate">{b.name}</p>
                       <p className="text-xs text-gray-500">{b.service} · €{b.price}</p>
                     </div>
-                  ) : <span className="text-gray-300 text-xs font-medium">Vrij</span>}
+                  ) : <span className="text-gray-400 text-xs font-medium">Vrij</span>}
                 </div>
               )
             })}
@@ -477,7 +477,7 @@ function AppointmentsView() {
   const statusBadge = {
     today: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">VANDAAG</span>,
     upcoming: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-brand-light text-brand">AANKOMEND</span>,
-    past: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">VERLEDEN</span>,
+    past: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">VERLEDEN</span>,
   }
 
   const filters = [{id:'upcoming',label:'Aankomend'},{id:'today',label:'Vandaag'},{id:'all',label:'Alle'},{id:'past',label:'Verleden'}] as const
@@ -502,7 +502,7 @@ function AppointmentsView() {
       {loading ? (
         <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin"/></div>
       ) : bookings.length===0 ? (
-        <div className="text-center py-12 text-gray-400 font-medium">Geen afspraken gevonden</div>
+        <div className="text-center py-12 text-gray-500 font-medium">Geen afspraken gevonden</div>
       ) : (
         <div className="space-y-3">
           {bookings.map(b=>{
@@ -525,7 +525,7 @@ function AppointmentsView() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-black text-gray-900">€{b.price}</p>
-                      <p className="text-xs text-gray-400 font-mono">{b.code}</p>
+                      <p className="text-xs text-gray-500 font-mono">{b.code}</p>
                       <button onClick={()=>del(b.id)} disabled={deleting===b.id}
                         className="text-xs text-red-400 hover:text-red-600 font-semibold mt-1 disabled:opacity-50">
                         {deleting===b.id?'...':'🗑 Verwijder'}
@@ -658,7 +658,7 @@ function ServicesView() {
             </div>
           </div>
         ))}
-        {services.length===0 && <p className="text-center text-gray-400 py-8 font-medium">Geen diensten</p>}
+        {services.length===0 && <p className="text-center text-gray-500 py-8 font-medium">Geen diensten</p>}
       </div>
     </div>
   )
@@ -731,14 +731,14 @@ function ManagementView() {
           <h2 className="font-black text-gray-900">Gebande e-mails ({banned.length})</h2>
         </div>
         {banned.length===0 ? (
-          <p className="text-center text-gray-400 font-medium py-10">Geen gebande e-mails</p>
+          <p className="text-center text-gray-500 font-medium py-10">Geen gebande e-mails</p>
         ) : (
           <div className="divide-y divide-gray-100">
             {banned.map(b=>(
               <div key={b.id} className="flex items-center justify-between px-5 py-4 gap-4">
                 <div className="min-w-0">
                   <p className="font-bold text-gray-900 truncate">🚫 {b.email}</p>
-                  {b.reason && <p className="text-xs text-gray-400 mt-0.5">{b.reason}</p>}
+                  {b.reason && <p className="text-xs text-gray-500 mt-0.5">{b.reason}</p>}
                 </div>
                 <button onClick={()=>unban(b.email)} disabled={actionLoading===b.email}
                   className="shrink-0 px-3 py-1.5 border-2 border-brand text-brand rounded-xl text-xs font-bold hover:bg-brand-light transition-colors disabled:opacity-50">
@@ -781,7 +781,7 @@ function BlockedCalendar({blocked, onChange}: {blocked: string[]; onChange: (dat
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600 font-bold text-lg transition-colors">›</button>
       </div>
       <div className="grid grid-cols-7 mb-1">
-        {NL_DAYS_SHORT.map(d=><div key={d} className="text-center text-xs font-bold text-gray-400 py-1">{d}</div>)}
+        {NL_DAYS_SHORT.map(d=><div key={d} className="text-center text-xs font-bold text-gray-500 py-1">{d}</div>)}
       </div>
       <div className="grid grid-cols-7 gap-1">
         {cells.map((day,i)=>{
@@ -905,28 +905,28 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
       {/* Beschikbaarheid + Werktijden per dag */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <h2 className="font-black text-gray-900 mb-1">📆 Beschikbaarheid & Werktijden</h2>
-        <p className="text-xs text-gray-400 mb-4">Zet dagen aan/uit en stel per dag uw begin- en eindtijd in</p>
+        <p className="text-xs text-gray-500 mb-4">Zet dagen aan/uit en stel per dag uw begin- en eindtijd in</p>
         <div className="space-y-2 mb-4">
           {dayOrder.map(day => {
             const cfg = daySchedule[day]
             return (
               <div key={day} className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-colors ${cfg.open ? 'border-brand-muted bg-brand-light/40' : 'border-gray-100 bg-gray-50'}`}>
                 <Toggle value={cfg.open} onChange={v => updateDay(day, {open: v})} />
-                <span className={`font-bold text-sm w-20 shrink-0 ${cfg.open ? 'text-gray-900' : 'text-gray-400'}`}>{NL_DAY_LABELS[day]}</span>
+                <span className={`font-bold text-sm w-20 shrink-0 ${cfg.open ? 'text-gray-900' : 'text-gray-500'}`}>{NL_DAY_LABELS[day]}</span>
                 {cfg.open ? (
                   <div className="flex items-center gap-2 flex-1 flex-wrap">
                     <select value={cfg.start} onChange={e => updateDay(day, {start: e.target.value})}
                       className="border-2 border-gray-200 rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-brand transition-colors bg-white">
                       {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
-                    <span className="text-gray-400 font-bold text-sm">→</span>
+                    <span className="text-gray-500 font-bold text-sm">→</span>
                     <select value={cfg.end} onChange={e => updateDay(day, {end: e.target.value})}
                       className="border-2 border-gray-200 rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-brand transition-colors bg-white">
                       {timeOptions.filter(t => t > cfg.start).map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                 ) : (
-                  <span className="text-gray-300 text-sm font-medium italic flex-1">Gesloten</span>
+                  <span className="text-gray-400 text-sm font-medium italic flex-1">Gesloten</span>
                 )}
               </div>
             )
@@ -937,7 +937,7 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="font-bold text-gray-900 text-sm">☕ Pauze</p>
-              <p className="text-xs text-gray-400">Geen boekingen tijdens pauze</p>
+              <p className="text-xs text-gray-500">Geen boekingen tijdens pauze</p>
             </div>
             <Toggle value={breakEnabled} onChange={setBreakEnabled}/>
           </div>
@@ -947,7 +947,7 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
                 className="border-2 border-gray-200 rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-brand transition-colors bg-white">
                 {timeOptions.map(t=><option key={t} value={t}>{t}</option>)}
               </select>
-              <span className="text-gray-400 font-bold text-sm">→</span>
+              <span className="text-gray-500 font-bold text-sm">→</span>
               <select value={breakEnd} onChange={e=>setBreakEnd(e.target.value)}
                 className="border-2 border-gray-200 rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-brand transition-colors bg-white">
                 {timeOptions.filter(t=>t>breakStart).map(t=><option key={t} value={t}>{t}</option>)}
@@ -976,7 +976,7 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
       {/* Geblokkeerde datums */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <h2 className="font-black text-gray-900 mb-1">🏖️ Vrije dagen / Vakantie</h2>
-        <p className="text-xs text-gray-400 mb-4">Klik op meerdere datums om ze te blokkeren — klik opnieuw om te deblokkeren</p>
+        <p className="text-xs text-gray-500 mb-4">Klik op meerdere datums om ze te blokkeren — klik opnieuw om te deblokkeren</p>
         <BlockedCalendar blocked={blockedDates} onChange={setBlockedDates}/>
         {blockedDates.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
@@ -1001,7 +1001,7 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
       {/* Exporteren */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <h2 className="font-black text-gray-900 mb-1">📤 Exporteren</h2>
-        <p className="text-xs text-gray-400 mb-4">Download uw agenda als kalenderbestand</p>
+        <p className="text-xs text-gray-500 mb-4">Download uw agenda als kalenderbestand</p>
         <div className="flex items-center justify-between py-3 border border-gray-100 rounded-xl px-4">
           <div>
             <p className="font-bold text-gray-900 text-sm">Exporteer alle afspraken</p>

@@ -2,9 +2,9 @@
 
 @theme {
   --font-sans: var(--font-nunito);
-  --color-brand: #2d7a4f;
-  --color-brand-dark: #1e5535;
-  --color-brand-hover: #256644;
-  --color-brand-light: #e8f4ed;
-  --color-brand-muted: #c8e6d3;
+  --color-brand: #1d4ed8;
+  --color-brand-dark: #1e3a8a;
+  --color-brand-hover: #1e40af;
+  --color-brand-light: #dbeafe;
+  --color-brand-muted: #bfdbfe;
 }

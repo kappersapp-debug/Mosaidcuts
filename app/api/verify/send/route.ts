@@ -41,13 +41,13 @@ export async function POST(request: Request) {
       subject: 'Uw verificatiecode – MoSaidCuts',
       html: `
         <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;">
-          <div style="background:#2d7a4f;padding:24px 32px;border-radius:12px 12px 0 0;">
+          <div style="background:#1d4ed8;padding:24px 32px;border-radius:12px 12px 0 0;">
             <h1 style="color:#fff;margin:0;font-size:24px;">✂ MoSaidCuts</h1>
           </div>
           <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;">
             <h2 style="color:#111;margin-top:0;">Verificatiecode</h2>
             <p style="color:#555;">Gebruik de onderstaande code om uw afspraak te bevestigen. De code is <strong>10 minuten</strong> geldig.</p>
-            <div style="background:#2d7a4f;color:#fff;font-size:36px;font-weight:800;letter-spacing:10px;padding:20px;text-align:center;border-radius:10px;margin:24px 0;">
+            <div style="background:#1d4ed8;color:#fff;font-size:36px;font-weight:800;letter-spacing:10px;padding:20px;text-align:center;border-radius:10px;margin:24px 0;">
               ${code}
             </div>
             <p style="color:#888;font-size:13px;">Als u geen afspraak heeft gemaakt bij MoSaidCuts, kunt u dit bericht negeren.</p>

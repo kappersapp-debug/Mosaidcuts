@@ -79,14 +79,14 @@ export async function POST(request: Request) {
       subject: `Afspraak bevestigd – ${code}`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;">
-          <div style="background:#2d7a4f;padding:24px 32px;border-radius:12px 12px 0 0;">
+          <div style="background:#1d4ed8;padding:24px 32px;border-radius:12px 12px 0 0;">
             <h1 style="color:#fff;margin:0;font-size:24px;">✂ MoSaidCuts</h1>
           </div>
           <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;">
-            <h2 style="color:#2d7a4f;margin-top:0;">Afspraak bevestigd!</h2>
+            <h2 style="color:#1d4ed8;margin-top:0;">Afspraak bevestigd!</h2>
             <p>Hallo <strong>${name}</strong>, uw afspraak is bevestigd.</p>
-            <div style="background:#e8f4ed;border-radius:10px;padding:20px;margin:20px 0;">
-              <p style="margin:6px 0;"><strong>Boekingscode:</strong> <span style="font-size:18px;font-weight:800;color:#2d7a4f;">${code}</span></p>
+            <div style="background:#dbeafe;border-radius:10px;padding:20px;margin:20px 0;">
+              <p style="margin:6px 0;"><strong>Boekingscode:</strong> <span style="font-size:18px;font-weight:800;color:#1d4ed8;">${code}</span></p>
               <p style="margin:6px 0;"><strong>Dienst:</strong> ${service}</p>
               <p style="margin:6px 0;"><strong>Datum:</strong> ${formatDateNL(date)}</p>
               <p style="margin:6px 0;"><strong>Tijd:</strong> ${time}</p>
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
         subject: `🔔 Nieuwe afspraak – ${name}`,
         html: `
           <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;">
-            <div style="background:#2d7a4f;padding:20px 28px;border-radius:10px 10px 0 0;">
+            <div style="background:#1d4ed8;padding:20px 28px;border-radius:10px 10px 0 0;">
               <h2 style="color:#fff;margin:0;">✂ Nieuwe afspraak</h2>
             </div>
             <div style="background:#f9fafb;padding:24px 28px;border-radius:0 0 10px 10px;border:1px solid #e5e7eb;">
