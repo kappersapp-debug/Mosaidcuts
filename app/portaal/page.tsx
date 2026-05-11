@@ -229,7 +229,7 @@ function DashboardView() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Aankomende afspraken */}
-        <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-300 overflow-hidden">
           <div className="flex items-center gap-3 px-5 py-4 bg-brand">
             <span className="text-xl">🕐</span>
             <div>
@@ -258,7 +258,7 @@ function DashboardView() {
         </div>
 
         {/* Vandaag schema */}
-        <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-300 overflow-hidden">
           <div className="flex items-center gap-3 px-5 py-4 bg-brand">
             <span className="text-xl">📅</span>
             <div>
@@ -351,7 +351,7 @@ function CalendarView() {
       <p className="text-gray-600 text-sm mb-6">Klik op een dag om het rooster te zien</p>
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Month */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-300 p-5">
           <div className="flex items-center justify-between mb-4">
             <button onClick={()=>setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth()-1,1))}
               className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-light text-brand font-bold text-xl">‹</button>
@@ -405,7 +405,7 @@ function CalendarView() {
         </div>
 
         {/* Day schedule */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden">
           <div className={`px-5 py-4 border-b border-gray-100 ${blockedDates.includes(selectedDay) ? 'bg-red-50' : ''}`}>
             <h2 className="font-black text-gray-900 capitalize">{formatLongDate(selectedDay)}</h2>
             {blockedDates.includes(selectedDay) ? (
@@ -504,7 +504,7 @@ function AppointmentsView() {
           {bookings.map(b=>{
             const status = getStatus(b.date)
             return (
-              <div key={b.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
+              <div key={b.id} className="bg-white rounded-2xl shadow-sm border border-gray-300 p-4 flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-brand-light flex items-center justify-center text-2xl shrink-0">
                   {serviceIcon(b.service)}
                 </div>
@@ -597,7 +597,7 @@ function ServicesView() {
       {msg && <div className="mb-4 bg-brand-light border border-brand-muted text-brand text-sm font-bold px-4 py-3 rounded-xl">{msg}</div>}
 
       {form && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-300 p-5 mb-6">
           <h2 className="font-black text-gray-900 mb-4">{services.find(s=>s.id===form.id) ? 'Dienst bewerken' : 'Nieuwe dienst'}</h2>
           <div className="space-y-3">
             <div>
@@ -637,7 +637,7 @@ function ServicesView() {
 
       <div className="space-y-3">
         {services.map(s=>(
-          <div key={s.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
+          <div key={s.id} className="bg-white rounded-2xl shadow-sm border border-gray-300 p-4 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-brand-light flex items-center justify-center text-2xl shrink-0">
               {serviceIcon(s.name)}
             </div>
@@ -700,7 +700,7 @@ function ManagementView() {
       </div>
       {banMsg && <div className="mb-4 bg-brand-light border border-brand-muted text-brand text-sm font-bold px-4 py-3 rounded-xl">{banMsg}</div>}
       {showForm && (
-        <form onSubmit={ban} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+        <form onSubmit={ban} className="bg-white rounded-2xl shadow-sm border border-gray-300 p-5 mb-6">
           <h2 className="font-black text-gray-900 mb-4">Nieuw ban</h2>
           <div className="grid sm:grid-cols-2 gap-4 mb-4">
             <div>
@@ -722,7 +722,7 @@ function ManagementView() {
           </div>
         </form>
       )}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
           <h2 className="font-black text-gray-900">Gebande e-mails ({banned.length})</h2>
         </div>
@@ -899,7 +899,7 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
       <h1 className="text-2xl font-black text-gray-900">⚙️ Instellingen</h1>
 
       {/* Beschikbaarheid + Werktijden per dag */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-300 p-5">
         <h2 className="font-black text-gray-900 mb-1">📆 Beschikbaarheid & Werktijden</h2>
         <p className="text-xs text-gray-600 mb-4">Zet dagen aan/uit en stel per dag uw begin- en eindtijd in</p>
         <div className="space-y-2 mb-4">
@@ -970,7 +970,7 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
       </div>
 
       {/* Geblokkeerde datums */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-300 p-5">
         <h2 className="font-black text-gray-900 mb-1">🏖️ Vrije dagen / Vakantie</h2>
         <p className="text-xs text-gray-600 mb-4">Klik op meerdere datums om ze te blokkeren — klik opnieuw om te deblokkeren</p>
         <BlockedCalendar blocked={blockedDates} onChange={setBlockedDates}/>
@@ -995,10 +995,10 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
       </div>
 
       {/* Exporteren */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-300 p-5">
         <h2 className="font-black text-gray-900 mb-1">📤 Exporteren</h2>
         <p className="text-xs text-gray-600 mb-4">Download uw agenda als kalenderbestand</p>
-        <div className="flex items-center justify-between py-3 border border-gray-100 rounded-xl px-4">
+        <div className="flex items-center justify-between py-3 border border-gray-300 rounded-xl px-4">
           <div>
             <p className="font-bold text-gray-900 text-sm">Exporteer alle afspraken</p>
             <p className="text-xs text-brand font-medium">Download als .ics kalenderbestand</p>
@@ -1008,7 +1008,7 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
       </div>
 
       {/* Wachtwoord */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-300 p-5">
         <h2 className="font-black text-gray-900 mb-4">🔑 Wachtwoord wijzigen</h2>
         <form onSubmit={changePw} className="space-y-4">
           {errs.pw && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm font-semibold">{errs.pw}</div>}
