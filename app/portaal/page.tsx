@@ -836,8 +836,7 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
   const [breakStart, setBreakStart] = useState('12:00')
   const [breakEnd, setBreakEnd] = useState('13:00')
   const [blockedDates, setBlockedDates] = useState<string[]>([])
-  const [notifNewBooking, setNotifNewBooking] = useState(true)
-  const [notifReminder, setNotifReminder] = useState(true)
+
   const [currentPw, setCurrentPw] = useState(''); const [newPw, setNewPw] = useState(''); const [confirmPw, setConfirmPw] = useState('')
   const [msgs, setMsgs] = useState<Record<string,string>>({})
   const [errs, setErrs] = useState<Record<string,string>>({})
@@ -864,8 +863,7 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
       if(s.break_enabled) setBreakEnabled(s.break_enabled==='true')
       if(s.break_start) setBreakStart(s.break_start)
       if(s.break_end) setBreakEnd(s.break_end)
-      if(s.notifications_new_booking!==undefined) setNotifNewBooking(s.notifications_new_booking==='true')
-      if(s.notifications_reminder!==undefined) setNotifReminder(s.notifications_reminder==='true')
+
     })
   },[])
 
@@ -998,35 +996,6 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
           </button>
           {msgs.blocked && <span className="text-brand text-sm font-semibold">{msgs.blocked}</span>}
         </div>
-      </div>
-
-      {/* Meldingen */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <h2 className="font-black text-gray-900 mb-1">🔔 Meldingen</h2>
-        <p className="text-xs text-gray-400 mb-4">E-mail meldingen naar {process.env.NEXT_PUBLIC_GMAIL_USER ?? 'uw e-mail'}</p>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between py-3 border-b border-gray-100">
-            <div>
-              <p className="font-bold text-gray-900 text-sm">Nieuwe boeking melding</p>
-              <p className="text-xs text-gray-400">Melding bij nieuwe afspraak</p>
-            </div>
-            <Toggle value={notifNewBooking} onChange={v=>{
-              setNotifNewBooking(v)
-              save('notifications_new_booking', String(v), 'notif')
-            }}/>
-          </div>
-          <div className="flex items-center justify-between py-3">
-            <div>
-              <p className="font-bold text-gray-900 text-sm">Herinnering 1 uur voor</p>
-              <p className="text-xs text-gray-400">Reminder voor elke afspraak</p>
-            </div>
-            <Toggle value={notifReminder} onChange={v=>{
-              setNotifReminder(v)
-              save('notifications_reminder', String(v), 'notif')
-            }}/>
-          </div>
-        </div>
-        {msgs.notif && <p className="text-brand text-sm font-semibold mt-2">{msgs.notif}</p>}
       </div>
 
       {/* Exporteren */}
