@@ -80,7 +80,7 @@ function LoginScreen({onLogin}: {onLogin:()=>void}) {
         <div className="bg-brand px-8 py-7 text-center">
           <div className="text-4xl mb-2">✂️</div>
           <h1 className="text-white font-black text-xl">MoSaidCuts</h1>
-          <p className="text-green-200 text-xs font-semibold mt-0.5">Kapper Portaal</p>
+          <p className="text-blue-200 text-xs font-semibold mt-0.5">Kapper Portaal</p>
         </div>
         <form onSubmit={submit} className="p-8">
           <h2 className="text-lg font-black text-gray-900 mb-6 text-center">Inloggen</h2>
@@ -111,20 +111,20 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
     <div className="min-h-screen flex bg-gray-50">
       {/* Sidebar */}
       <aside className="hidden lg:flex flex-col w-60 bg-brand min-h-screen fixed left-0 top-0 z-30">
-        <div className="px-6 py-5 border-b border-green-700">
+        <div className="px-6 py-5 border-b border-blue-800">
           <div className="text-white font-black text-lg flex items-center gap-2">✂️ MoSaidCuts</div>
-          <p className="text-green-300 text-xs font-semibold mt-0.5">Kapper Portaal</p>
+          <p className="text-blue-200 text-xs font-semibold mt-0.5">Kapper Portaal</p>
         </div>
         <nav className="flex-1 py-3">
           {NAV.map(n => (
             <button key={n.id} onClick={()=>setView(n.id)}
               className={['flex items-center gap-3 w-full px-6 py-3 text-sm font-bold transition-colors rounded-lg mx-2 my-0.5 w-[calc(100%-16px)]',
-                view===n.id ? 'bg-white/15 text-white' : 'text-green-200 hover:bg-white/8 hover:text-white'].join(' ')}>
+                view===n.id ? 'bg-white/15 text-white' : 'text-blue-200 hover:bg-white/8 hover:text-white'].join(' ')}>
               <span className="text-base">{n.icon}</span>{n.label}
             </button>
           ))}
         </nav>
-        <button onClick={onLogout} className="m-4 py-2 rounded-xl border border-green-600 text-green-200 text-sm font-bold hover:bg-white/10 transition-colors">
+        <button onClick={onLogout} className="m-4 py-2 rounded-xl border border-blue-600 text-blue-200 text-sm font-bold hover:bg-white/10 transition-colors">
           🚪 Uitloggen
         </button>
       </aside>
@@ -138,19 +138,19 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
       {menuOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-black/50" onClick={()=>setMenuOpen(false)}>
           <div className="w-60 bg-brand h-full" onClick={e=>e.stopPropagation()}>
-            <div className="px-6 py-5 border-b border-green-700">
+            <div className="px-6 py-5 border-b border-blue-800">
               <div className="text-white font-black text-lg">✂️ MoSaidCuts</div>
             </div>
             <nav className="py-3">
               {NAV.map(n => (
                 <button key={n.id} onClick={()=>{setView(n.id);setMenuOpen(false)}}
                   className={['flex items-center gap-3 w-full px-6 py-3 text-sm font-bold',
-                    view===n.id?'bg-white/15 text-white':'text-green-200 hover:bg-white/8 hover:text-white'].join(' ')}>
+                    view===n.id?'bg-white/15 text-white':'text-blue-200 hover:bg-white/8 hover:text-white'].join(' ')}>
                   <span>{n.icon}</span>{n.label}
                 </button>
               ))}
             </nav>
-            <button onClick={onLogout} className="m-4 py-2 w-[calc(100%-32px)] rounded-xl border border-green-600 text-green-200 text-sm font-bold">🚪 Uitloggen</button>
+            <button onClick={onLogout} className="m-4 py-2 w-[calc(100%-32px)] rounded-xl border border-blue-600 text-blue-200 text-sm font-bold">🚪 Uitloggen</button>
           </div>
         </div>
       )}
@@ -463,11 +463,12 @@ function AppointmentsView() {
 
   useEffect(()=>{load()},[load])
 
+  const [confirmDel, setConfirmDel] = useState<string|null>(null)
+
   async function del(id: string) {
-    if(!confirm('Afspraak verwijderen?')) return
     setDeleting(id)
     await fetch('/api/portaal/bookings',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})})
-    setDeleting(null); load()
+    setDeleting(null); setConfirmDel(null); load()
   }
 
   const statusBadge = {
@@ -522,10 +523,14 @@ function AppointmentsView() {
                     <div className="text-right shrink-0">
                       <p className="font-black text-gray-900">€{b.price}</p>
                       <p className="text-xs text-gray-600 font-mono">{b.code}</p>
-                      <button onClick={()=>del(b.id)} disabled={deleting===b.id}
-                        className="text-xs text-red-400 hover:text-red-600 font-semibold mt-1 disabled:opacity-50">
-                        {deleting===b.id?'...':'🗑 Verwijder'}
-                      </button>
+                      {confirmDel===b.id ? (
+                        <div className="flex gap-1 mt-1">
+                          <button onClick={()=>del(b.id)} disabled={deleting===b.id} className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-lg font-bold disabled:opacity-50">{deleting===b.id?'...':'Ja'}</button>
+                          <button onClick={()=>setConfirmDel(null)} className="text-xs border border-gray-300 text-gray-600 px-2 py-0.5 rounded-lg font-bold">Nee</button>
+                        </div>
+                      ) : (
+                        <button onClick={()=>setConfirmDel(b.id)} className="text-xs text-red-400 hover:text-red-600 font-semibold mt-1">🗑 Verwijder</button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -578,10 +583,11 @@ function ServicesView() {
     setServices(updated); persist(updated); setForm(null)
   }
 
+  const [confirmRemove, setConfirmRemove] = useState<string|null>(null)
+
   function remove(id: string) {
-    if(!confirm('Dienst verwijderen?')) return
     const updated = services.filter(s=>s.id!==id)
-    setServices(updated); persist(updated)
+    setServices(updated); persist(updated); setConfirmRemove(null)
   }
 
   const durations = [15,20,30,45,60,75,90]
@@ -649,7 +655,14 @@ function ServicesView() {
               <p className="font-black text-gray-900 text-lg">€{s.price}</p>
               <div className="flex gap-3 mt-1 justify-end">
                 <button onClick={()=>setForm({...s})} className="text-xs text-brand hover:underline font-semibold">✏️ Bewerken</button>
-                <button onClick={()=>remove(s.id)} className="text-xs text-red-400 hover:text-red-600 font-semibold">🗑 Verwijder</button>
+                {confirmRemove===s.id ? (
+                  <span className="flex gap-1">
+                    <button onClick={()=>remove(s.id)} className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-lg font-bold">Ja</button>
+                    <button onClick={()=>setConfirmRemove(null)} className="text-xs border border-gray-300 text-gray-600 px-2 py-0.5 rounded-lg font-bold">Nee</button>
+                  </span>
+                ) : (
+                  <button onClick={()=>setConfirmRemove(s.id)} className="text-xs text-red-400 hover:text-red-600 font-semibold">🗑 Verwijder</button>
+                )}
               </div>
             </div>
           </div>
@@ -684,10 +697,12 @@ function ManagementView() {
     load()
   }
 
+  const [confirmUnban, setConfirmUnban] = useState<string|null>(null)
+
   async function unban(email: string) {
     setActionLoading(email)
     await fetch('/api/portaal/ban',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})})
-    setActionLoading(null); load()
+    setActionLoading(null); setConfirmUnban(null); load()
   }
 
   return (
@@ -736,10 +751,17 @@ function ManagementView() {
                   <p className="font-bold text-gray-900 truncate">🚫 {b.email}</p>
                   {b.reason && <p className="text-xs text-gray-600 mt-0.5">{b.reason}</p>}
                 </div>
-                <button onClick={()=>unban(b.email)} disabled={actionLoading===b.email}
-                  className="shrink-0 px-3 py-1.5 border-2 border-brand text-brand rounded-xl text-xs font-bold hover:bg-brand-light transition-colors disabled:opacity-50">
-                  {actionLoading===b.email?'...':'✅ Ontbannen'}
-                </button>
+                {confirmUnban===b.email ? (
+                  <div className="flex gap-1 shrink-0">
+                    <button onClick={()=>unban(b.email)} disabled={actionLoading===b.email} className="text-xs bg-brand text-white px-2 py-1 rounded-lg font-bold disabled:opacity-50">{actionLoading===b.email?'...':'Ja'}</button>
+                    <button onClick={()=>setConfirmUnban(null)} className="text-xs border border-gray-300 text-gray-600 px-2 py-1 rounded-lg font-bold">Nee</button>
+                  </div>
+                ) : (
+                  <button onClick={()=>setConfirmUnban(b.email)}
+                    className="shrink-0 px-3 py-1.5 border-2 border-brand text-brand rounded-xl text-xs font-bold hover:bg-brand-light transition-colors">
+                    ✅ Ontbannen
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -1003,7 +1025,7 @@ function SettingsView({onLogout}: {onLogout:()=>void}) {
             <p className="font-bold text-gray-900 text-sm">Exporteer alle afspraken</p>
             <p className="text-xs text-brand font-medium">Download als .ics kalenderbestand</p>
           </div>
-          <a href="/api/portaal/export" download className="text-2xl hover:scale-110 transition-transform">📥</a>
+          <a href="/api/portaal/export" download className="flex items-center gap-2 bg-brand text-white px-3 py-2 rounded-xl font-bold text-sm hover:bg-brand-hover transition-colors">📥 Downloaden</a>
         </div>
       </div>
 
@@ -1035,10 +1057,14 @@ export default function PortaalPage() {
   const [checking, setChecking] = useState(true)
   const [authenticated, setAuthenticated] = useState(false)
 
+  const [authError, setAuthError] = useState(false)
+
   useEffect(()=>{
+    const timer = setTimeout(()=>{ setChecking(false); setAuthError(true) }, 8000)
     fetch('/api/portaal/auth').then(r=>r.json()).then(d=>{
-      setAuthenticated(d.authenticated); setChecking(false)
-    }).catch(()=>setChecking(false))
+      clearTimeout(timer); setAuthenticated(d.authenticated); setChecking(false)
+    }).catch(()=>{ clearTimeout(timer); setChecking(false) })
+    return ()=>clearTimeout(timer)
   },[])
 
   async function logout() {
@@ -1046,8 +1072,20 @@ export default function PortaalPage() {
   }
 
   if(checking) return (
-    <div className="min-h-screen flex items-center justify-center bg-brand-light">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-brand-light">
       <div className="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin"/>
+      <p className="text-gray-600 text-sm font-medium">Even geduld...</p>
+    </div>
+  )
+
+  if(authError) return (
+    <div className="min-h-screen flex items-center justify-center bg-brand-light px-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full text-center">
+        <p className="text-2xl mb-3">⚠️</p>
+        <p className="font-black text-gray-900 mb-2">Verbinding mislukt</p>
+        <p className="text-gray-600 text-sm mb-4">De server reageert niet. Controleer uw internetverbinding.</p>
+        <button onClick={()=>window.location.reload()} className="w-full py-2.5 bg-brand text-white rounded-xl font-bold text-sm">Opnieuw proberen</button>
+      </div>
     </div>
   )
 

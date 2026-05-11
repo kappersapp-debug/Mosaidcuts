@@ -165,7 +165,7 @@ function Progress({ step }: { step: number }) {
             ].join(' ')}>
               {done ? '✓' : n}
             </div>
-            <span className={`text-xs hidden sm:block font-semibold ${active || done ? 'text-brand' : 'text-gray-600'}`}>{label}</span>
+            <span className={`text-xs font-semibold ${active || done ? 'text-brand' : 'text-gray-600'}`}>{label}</span>
           </div>
         )
       })}
@@ -599,8 +599,8 @@ export default function BookingPage() {
       {/* Afspraak opzoeken */}
       <div className="max-w-md mx-auto px-4 mb-6">
         {!lookup ? (
-          <button onClick={()=>setLookup(true)} className="w-full py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold text-sm hover:border-brand hover:text-brand transition-colors">
-            🔍 Afspraak opzoeken
+          <button onClick={()=>setLookup(true)} className="w-full py-3 rounded-xl border-2 border-brand/30 bg-brand-light text-brand font-bold text-sm hover:bg-brand hover:text-white transition-colors flex items-center justify-center gap-2">
+            🔍 Afspraak opzoeken of annuleren
           </button>
         ) : (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
