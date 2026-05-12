@@ -124,12 +124,21 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
         if (!r.ok) return
         const d = await r.json()
         const newOnes: Booking[] = d.bookings ?? []
+        const cancelled: {id:string;code:string;name:string;service:string;date:string;time:string;cancelled_by:string}[] = d.cancellations ?? []
+
         if (newOnes.length > 0) {
-          setNotifications(prev => [...newOnes, ...prev])
+          setNotifications(prev => [...newOnes.map(b => ({...b, _type: 'new' as const})), ...prev])
           setUnreadCount(prev => prev + newOnes.length)
           setToast(newOnes.length === 1
-            ? `${newOnes[0].name} – ${newOnes[0].service}`
+            ? `Nieuwe afspraak: ${newOnes[0].name} – ${newOnes[0].service}`
             : `${newOnes.length} nieuwe afspraken`)
+        }
+        if (cancelled.length > 0) {
+          setNotifications(prev => [...cancelled.map(b => ({...b, _type: 'cancelled' as const, phone:'', email:'', price:0, duration:0, created_at:''})), ...prev])
+          setUnreadCount(prev => prev + cancelled.length)
+          setToast(cancelled.length === 1
+            ? `❌ Geannuleerd: ${cancelled[0].name} – ${cancelled[0].service}`
+            : `${cancelled.length} afspraken geannuleerd`)
         }
       } catch { /* ignore */ }
     }
@@ -188,8 +197,10 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
           ) : (
             <div className="max-h-72 overflow-y-auto divide-y divide-gray-50">
               {notifications.map(n => (
-                <div key={n.id} className="px-4 py-3 hover:bg-gray-50">
-                  <p className="font-semibold text-sm text-gray-800">{n.name}</p>
+                <div key={n.id} className={`px-4 py-3 hover:bg-gray-50 border-l-2 ${(n as Booking & {_type?:string})._type==='cancelled' ? 'border-red-400' : 'border-brand'}`}>
+                  <p className="font-semibold text-sm text-gray-800">
+                    {(n as Booking & {_type?:string})._type==='cancelled' ? '❌ ' : '✅ '}{n.name}
+                  </p>
                   <p className="text-xs text-gray-500">{n.service} · {n.date} · {n.time}</p>
                 </div>
               ))}

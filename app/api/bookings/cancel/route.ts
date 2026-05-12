@@ -60,6 +60,10 @@ export async function POST(request: Request) {
   }
 
   attempts.delete(ip)
+  await supabaseAdmin.from('cancelled_bookings').insert({
+    code: booking.code, name: booking.name, service: booking.service,
+    date: booking.date, time: booking.time, cancelled_by: 'customer',
+  })
   await supabaseAdmin.from('bookings').delete().eq('id', booking.id)
 
   try {

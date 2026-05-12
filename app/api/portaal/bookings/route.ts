@@ -16,13 +16,14 @@ export async function GET(request: NextRequest) {
 
   const today = new Date().toISOString().split('T')[0]
 
-  // Polling endpoint: return only bookings created after `since`
+  // Polling endpoint: return new bookings + cancellations since `since`
   const since = searchParams.get('since')
   if (since) {
-    const { data, error } = await supabaseAdmin
-      .from('bookings').select('*').gt('created_at', since).order('created_at', { ascending: false })
-    if (error) return Response.json({ error: 'Database fout' }, { status: 500 })
-    return Response.json({ bookings: data })
+    const [{ data: newBookings }, { data: cancellations }] = await Promise.all([
+      supabaseAdmin.from('bookings').select('*').gt('created_at', since).order('created_at', { ascending: false }),
+      supabaseAdmin.from('cancelled_bookings').select('*').gt('cancelled_at', since).order('cancelled_at', { ascending: false }),
+    ])
+    return Response.json({ bookings: newBookings ?? [], cancellations: cancellations ?? [] })
   }
 
   let query = supabaseAdmin.from('bookings').select('*').order('date', { ascending: true }).order('time', { ascending: true })
@@ -62,6 +63,12 @@ export async function DELETE(request: Request) {
   const { data: booking } = await supabaseAdmin
     .from('bookings').select('email, name, code, service, date, time').eq('id', id).single()
 
+  if (booking) {
+    await supabaseAdmin.from('cancelled_bookings').insert({
+      code: booking.code, name: booking.name, service: booking.service,
+      date: booking.date, time: booking.time, cancelled_by: 'portal',
+    })
+  }
   const { error } = await supabaseAdmin.from('bookings').delete().eq('id', id)
   if (error) return Response.json({ error: 'Fout bij verwijderen' }, { status: 500 })
 

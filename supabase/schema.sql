@@ -57,3 +57,18 @@ CREATE TABLE IF NOT EXISTS verification_codes (
 );
 
 CREATE INDEX IF NOT EXISTS verification_codes_email_idx ON verification_codes (email);
+
+-- cancelled_bookings
+-- Log van geannuleerde afspraken voor portaal-meldingen.
+CREATE TABLE IF NOT EXISTS cancelled_bookings (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  code         text NOT NULL,
+  name         text NOT NULL,
+  service      text NOT NULL,
+  date         date NOT NULL,
+  time         text NOT NULL,
+  cancelled_by text NOT NULL DEFAULT 'customer', -- 'customer' | 'portal'
+  cancelled_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS cancelled_bookings_at_idx ON cancelled_bookings (cancelled_at);
