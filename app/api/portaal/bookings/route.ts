@@ -16,6 +16,15 @@ export async function GET(request: NextRequest) {
 
   const today = new Date().toISOString().split('T')[0]
 
+  // Polling endpoint: return only bookings created after `since`
+  const since = searchParams.get('since')
+  if (since) {
+    const { data, error } = await supabaseAdmin
+      .from('bookings').select('*').gt('created_at', since).order('created_at', { ascending: false })
+    if (error) return Response.json({ error: 'Database fout' }, { status: 500 })
+    return Response.json({ bookings: data })
+  }
+
   let query = supabaseAdmin.from('bookings').select('*').order('date', { ascending: true }).order('time', { ascending: true })
 
   if (filter === 'today') {

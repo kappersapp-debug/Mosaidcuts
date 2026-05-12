@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 
 /* ─── Types ──────────────────────────────────────────────── */
 interface Booking {
@@ -105,14 +105,108 @@ function LoginScreen({onLogin}: {onLogin:()=>void}) {
 function PortalShell({onLogout}: {onLogout:()=>void}) {
   const [view, setView] = useState<View>('dashboard')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [notifications, setNotifications] = useState<Booking[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [toast, setToast] = useState<string|null>(null)
+  const lastCheckedRef = useRef(new Date().toISOString())
+
+  // Poll every 30 seconds for new bookings
+  useEffect(() => {
+    const poll = async () => {
+      try {
+        const r = await fetch(`/api/portaal/bookings?since=${encodeURIComponent(lastCheckedRef.current)}`)
+        lastCheckedRef.current = new Date().toISOString()
+        if (!r.ok) return
+        const d = await r.json()
+        const newOnes: Booking[] = d.bookings ?? []
+        if (newOnes.length > 0) {
+          setNotifications(prev => [...newOnes, ...prev])
+          setUnreadCount(prev => prev + newOnes.length)
+          setToast(newOnes.length === 1
+            ? `${newOnes[0].name} – ${newOnes[0].service}`
+            : `${newOnes.length} nieuwe afspraken`)
+        }
+      } catch { /* ignore */ }
+    }
+    const id = setInterval(poll, 30_000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Auto-dismiss toast after 5 seconds
+  useEffect(() => {
+    if (!toast) return
+    const t = setTimeout(() => setToast(null), 5000)
+    return () => clearTimeout(t)
+  }, [toast])
+
+  // Close notification panel on outside click
+  useEffect(() => {
+    if (!notifOpen) return
+    const handler = (e: MouseEvent) => {
+      const panel = document.getElementById('notif-panel')
+      if (panel && !panel.contains(e.target as Node)) setNotifOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [notifOpen])
+
+  function openNotif() { setNotifOpen(o => !o); setUnreadCount(0) }
 
   return (
     <div className="min-h-screen flex bg-gray-50">
+
+      {/* Notification panel (fixed, top-right) */}
+      {notifOpen && (
+        <div id="notif-panel" className="fixed top-14 right-4 lg:top-4 z-50 w-72 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
+            <span className="font-bold text-gray-800 text-sm">🔔 Meldingen</span>
+            {notifications.length > 0 && (
+              <button onClick={() => { setNotifications([]); setNotifOpen(false) }} className="text-xs text-brand hover:underline">Wis alles</button>
+            )}
+          </div>
+          {notifications.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-gray-400 text-center">Geen nieuwe meldingen</p>
+          ) : (
+            <div className="max-h-72 overflow-y-auto divide-y divide-gray-50">
+              {notifications.map(n => (
+                <div key={n.id} className="px-4 py-3 hover:bg-gray-50">
+                  <p className="font-semibold text-sm text-gray-800">{n.name}</p>
+                  <p className="text-xs text-gray-500">{n.service} · {n.date} · {n.time}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Toast popup */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-brand text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 max-w-xs">
+          <span className="text-lg shrink-0">🔔</span>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-sm">Nieuwe afspraak!</p>
+            <p className="text-xs text-blue-100 truncate">{toast}</p>
+          </div>
+          <button onClick={() => setToast(null)} className="text-blue-200 hover:text-white shrink-0 text-lg leading-none">✕</button>
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className="hidden lg:flex flex-col w-60 bg-brand min-h-screen fixed left-0 top-0 z-30">
-        <div className="px-6 py-5 border-b border-blue-800">
-          <div className="text-white font-black text-lg flex items-center gap-2">✂️ MoSaidCuts</div>
-          <p className="text-blue-200 text-xs font-semibold mt-0.5">Kapper Portaal</p>
+        <div className="px-6 py-5 border-b border-blue-800 flex items-center justify-between">
+          <div>
+            <div className="text-white font-black text-lg flex items-center gap-2">✂️ MoSaidCuts</div>
+            <p className="text-blue-200 text-xs font-semibold mt-0.5">Kapper Portaal</p>
+          </div>
+          <button onClick={openNotif} className="relative text-white hover:text-blue-200 transition-colors p-1">
+            🔔
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
         </div>
         <nav className="flex-1 py-3">
           {NAV.map(n => (
@@ -131,7 +225,17 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-brand px-4 py-3 flex items-center justify-between shadow-md">
         <div className="text-white font-black flex items-center gap-2">✂️ MoSaidCuts</div>
-        <button onClick={()=>setMenuOpen(o=>!o)} className="text-white text-2xl">☰</button>
+        <div className="flex items-center gap-3">
+          <button onClick={openNotif} className="relative text-white hover:text-blue-200 transition-colors">
+            🔔
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
+          <button onClick={()=>setMenuOpen(o=>!o)} className="text-white text-2xl">☰</button>
+        </div>
       </div>
 
       {menuOpen && (
