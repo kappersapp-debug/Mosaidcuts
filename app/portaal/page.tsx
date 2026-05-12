@@ -544,7 +544,7 @@ interface ServiceItem { id: string; name: string; price: number; duration: numbe
 const DEFAULT_SERVICES: ServiceItem[] = [
   {id:'knipbeurt', name:'Normale Knipbeurt', price:15, duration:30, desc:'30 minuten'},
   {id:'baard', name:'Baard Trimmen', price:10, duration:20, desc:'20 minuten'},
-  {id:'knipbeurt-baard', name:'Knipbeurt + Baard', price:20, duration:45, desc:'45 minuten'},
+  {id:'knipbeurt-baard', name:'Knipbeurt + Baard', price:20, duration:30, desc:'30 minuten'},
 ]
 
 function ServicesView() {
