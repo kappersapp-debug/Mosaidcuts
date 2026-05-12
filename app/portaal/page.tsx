@@ -123,7 +123,15 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
         lastCheckedRef.current = new Date().toISOString()
         if (!r.ok) return
         const d = await r.json()
-        const newOnes: Booking[] = d.bookings ?? []
+        const now2 = new Date()
+        const todayStr2 = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`
+        const nowMins2 = now2.getHours() * 60 + now2.getMinutes()
+
+        const newOnes: Booking[] = (d.bookings ?? []).filter((b: Booking) => {
+          if (b.date > todayStr2) return true
+          if (b.date === todayStr2) { const [h,m] = b.time.split(':').map(Number); return h*60+m > nowMins2 }
+          return false
+        })
         const cancelled: {id:string;code:string;name:string;service:string;date:string;time:string;cancelled_by:string}[] = d.cancellations ?? []
 
         if (newOnes.length > 0) {
