@@ -34,7 +34,6 @@ Kopieer `.env.example` naar `.env.local` en vul alle waarden in:
 | Variabele | Beschrijving |
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | URL van uw Supabase-project |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon/public key van Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key (alleen server-side) |
 | `AUTH_SECRET` | Willekeurig geheim voor sessiecookies — genereer met `openssl rand -hex 32` |
 | `GMAIL_USER` | Gmail-adres voor het versturen van e-mails |

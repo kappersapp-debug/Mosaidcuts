@@ -225,6 +225,7 @@ export default function BookingPage() {
     const params = new URLSearchParams(window.location.search)
     const cancelCode = params.get('annuleer')
     if (cancelCode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBooking({ code: cancelCode.toUpperCase(), service: '', price: 0, duration: 0, date: '', time: '', name: '' })
       setStep('confirmation')
       setCancelConfirm(true)

@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Don't return the email in the response
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { email: _email, ...booking } = data
   return Response.json({ booking })
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 
 /* ─── Types ──────────────────────────────────────────────── */
 interface Booking {
@@ -15,7 +15,6 @@ const NL_MONTHS_LONG = ['januari','februari','maart','april','mei','juni','juli'
 const NL_DAYS_SHORT = ['Ma','Di','Wo','Do','Vr','Za','Zo']
 const NL_DAYS_LONG = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag']
 const NL_DAY_LABELS: Record<string,string> = {'0':'Zondag','1':'Maandag','2':'Dinsdag','3':'Woensdag','4':'Donderdag','5':'Vrijdag','6':'Zaterdag'}
-const NL_DAY_SHORT: Record<string,string> = {'0':'Zo','1':'Ma','2':'Di','3':'Wo','4':'Do','5':'Vr','6':'Za'}
 
 function toDateStr(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
@@ -162,7 +161,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
           {view==='appointments' && <AppointmentsView />}
           {view==='services' && <ServicesView />}
           {view==='management' && <ManagementView />}
-          {view==='settings' && <SettingsView onLogout={onLogout}/>}
+          {view==='settings' && <SettingsView/>}
         </div>
       </main>
     </div>
@@ -300,7 +299,7 @@ function CalendarView() {
   const [viewMonth, setViewMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
   const [selectedDay, setSelectedDay] = useState(toDateStr(today))
   const [monthBookings, setMonthBookings] = useState<Booking[]>([])
-  const [dayBookings, setDayBookings] = useState<Booking[]>([])
+  const dayBookings = useMemo(() => monthBookings.filter(b => b.date === selectedDay), [selectedDay, monthBookings])
   const [schedule, setSchedule] = useState<Record<string,{open:boolean;start:string;end:string}>>(DEFAULT_SCHEDULE)
   const [blockedDates, setBlockedDates] = useState<string[]>([])
   const [breakEnabled, setBreakEnabled] = useState(false)
@@ -327,10 +326,6 @@ function CalendarView() {
   useEffect(()=>{
     fetch(`/api/portaal/bookings?month=${monthStr}`).then(r=>r.json()).then(d=>setMonthBookings(d.bookings??[]))
   },[monthStr])
-
-  useEffect(()=>{
-    setDayBookings(monthBookings.filter(b=>b.date===selectedDay))
-  },[selectedDay, monthBookings])
 
   const firstDay = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1)
   const lastDay = new Date(viewMonth.getFullYear(), viewMonth.getMonth()+1, 0)
@@ -461,6 +456,7 @@ function AppointmentsView() {
     } finally { setLoading(false) }
   },[filter,search])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(()=>{load()},[load])
 
   const [confirmDel, setConfirmDel] = useState<string|null>(null)
@@ -684,6 +680,7 @@ function ManagementView() {
   async function load() {
     const r = await fetch('/api/portaal/ban'); const d = await r.json(); setBanned(d.banned??[])
   }
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(()=>{load()},[])
 
   async function ban(e: React.FormEvent) {
@@ -848,7 +845,7 @@ const DEFAULT_SCHEDULE: Record<string, DayConfig> = {
   '6': {open:false, start:'09:00', end:'17:00'},
 }
 
-function SettingsView({onLogout}: {onLogout:()=>void}) {
+function SettingsView() {
   const [daySchedule, setDaySchedule] = useState<Record<string, DayConfig>>(DEFAULT_SCHEDULE)
   const [breakEnabled, setBreakEnabled] = useState(false)
   const [breakStart, setBreakStart] = useState('12:00')
