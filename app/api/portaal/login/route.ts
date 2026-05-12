@@ -1,49 +1,56 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { makeSessionToken } from '@/lib/auth'
+import { rateLimit } from '@/lib/rate-limit'
 import { cookies } from 'next/headers'
-
-const attempts = new Map<string, { count: number; lockedUntil: number }>()
+import bcrypt from 'bcryptjs'
 
 export async function POST(request: Request) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-  const now = Date.now()
-  const entry = attempts.get(ip) ?? { count: 0, lockedUntil: 0 }
 
-  if (entry.lockedUntil > now) {
-    const secs = Math.ceil((entry.lockedUntil - now) / 1000)
-    return Response.json({ error: `Te veel pogingen. Probeer over ${secs} seconden opnieuw.` }, { status: 429 })
+  if (!rateLimit(`login:${ip}`, 5, 15 * 60 * 1000)) {
+    return Response.json({ error: 'Te veel pogingen, probeer het later opnieuw.' }, { status: 429 })
   }
 
   const { password } = await request.json()
   if (!password) return Response.json({ error: 'Wachtwoord vereist' }, { status: 400 })
 
-  const { data } = await supabaseAdmin
+  // Try bcrypt hash first
+  const { data: hashRow } = await supabaseAdmin
     .from('settings')
     .select('value')
-    .eq('key', 'portal_password')
+    .eq('key', 'portal_password_hash')
     .single()
 
-  const stored = data?.value ?? 'admin'
+  if (hashRow?.value) {
+    const valid = await bcrypt.compare(password, hashRow.value)
+    if (!valid) return Response.json({ error: 'Ongeldig wachtwoord' }, { status: 401 })
+  } else {
+    // Migration: fall back to plain-text portal_password
+    const { data: plainRow } = await supabaseAdmin
+      .from('settings')
+      .select('value')
+      .eq('key', 'portal_password')
+      .single()
 
-  if (password !== stored) {
-    entry.count += 1
-    if (entry.count >= 5) {
-      entry.lockedUntil = now + 15 * 60 * 1000
-      entry.count = 0
-    }
-    attempts.set(ip, entry)
-    return Response.json({ error: 'Ongeldig wachtwoord' }, { status: 401 })
+    const stored = plainRow?.value ?? 'admin'
+    if (password !== stored) return Response.json({ error: 'Ongeldig wachtwoord' }, { status: 401 })
+
+    // Migrate: hash and save, remove old row
+    const hash = await bcrypt.hash(password, 12)
+    await supabaseAdmin
+      .from('settings')
+      .upsert({ key: 'portal_password_hash', value: hash, updated_at: new Date().toISOString() }, { onConflict: 'key' })
+    await supabaseAdmin.from('settings').delete().eq('key', 'portal_password')
   }
 
-  attempts.delete(ip)
-
-  const token = makeSessionToken(stored)
+  const token = makeSessionToken()
   const cookieStore = await cookies()
   cookieStore.set('portaal_session', token, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 60 * 60 * 8, // 8 hours
     path: '/',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
   })
 
   return Response.json({ success: true })

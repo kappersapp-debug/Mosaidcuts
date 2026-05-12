@@ -3,13 +3,14 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { transporter } from '@/lib/mailer'
 import { cancelMailHtml } from '@/app/api/bookings/cancel/route'
 import { cookies } from 'next/headers'
+import bcrypt from 'bcryptjs'
 
 export async function GET() {
   const { data } = await supabaseAdmin.from('settings').select('key, value')
 
   const map: Record<string, string> = {}
   for (const row of data ?? []) {
-    if (row.key !== 'portal_password') map[row.key] = row.value
+    if (row.key !== 'portal_password' && row.key !== 'portal_password_hash') map[row.key] = row.value
   }
 
   return Response.json({ settings: map })
@@ -51,22 +52,32 @@ export async function POST(request: Request) {
     }
   }
 
+  // If portal password is being changed, hash it and store as portal_password_hash
+  if (key === 'portal_password') {
+    const hash = await bcrypt.hash(value, 12)
+    await supabaseAdmin
+      .from('settings')
+      .upsert({ key: 'portal_password_hash', value: hash, updated_at: new Date().toISOString() }, { onConflict: 'key' })
+    await supabaseAdmin.from('settings').delete().eq('key', 'portal_password')
+
+    // Re-issue session cookie (token is fixed, but re-set for freshness)
+    const token = makeSessionToken()
+    const cookieStore = await cookies()
+    cookieStore.set('portaal_session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    })
+
+    return Response.json({ success: true })
+  }
+
   await supabaseAdmin.from('settings').upsert(
     { key, value, updated_at: new Date().toISOString() },
     { onConflict: 'key' }
   )
-
-  // If password changed, re-issue session cookie
-  if (key === 'portal_password') {
-    const token = makeSessionToken(value)
-    const cookieStore = await cookies()
-    cookieStore.set('portaal_session', token, {
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 8,
-      path: '/',
-    })
-  }
 
   return Response.json({ success: true })
 }

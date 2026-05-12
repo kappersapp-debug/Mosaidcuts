@@ -1,5 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { transporter } from '@/lib/mailer'
+import { rateLimit } from '@/lib/rate-limit'
+import crypto from 'crypto'
 
 export async function POST(request: Request) {
   const { email } = await request.json()
@@ -9,27 +11,22 @@ export async function POST(request: Request) {
 
   const lowerEmail = email.toLowerCase().trim()
 
+  if (!rateLimit(`verify-send:${lowerEmail}`, 3, 10 * 60 * 1000)) {
+    return Response.json({ error: 'Te veel pogingen, probeer het later opnieuw.' }, { status: 429 })
+  }
+
   const { data: banned } = await supabaseAdmin
     .from('banned_emails').select('id').eq('email', lowerEmail).single()
   if (banned) return Response.json({ banned: true }, { status: 403 })
 
-  // Server-side rate limit: max 1 code per 60 seconden per e-mail
-  const { data: existing } = await supabaseAdmin
-    .from('verification_codes').select('expires_at').eq('email', lowerEmail).single()
-  if (existing) {
-    const createdAt = new Date(existing.expires_at).getTime() - 10 * 60 * 1000
-    if (Date.now() - createdAt < 60 * 1000) {
-      return Response.json({ error: 'Wacht 60 seconden voordat u opnieuw een code aanvraagt.' }, { status: 429 })
-    }
-  }
-
   const code = String(Math.floor(100000 + Math.random() * 900000))
+  const codeHash = crypto.createHash('sha256').update(code).digest('hex')
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
   await supabaseAdmin.from('verification_codes').delete().eq('email', lowerEmail)
 
   const { error } = await supabaseAdmin.from('verification_codes').insert({
-    email: lowerEmail, code, expires_at: expiresAt, used: false,
+    email: lowerEmail, code: codeHash, expires_at: expiresAt, used: false,
   })
 
   if (error) return Response.json({ error: 'Database fout' }, { status: 500 })

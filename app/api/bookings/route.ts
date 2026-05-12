@@ -70,6 +70,9 @@ export async function POST(request: Request) {
   if (error) return Response.json({ error: 'Boeking kon niet worden opgeslagen' }, { status: 500 })
 
   // Send confirmation email via Gmail
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_BASE_URL) {
+    console.warn('[MoSaidCuts] NEXT_PUBLIC_BASE_URL is niet ingesteld in productie — annuleerlinks wijzen naar localhost')
+  }
   const cancelUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'}/?annuleer=${code}`
 
   try {
