@@ -84,10 +84,16 @@ export async function GET(request: NextRequest) {
   }
 
   const maxStart = endMins - duration
+
+  // For today: block slots that have already passed (nowMins passed from client to avoid timezone issues)
+  const nowParam = request.nextUrl.searchParams.get('now') // HH:MM in local time
+  const nowMins = nowParam ? (() => { const [h, m] = nowParam.split(':').map(Number); return h * 60 + m })() : 0
+
   const slots = allSlots
     .filter(slot => {
       const [h, m] = slot.split(':').map(Number)
-      return h * 60 + m <= maxStart
+      const slotMins = h * 60 + m
+      return slotMins <= maxStart && slotMins > nowMins
     })
     .map(slot => ({ time: slot, available: !blocked.has(slot) }))
 

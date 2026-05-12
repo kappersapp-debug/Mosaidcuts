@@ -236,7 +236,12 @@ export default function BookingPage() {
     setSlotsLoading(true)
     setSlots([])
     try {
-      const r = await fetch(`/api/slots?date=${d}&duration=${dur}`)
+      const today = new Date()
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+      const nowParam = d === todayStr
+        ? `&now=${String(today.getHours()).padStart(2,'0')}:${String(today.getMinutes()).padStart(2,'0')}`
+        : ''
+      const r = await fetch(`/api/slots?date=${d}&duration=${dur}${nowParam}`)
       const data = await r.json()
       setSlots(data.slots ?? [])
     } finally {
