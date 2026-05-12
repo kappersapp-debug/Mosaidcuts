@@ -309,7 +309,7 @@ function DashboardView() {
   const [breakStart, setBreakStart] = useState('12:00')
   const [breakEnd, setBreakEnd] = useState('13:00')
 
-  useEffect(()=>{
+  const loadDashboard = useCallback(()=>{
     fetch('/api/portaal/stats').then(r=>r.json()).then(d=>setStats(d))
     fetch('/api/portaal/bookings?filter=upcoming').then(r=>r.json()).then(d=>{
       const now = new Date()
@@ -322,6 +322,10 @@ function DashboardView() {
       })
       setUpcoming(filtered.slice(0, 5))
     })
+  },[])
+
+  useEffect(()=>{
+    loadDashboard()
     fetch('/api/portaal/settings').then(r=>r.json()).then(d=>{
       const s = d.settings??{}
       const dow = String(new Date().getDay())
@@ -336,7 +340,9 @@ function DashboardView() {
       if (s.break_start) setBreakStart(s.break_start)
       if (s.break_end) setBreakEnd(s.break_end)
     })
-  },[])
+    const id = setInterval(loadDashboard, 60_000)
+    return () => clearInterval(id)
+  },[loadDashboard])
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -457,7 +463,10 @@ function CalendarView() {
   },[])
 
   useEffect(()=>{
-    fetch(`/api/portaal/bookings?month=${monthStr}`).then(r=>r.json()).then(d=>setMonthBookings(d.bookings??[]))
+    const load = () => fetch(`/api/portaal/bookings?month=${monthStr}`).then(r=>r.json()).then(d=>setMonthBookings(d.bookings??[]))
+    load()
+    const id = setInterval(load, 60_000)
+    return () => clearInterval(id)
   },[monthStr])
 
   const firstDay = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1)
@@ -589,8 +598,10 @@ function AppointmentsView() {
     } finally { setLoading(false) }
   },[filter,search])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(()=>{load()},[load])
+  useEffect(()=>{
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load(); const id = setInterval(load, 60_000); return () => clearInterval(id)
+  },[load])
 
   const [confirmDel, setConfirmDel] = useState<string|null>(null)
 
