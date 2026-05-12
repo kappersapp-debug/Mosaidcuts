@@ -52,6 +52,26 @@ export async function POST(request: Request) {
     }
   }
 
+  // When service durations change, update future bookings so slots stay correct
+  if (key === 'services') {
+    const newServices: { id: string; name: string; duration: number }[] = JSON.parse(value ?? '[]')
+    const { data: existing } = await supabaseAdmin.from('settings').select('value').eq('key', 'services').single()
+    if (existing?.value) {
+      const oldServices: { id: string; name: string; duration: number }[] = JSON.parse(existing.value)
+      const today = new Date().toISOString().slice(0, 10)
+      for (const newSvc of newServices) {
+        const oldSvc = oldServices.find(s => s.id === newSvc.id)
+        if (oldSvc && oldSvc.duration !== newSvc.duration) {
+          await supabaseAdmin
+            .from('bookings')
+            .update({ duration: newSvc.duration })
+            .eq('service', newSvc.name)
+            .gte('date', today)
+        }
+      }
+    }
+  }
+
   // If portal password is being changed, hash it and store as portal_password_hash
   if (key === 'portal_password') {
     const hash = await bcrypt.hash(value, 12)
