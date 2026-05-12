@@ -110,6 +110,8 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
   const [notifOpen, setNotifOpen] = useState(false)
   const [toast, setToast] = useState<string|null>(null)
   const lastCheckedRef = useRef('')
+  const notifBtnRef = useRef<HTMLButtonElement>(null)
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({ top: 56, right: 16 })
 
   // Poll for new bookings — runs immediately on mount, then every 30 seconds
   useEffect(() => {
@@ -154,14 +156,27 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
     return () => document.removeEventListener('mousedown', handler)
   }, [notifOpen])
 
-  function openNotif() { setNotifOpen(o => !o); setUnreadCount(0) }
+  function openNotifDesktop() {
+    if (notifBtnRef.current) {
+      const rect = notifBtnRef.current.getBoundingClientRect()
+      setPanelStyle({ bottom: window.innerHeight - rect.top + 4, left: rect.right + 8 })
+    }
+    setNotifOpen(o => !o)
+    setUnreadCount(0)
+  }
+
+  function openNotifMobile() {
+    setPanelStyle({ top: 56, right: 16 })
+    setNotifOpen(o => !o)
+    setUnreadCount(0)
+  }
 
   return (
     <div className="min-h-screen flex bg-gray-50">
 
-      {/* Notification panel (fixed, top-right) */}
+      {/* Notification panel */}
       {notifOpen && (
-        <div id="notif-panel" className="fixed top-14 right-4 lg:top-4 z-50 w-72 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
+        <div id="notif-panel" style={panelStyle} className="fixed z-50 w-72 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
           <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
             <span className="font-bold text-gray-800 text-sm">🔔 Meldingen</span>
             {notifications.length > 0 && (
@@ -183,9 +198,9 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
         </div>
       )}
 
-      {/* Toast popup */}
+      {/* Toast popup — top of screen */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-brand text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 max-w-xs">
+        <div className="fixed top-16 right-4 lg:top-4 lg:right-6 z-50 bg-brand text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 max-w-xs">
           <span className="text-lg shrink-0">🔔</span>
           <div className="flex-1 min-w-0">
             <p className="font-bold text-sm">Nieuwe afspraak!</p>
@@ -209,7 +224,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
               <span className="text-base">{n.icon}</span>{n.label}
             </button>
           ))}
-          <button onClick={openNotif}
+          <button ref={notifBtnRef} onClick={openNotifDesktop}
             className={['flex items-center gap-3 w-full px-6 py-3 text-sm font-bold transition-colors rounded-lg mx-2 my-0.5 w-[calc(100%-16px)]',
               notifOpen ? 'bg-white/15 text-white' : 'text-blue-200 hover:bg-white/8 hover:text-white'].join(' ')}>
             <span className="text-base">🔔</span>
@@ -230,7 +245,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-brand px-4 py-3 flex items-center justify-between shadow-md">
         <div className="text-white font-black flex items-center gap-2">✂️ MoSaidCuts</div>
         <div className="flex items-center gap-3">
-          <button onClick={openNotif} className="relative text-white hover:text-blue-200 transition-colors">
+          <button onClick={openNotifMobile} className="relative text-white hover:text-blue-200 transition-colors">
             🔔
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
