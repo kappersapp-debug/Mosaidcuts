@@ -109,11 +109,12 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifOpen, setNotifOpen] = useState(false)
   const [toast, setToast] = useState<string|null>(null)
-  // Start 1 hour ago so bookings from the last hour show up immediately on load
-  const lastCheckedRef = useRef(new Date(Date.now() - 60 * 60 * 1000).toISOString())
+  const lastCheckedRef = useRef('')
 
   // Poll for new bookings — runs immediately on mount, then every 30 seconds
   useEffect(() => {
+    // Start 1 hour ago so bookings from the last hour show up on first load
+    lastCheckedRef.current = new Date(Date.now() - 60 * 60 * 1000).toISOString()
     const poll = async () => {
       try {
         const r = await fetch(`/api/portaal/bookings?since=${encodeURIComponent(lastCheckedRef.current)}`)
@@ -196,19 +197,9 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
 
       {/* Sidebar */}
       <aside className="hidden lg:flex flex-col w-60 bg-brand min-h-screen fixed left-0 top-0 z-30">
-        <div className="px-6 py-5 border-b border-blue-800 flex items-center justify-between">
-          <div>
-            <div className="text-white font-black text-lg flex items-center gap-2">✂️ MoSaidCuts</div>
-            <p className="text-blue-200 text-xs font-semibold mt-0.5">Kapper Portaal</p>
-          </div>
-          <button onClick={openNotif} className="relative text-white hover:text-blue-200 transition-colors p-1">
-            🔔
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </button>
+        <div className="px-6 py-5 border-b border-blue-800">
+          <div className="text-white font-black text-lg flex items-center gap-2">✂️ MoSaidCuts</div>
+          <p className="text-blue-200 text-xs font-semibold mt-0.5">Kapper Portaal</p>
         </div>
         <nav className="flex-1 py-3">
           {NAV.map(n => (
@@ -218,6 +209,17 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
               <span className="text-base">{n.icon}</span>{n.label}
             </button>
           ))}
+          <button onClick={openNotif}
+            className={['flex items-center gap-3 w-full px-6 py-3 text-sm font-bold transition-colors rounded-lg mx-2 my-0.5 w-[calc(100%-16px)]',
+              notifOpen ? 'bg-white/15 text-white' : 'text-blue-200 hover:bg-white/8 hover:text-white'].join(' ')}>
+            <span className="text-base">🔔</span>
+            <span className="flex-1 text-left">Meldingen</span>
+            {unreadCount > 0 && (
+              <span className="bg-red-500 text-white text-[11px] font-bold min-w-5 h-5 rounded-full flex items-center justify-center px-1 leading-none">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
         </nav>
         <button onClick={onLogout} className="m-4 py-2 rounded-xl border border-blue-600 text-blue-200 text-sm font-bold hover:bg-white/10 transition-colors">
           🚪 Uitloggen
