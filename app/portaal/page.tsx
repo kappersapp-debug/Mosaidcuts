@@ -311,7 +311,17 @@ function DashboardView() {
 
   useEffect(()=>{
     fetch('/api/portaal/stats').then(r=>r.json()).then(d=>setStats(d))
-    fetch('/api/portaal/bookings?filter=upcoming').then(r=>r.json()).then(d=>setUpcoming((d.bookings??[]).slice(0,5)))
+    fetch('/api/portaal/bookings?filter=upcoming').then(r=>r.json()).then(d=>{
+      const now = new Date()
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`
+      const nowMins = now.getHours() * 60 + now.getMinutes()
+      const filtered = (d.bookings??[]).filter((b: Booking) => {
+        if (b.date > todayStr) return true
+        if (b.date === todayStr) { const [h,m] = b.time.split(':').map(Number); return h*60+m > nowMins }
+        return false
+      })
+      setUpcoming(filtered.slice(0, 5))
+    })
     fetch('/api/portaal/settings').then(r=>r.json()).then(d=>{
       const s = d.settings??{}
       const dow = String(new Date().getDay())
@@ -461,13 +471,7 @@ function CalendarView() {
 
   const selectedDow = String(new Date(selectedDay + 'T12:00:00').getDay())
   const dayCfg = schedule[selectedDow]
-  const allSlots = dayCfg?.open ? generateWorkSlots(dayCfg.start, dayCfg.end) : []
-  const now = new Date()
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`
-  const nowMins = now.getHours() * 60 + now.getMinutes()
-  const slots = selectedDay === todayStr
-    ? allSlots.filter(s => { const [h,m] = s.split(':').map(Number); return h*60+m > nowMins })
-    : allSlots
+  const slots = dayCfg?.open ? generateWorkSlots(dayCfg.start, dayCfg.end) : []
 
   return (
     <div>
