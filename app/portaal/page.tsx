@@ -109,9 +109,10 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifOpen, setNotifOpen] = useState(false)
   const [toast, setToast] = useState<string|null>(null)
-  const lastCheckedRef = useRef(new Date().toISOString())
+  // Start 1 hour ago so bookings from the last hour show up immediately on load
+  const lastCheckedRef = useRef(new Date(Date.now() - 60 * 60 * 1000).toISOString())
 
-  // Poll every 30 seconds for new bookings
+  // Poll for new bookings — runs immediately on mount, then every 30 seconds
   useEffect(() => {
     const poll = async () => {
       try {
@@ -129,6 +130,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
         }
       } catch { /* ignore */ }
     }
+    poll()
     const id = setInterval(poll, 30_000)
     return () => clearInterval(id)
   }, [])
