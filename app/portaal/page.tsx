@@ -74,24 +74,24 @@ function LoginScreen({onLogin}: {onLogin:()=>void}) {
     } catch { setError('Netwerkfout') } finally { setLoading(false) }
   }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-light via-white to-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="bg-brand px-8 py-7 text-center">
-          <h1 className="text-white font-bold text-base">MoSaidCuts</h1>
-          <p className="text-blue-200 text-xs mt-1">Kapper Portaal</p>
+    <div className="min-h-screen bg-[#0c0c0c] flex items-center justify-center px-4">
+      <div className="w-full max-w-sm bg-[#141414] rounded-xl shadow-xl border border-[#2a2a2a] overflow-hidden">
+        <div className="bg-[#111] px-8 py-7 text-center border-b border-[#2a2a2a]">
+          <h1 className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-2xl">MoSaidCuts</h1>
+          <p className="text-gray-500 text-xs mt-1">Kapper Portaal</p>
         </div>
         <form onSubmit={submit} className="p-8">
-          <h2 className="text-lg font-black text-gray-900 mb-6 text-center">Inloggen</h2>
-          {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-4 text-sm font-semibold">{error}</div>}
+          <h2 className="text-lg font-black text-white mb-6 text-center">Inloggen</h2>
+          {error && <div className="bg-red-900/30 border border-red-700/50 text-red-400 rounded-xl px-4 py-3 mb-4 text-sm font-semibold">{error}</div>}
           <div className="mb-5">
-            <label className="block text-sm font-bold text-gray-700 mb-1">Wachtwoord</label>
+            <label className="block text-sm font-bold text-gray-400 mb-1">Wachtwoord</label>
             <div className="relative">
               <input type={show?'text':'password'} value={pw} onChange={e=>setPw(e.target.value)} required
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 pr-12 font-medium focus:outline-none focus:border-brand transition-colors"/>
-              <button type="button" onClick={()=>setShow(s=>!s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium hover:text-gray-700">{show?'Verberg':'Toon'}</button>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-3 pr-12 font-medium focus:outline-none focus:border-[#c8a84b] transition-colors"/>
+              <button type="button" onClick={()=>setShow(s=>!s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs font-medium hover:text-gray-300">{show?'Verberg':'Toon'}</button>
             </div>
           </div>
-          <button type="submit" disabled={loading} className="w-full py-3 rounded-xl bg-brand text-white font-bold hover:bg-brand-hover disabled:opacity-50 transition-colors">
+          <button type="submit" disabled={loading} className="w-full py-3 rounded-xl bg-[#c8a84b] text-black font-bold hover:bg-[#d4b462] disabled:opacity-50 transition-colors">
             {loading ? 'Bezig...' : 'Inloggen'}
           </button>
         </form>
@@ -188,24 +188,24 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-[#0c0c0c] font-[family-name:var(--font-barlow)]">
 
       {/* Notification panel */}
       {notifOpen && (
-        <div id="notif-panel" style={panelStyle} className="fixed z-50 w-72 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
-            <span className="font-semibold text-gray-800 text-sm">Meldingen</span>
+        <div id="notif-panel" style={panelStyle} className="fixed z-50 w-72 bg-[#141414] rounded-xl shadow-2xl border border-[#2a2a2a] overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-[#1e1e1e] flex items-center justify-between">
+            <span className="font-semibold text-white text-sm">Meldingen</span>
             {notifications.length > 0 && (
-              <button onClick={() => { setNotifications([]); setNotifOpen(false) }} className="text-xs text-brand hover:underline">Wis alles</button>
+              <button onClick={() => { setNotifications([]); setNotifOpen(false) }} className="text-xs text-[#c8a84b] hover:underline">Wis alles</button>
             )}
           </div>
           {notifications.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-gray-400 text-center">Geen nieuwe meldingen</p>
+            <p className="px-4 py-6 text-sm text-gray-500 text-center">Geen nieuwe meldingen</p>
           ) : (
-            <div className="max-h-72 overflow-y-auto divide-y divide-gray-50">
+            <div className="max-h-72 overflow-y-auto divide-y divide-[#1e1e1e]">
               {notifications.map(n => (
-                <div key={n.id} className={`px-4 py-3 hover:bg-gray-50 border-l-2 ${(n as Booking & {_type?:string})._type==='cancelled' ? 'border-red-400' : 'border-brand'}`}>
-                  <p className="font-semibold text-sm text-gray-800">{n.name}</p>
+                <div key={n.id} className={`px-4 py-3 hover:bg-white/5 border-l-2 ${(n as Booking & {_type?:string})._type==='cancelled' ? 'border-red-500' : 'border-[#c8a84b]'}`}>
+                  <p className="font-semibold text-sm text-white">{n.name}</p>
                   <p className="text-xs text-gray-500">{n.service} · {n.date} · {n.time}</p>
                 </div>
               ))}
@@ -216,32 +216,32 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
 
       {/* Toast popup — top of screen */}
       {toast && (
-        <div className="fixed top-16 right-4 lg:top-4 lg:right-6 z-50 bg-brand text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-xs">
+        <div className="fixed top-16 right-4 lg:top-4 lg:right-6 z-50 bg-[#c8a84b] text-black px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-xs">
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm">Nieuwe afspraak</p>
-            <p className="text-xs text-blue-100 truncate">{toast}</p>
+            <p className="font-bold text-sm">Nieuwe melding</p>
+            <p className="text-xs text-black/70 truncate">{toast}</p>
           </div>
-          <button onClick={() => setToast(null)} className="text-blue-200 hover:text-white shrink-0 leading-none text-lg">×</button>
+          <button onClick={() => setToast(null)} className="text-black/50 hover:text-black shrink-0 leading-none text-lg">×</button>
         </div>
       )}
 
       {/* Sidebar */}
-      <aside className="hidden lg:flex flex-col w-56 bg-brand min-h-screen fixed left-0 top-0 z-30">
-        <div className="px-6 py-5 border-b border-blue-800">
-          <div className="text-white font-semibold text-sm">MoSaidCuts</div>
-          <p className="text-blue-300 text-xs mt-0.5">Kapper Portaal</p>
+      <aside className="hidden lg:flex flex-col w-56 bg-[#111] min-h-screen fixed left-0 top-0 z-30 border-r border-[#2a2a2a]">
+        <div className="px-6 py-5 border-b border-[#2a2a2a]">
+          <div className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-xl">MoSaidCuts</div>
+          <p className="text-gray-500 text-xs mt-0.5">Kapper Portaal</p>
         </div>
         <nav className="flex-1 py-2">
           {NAV.map(n => (
             <button key={n.id} onClick={()=>setView(n.id)}
               className={['flex items-center w-full px-6 py-2.5 text-sm transition-colors',
-                view===n.id ? 'bg-white/15 text-white font-medium' : 'text-blue-200 hover:bg-white/8 hover:text-white'].join(' ')}>
+                view===n.id ? 'bg-[#c8a84b]/10 text-[#c8a84b] font-semibold border-r-2 border-[#c8a84b]' : 'text-gray-400 hover:bg-white/5 hover:text-white'].join(' ')}>
               {n.label}
             </button>
           ))}
           <button ref={notifBtnRef} onClick={openNotifDesktop}
             className={['flex items-center w-full px-6 py-2.5 text-sm transition-colors',
-              notifOpen ? 'bg-white/15 text-white font-medium' : 'text-blue-200 hover:bg-white/8 hover:text-white'].join(' ')}>
+              notifOpen ? 'bg-[#c8a84b]/10 text-[#c8a84b] font-semibold border-r-2 border-[#c8a84b]' : 'text-gray-400 hover:bg-white/5 hover:text-white'].join(' ')}>
             <span className="flex-1 text-left">Meldingen</span>
             {unreadCount > 0 && (
               <span className="bg-red-500 text-white text-[10px] font-bold min-w-4 h-4 rounded-full flex items-center justify-center px-1 leading-none">
@@ -250,16 +250,16 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
             )}
           </button>
         </nav>
-        <button onClick={onLogout} className="m-4 py-2 rounded-lg border border-blue-700 text-blue-200 text-sm hover:bg-white/10 transition-colors">
+        <button onClick={onLogout} className="m-4 py-2 rounded-lg border border-[#2a2a2a] text-gray-400 text-sm hover:bg-white/5 hover:text-white transition-colors">
           Uitloggen
         </button>
       </aside>
 
       {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-brand px-4 py-3 flex items-center justify-between">
-        <div className="text-white font-semibold text-sm">MoSaidCuts</div>
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-[#111] px-4 py-3 flex items-center justify-between border-b border-[#2a2a2a]">
+        <div className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-lg">MoSaidCuts</div>
         <div className="flex items-center gap-4">
-          <button onClick={openNotifMobile} className="relative text-blue-200 hover:text-white transition-colors text-xs">
+          <button onClick={openNotifMobile} className="relative text-gray-400 hover:text-white transition-colors text-xs">
             Meldingen
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
@@ -267,7 +267,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
               </span>
             )}
           </button>
-          <button onClick={()=>setMenuOpen(o=>!o)} className="text-white">
+          <button onClick={()=>setMenuOpen(o=>!o)} className="text-gray-300 hover:text-white">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -276,21 +276,21 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
       </div>
 
       {menuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-black/50" onClick={()=>setMenuOpen(false)}>
-          <div className="w-56 bg-brand h-full" onClick={e=>e.stopPropagation()}>
-            <div className="px-6 py-5 border-b border-blue-800">
-              <div className="text-white font-semibold text-sm">MoSaidCuts</div>
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/70" onClick={()=>setMenuOpen(false)}>
+          <div className="w-56 bg-[#111] h-full border-r border-[#2a2a2a]" onClick={e=>e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-[#2a2a2a]">
+              <div className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-xl">MoSaidCuts</div>
             </div>
             <nav className="py-2">
               {NAV.map(n => (
                 <button key={n.id} onClick={()=>{setView(n.id);setMenuOpen(false)}}
                   className={['flex items-center w-full px-6 py-2.5 text-sm',
-                    view===n.id?'bg-white/15 text-white font-medium':'text-blue-200 hover:bg-white/8 hover:text-white'].join(' ')}>
+                    view===n.id?'bg-[#c8a84b]/10 text-[#c8a84b] font-semibold border-r-2 border-[#c8a84b]':'text-gray-400 hover:bg-white/5 hover:text-white'].join(' ')}>
                   {n.label}
                 </button>
               ))}
             </nav>
-            <button onClick={onLogout} className="m-4 py-2 w-[calc(100%-32px)] rounded-lg border border-blue-700 text-blue-200 text-sm">Uitloggen</button>
+            <button onClick={onLogout} className="m-4 py-2 w-[calc(100%-32px)] rounded-lg border border-[#2a2a2a] text-gray-400 text-sm hover:bg-white/5 hover:text-white transition-colors">Uitloggen</button>
           </div>
         </div>
       )}
@@ -366,43 +366,43 @@ function DashboardView() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-gray-900 mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white mb-6">Dashboard</h1>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {[
-          {label:'Vandaag', value:stats?.today??'—', sub:'afspraken', green:true},
-          {label:'Deze week', value:stats?.week??'—', sub:'afspraken', green:false},
-          {label:'Klanten', value:stats?.totalCustomers??'—', sub:'uniek totaal', green:false},
+          {label:'Vandaag', value:stats?.today??'—', sub:'afspraken', gold:true},
+          {label:'Deze week', value:stats?.week??'—', sub:'afspraken', gold:false},
+          {label:'Klanten', value:stats?.totalCustomers??'—', sub:'uniek totaal', gold:false},
         ].map(c=>(
-          <div key={c.label} className={`rounded-xl p-5 border ${c.green?'bg-brand border-brand-dark':'bg-white border-gray-200'}`}>
-            <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${c.green?'text-blue-100':'text-gray-600'}`}>{c.label}</p>
-            <p className={`text-3xl font-black ${c.green?'text-white':'text-gray-900'}`}>{c.value}</p>
-            <p className={`text-xs font-semibold mt-0.5 ${c.green?'text-blue-100':'text-gray-600'}`}>{c.sub}</p>
+          <div key={c.label} className={`rounded-xl p-5 border ${c.gold?'bg-[#c8a84b]/10 border-[#c8a84b]/30':'bg-[#141414] border-[#2a2a2a]'}`}>
+            <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${c.gold?'text-[#c8a84b]/70':'text-gray-500'}`}>{c.label}</p>
+            <p className={`text-3xl font-black ${c.gold?'text-[#c8a84b]':'text-white'}`}>{c.value}</p>
+            <p className={`text-xs font-semibold mt-0.5 ${c.gold?'text-[#c8a84b]/70':'text-gray-500'}`}>{c.sub}</p>
           </div>
         ))}
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Aankomende afspraken */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900 text-sm">Aankomende afspraken</h2>
+        <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#1e1e1e]">
+            <h2 className="font-semibold text-white text-sm">Aankomende afspraken</h2>
             <p className="text-xs text-gray-500 mt-0.5">Volgende {upcoming.length} afspraken</p>
           </div>
           {upcoming.length===0 ? (
-            <p className="text-center text-gray-600 py-8 text-sm font-medium">Geen aankomende afspraken</p>
+            <p className="text-center text-gray-500 py-8 text-sm font-medium">Geen aankomende afspraken</p>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-[#1e1e1e]">
               {upcoming.map(b=>(
                 <div key={b.id} className="flex items-center gap-4 px-5 py-3.5">
                   <div className="text-center shrink-0 w-14">
-                    <p className="text-xs font-black text-brand">{formatShortDate(b.date)}</p>
-                    <p className="text-lg font-black text-gray-900 leading-tight">{b.time}</p>
+                    <p className="text-xs font-black text-[#c8a84b]">{formatShortDate(b.date)}</p>
+                    <p className="text-lg font-black text-white leading-tight">{b.time}</p>
                   </div>
                   <div className="min-w-0">
-                    <p className="font-black text-gray-900 truncate">{b.name}</p>
-                    <p className="text-xs text-gray-600 font-medium">{b.service}</p>
+                    <p className="font-black text-white truncate">{b.name}</p>
+                    <p className="text-xs text-gray-400 font-medium">{b.service}</p>
                   </div>
                 </div>
               ))}
@@ -411,9 +411,9 @@ function DashboardView() {
         </div>
 
         {/* Vandaag schema */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900 text-sm">Schema vandaag</h2>
+        <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#1e1e1e]">
+            <h2 className="font-semibold text-white text-sm">Schema vandaag</h2>
             <p className="text-xs text-gray-500 mt-0.5 capitalize">{formatLongDate(today)}</p>
           </div>
           <div className="overflow-y-auto max-h-72">
@@ -421,19 +421,19 @@ function DashboardView() {
               const b = stats?.todayBookings?.find(b=>b.time===slot)
               const isPause = isBreak(slot, breakEnabled, breakStart, breakEnd)
               return (
-                <div key={slot} className={`flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 ${b?'bg-brand-light':isPause?'bg-amber-50':'bg-gray-50/60'}`}>
-                  <span className={`font-black text-xs w-14 text-center shrink-0 px-2 py-1 rounded-lg ${b?'bg-brand text-white':isPause?'bg-amber-100 text-amber-700':'bg-white text-brand border border-brand/20'}`}>{slot}</span>
+                <div key={slot} className={`flex items-center gap-3 px-3 py-2.5 border-b border-[#1e1e1e] ${b?'bg-[#c8a84b]/5':isPause?'bg-amber-900/10':'bg-[#161616]'}`}>
+                  <span className={`font-black text-xs w-14 text-center shrink-0 px-2 py-1 rounded-lg ${b?'bg-[#c8a84b] text-black':isPause?'bg-amber-900/30 text-amber-400':'bg-[#1e1e1e] text-[#c8a84b] border border-[#c8a84b]/20'}`}>{slot}</span>
                   {isPause ? (
-                    <span className="text-amber-700 text-xs font-medium">Pauze</span>
+                    <span className="text-amber-400 text-xs font-medium">Pauze</span>
                   ) : b ? (
                     <>
                       <div className="min-w-0 flex-1">
-                        <p className="font-bold text-gray-900 text-sm truncate">{b.name}</p>
-                        <p className="text-xs text-gray-600 truncate">{b.service}</p>
+                        <p className="font-bold text-white text-sm truncate">{b.name}</p>
+                        <p className="text-xs text-gray-400 truncate">{b.service}</p>
                       </div>
-                      <span className="ml-auto bg-brand text-white font-bold text-xs px-2 py-1 rounded-lg shrink-0">€{b.price}</span>
+                      <span className="ml-auto bg-[#c8a84b] text-black font-bold text-xs px-2 py-1 rounded-lg shrink-0">€{b.price}</span>
                     </>
-                  ) : <span className="text-gray-500 text-xs font-medium">Vrij</span>}
+                  ) : <span className="text-gray-600 text-xs font-medium">Vrij</span>}
                 </div>
               )
             })}
@@ -496,22 +496,22 @@ function CalendarView() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-gray-900 mb-2">Agenda</h1>
-      <p className="text-gray-600 text-sm mb-6">Klik op een dag om het rooster te zien</p>
+      <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white mb-2">Agenda</h1>
+      <p className="text-gray-500 text-sm mb-6">Klik op een dag om het rooster te zien</p>
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Month */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-5">
           <div className="flex items-center justify-between mb-4">
             <button onClick={()=>setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth()-1,1))}
-              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-light text-brand font-bold text-xl">‹</button>
-            <span className="font-black text-gray-800 capitalize">
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#c8a84b]/10 text-[#c8a84b] font-bold text-xl transition-colors">‹</button>
+            <span className="font-black text-white capitalize">
               {viewMonth.toLocaleDateString('nl-NL',{month:'long',year:'numeric'})}
             </span>
             <button onClick={()=>setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth()+1,1))}
-              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-light text-brand font-bold text-xl">›</button>
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#c8a84b]/10 text-[#c8a84b] font-bold text-xl transition-colors">›</button>
           </div>
           <div className="grid grid-cols-7 mb-1">
-            {NL_DAYS_SHORT.map(d=><div key={d} className="text-center text-xs font-bold text-gray-600 py-1">{d}</div>)}
+            {NL_DAYS_SHORT.map(d=><div key={d} className="text-center text-xs font-bold text-gray-500 py-1">{d}</div>)}
           </div>
           <div className="grid grid-cols-7">
             {cells.map((day,i)=>{
@@ -526,17 +526,17 @@ function CalendarView() {
                 <button key={i} onClick={()=>setSelectedDay(ds)}
                   className={[
                     'flex flex-col items-center py-1.5 rounded-xl m-0.5 transition-colors font-bold text-sm relative',
-                    isSelected ? 'bg-brand text-white shadow-md' :
-                    isBlocked ? 'bg-red-100 text-red-500 hover:bg-red-200' :
-                    isClosed ? 'bg-gray-100 text-gray-300 hover:bg-gray-200' :
-                    isToday ? 'ring-2 ring-brand text-brand' :
-                    'hover:bg-brand-light text-gray-700',
+                    isSelected ? 'bg-[#c8a84b] text-black shadow-md' :
+                    isBlocked ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' :
+                    isClosed ? 'bg-[#1a1a1a] text-gray-600 hover:bg-[#222]' :
+                    isToday ? 'ring-2 ring-[#c8a84b] text-[#c8a84b]' :
+                    'hover:bg-[#c8a84b]/10 text-gray-300',
                   ].join(' ')}>
                   <span>{day.getDate()}</span>
                   {!isBlocked && count>0 && (
                     <div className="flex gap-0.5 mt-0.5">
                       {Array.from({length:Math.min(count,3)}).map((_,j)=>(
-                        <div key={j} className={`w-1.5 h-1.5 rounded-full ${isSelected?'bg-white':'bg-brand'}`}/>
+                        <div key={j} className={`w-1.5 h-1.5 rounded-full ${isSelected?'bg-black':'bg-[#c8a84b]'}`}/>
                       ))}
                     </div>
                   )}
@@ -545,43 +545,43 @@ function CalendarView() {
             })}
           </div>
           {/* Legend */}
-          <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t border-gray-100 text-xs font-semibold text-gray-600">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-brand inline-block"/>{' '}Geselecteerd</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-100 inline-block"/>Geblokkeerd</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-gray-100 inline-block"/>Gesloten</span>
+          <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t border-[#1e1e1e] text-xs font-semibold text-gray-500">
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#c8a84b] inline-block"/>Geselecteerd</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-900/40 inline-block"/>Geblokkeerd</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#1a1a1a] inline-block"/>Gesloten</span>
           </div>
         </div>
 
         {/* Day schedule */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className={`px-5 py-4 border-b border-gray-100 ${blockedDates.includes(selectedDay) ? 'bg-red-50' : ''}`}>
-            <h2 className="font-semibold text-gray-900 capitalize text-sm">{formatLongDate(selectedDay)}</h2>
+        <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] overflow-hidden">
+          <div className={`px-5 py-4 border-b border-[#1e1e1e] ${blockedDates.includes(selectedDay) ? 'bg-red-900/10' : ''}`}>
+            <h2 className="font-semibold text-white capitalize text-sm">{formatLongDate(selectedDay)}</h2>
             {blockedDates.includes(selectedDay) ? (
-              <p className="text-xs text-red-500 font-medium mt-0.5">Geblokkeerd — geen boekingen mogelijk</p>
+              <p className="text-xs text-red-400 font-medium mt-0.5">Geblokkeerd — geen boekingen mogelijk</p>
             ) : !dayCfg?.open ? (
-              <p className="text-xs text-gray-600 font-bold">Gesloten</p>
+              <p className="text-xs text-gray-500 font-bold">Gesloten</p>
             ) : (
-              <p className="text-xs text-gray-600">{dayBookings.length} afspraken · {dayCfg.start}–{dayCfg.end}</p>
+              <p className="text-xs text-gray-500">{dayBookings.length} afspraken · {dayCfg.start}–{dayCfg.end}</p>
             )}
           </div>
           <div className="overflow-y-auto max-h-96">
             {slots.length === 0 ? (
-              <p className="text-center text-gray-400 text-sm font-medium py-10">Geen rooster beschikbaar</p>
+              <p className="text-center text-gray-600 text-sm font-medium py-10">Geen rooster beschikbaar</p>
             ) : null}
             {slots.map(slot=>{
               const b = dayBookings.find(b=>b.time===slot)
               const isPause = isBreak(slot, breakEnabled, breakStart, breakEnd)
               return (
-                <div key={slot} className={`flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 ${b?'bg-brand-light':isPause?'bg-amber-50':'bg-gray-50/60'}`}>
-                  <span className={`font-black text-xs w-14 text-center shrink-0 px-2 py-1 rounded-lg ${b?'bg-brand text-white':isPause?'bg-amber-100 text-amber-700':'bg-white text-brand border border-brand/20'}`}>{slot}</span>
+                <div key={slot} className={`flex items-center gap-3 px-3 py-2.5 border-b border-[#1e1e1e] ${b?'bg-[#c8a84b]/5':isPause?'bg-amber-900/10':'bg-[#161616]'}`}>
+                  <span className={`font-black text-xs w-14 text-center shrink-0 px-2 py-1 rounded-lg ${b?'bg-[#c8a84b] text-black':isPause?'bg-amber-900/30 text-amber-400':'bg-[#1e1e1e] text-[#c8a84b] border border-[#c8a84b]/20'}`}>{slot}</span>
                   {isPause ? (
-                    <span className="text-amber-700 text-xs font-medium">Pauze</span>
+                    <span className="text-amber-400 text-xs font-medium">Pauze</span>
                   ) : b ? (
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-gray-900 text-sm truncate">{b.name}</p>
-                      <p className="text-xs text-gray-600">{b.service} · €{b.price}</p>
+                      <p className="font-bold text-white text-sm truncate">{b.name}</p>
+                      <p className="text-xs text-gray-400">{b.service} · €{b.price}</p>
                     </div>
-                  ) : <span className="text-gray-500 text-xs font-medium">Vrij</span>}
+                  ) : <span className="text-gray-600 text-xs font-medium">Vrij</span>}
                 </div>
               )
             })}
@@ -623,24 +623,24 @@ function AppointmentsView() {
   }
 
   const statusBadge = {
-    today: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">VANDAAG</span>,
-    upcoming: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-brand-light text-brand">AANKOMEND</span>,
-    past: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">VERLEDEN</span>,
+    today: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-amber-900/30 text-amber-400">VANDAAG</span>,
+    upcoming: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#c8a84b]/10 text-[#c8a84b]">AANKOMEND</span>,
+    past: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#1e1e1e] text-gray-500">VERLEDEN</span>,
   }
 
   const filters = [{id:'upcoming',label:'Aankomend'},{id:'today',label:'Vandaag'},{id:'all',label:'Alle'},{id:'past',label:'Verleden'}] as const
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-gray-900 mb-6">Afspraken</h1>
+      <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white mb-6">Afspraken</h1>
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <input type="text" placeholder="Zoeken op naam, e-mail of code..." value={search} onChange={e=>setSearch(e.target.value)}
-          className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-brand transition-colors"/>
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
+          className="flex-1 bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-[#c8a84b] transition-colors"/>
+        <div className="flex gap-1 bg-[#1a1a1a] rounded-xl p-1 border border-[#2a2a2a]">
           {filters.map(f=>(
             <button key={f.id} onClick={()=>setFilter(f.id)}
               className={['px-3 py-1.5 rounded-lg text-xs font-bold transition-colors',
-                filter===f.id?'bg-white text-brand shadow-sm':'text-gray-600 hover:text-gray-700'].join(' ')}>
+                filter===f.id?'bg-[#c8a84b] text-black shadow-sm':'text-gray-500 hover:text-gray-300'].join(' ')}>
               {f.label}
             </button>
           ))}
@@ -648,39 +648,39 @@ function AppointmentsView() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin"/></div>
+        <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-[#c8a84b] border-t-transparent rounded-full animate-spin"/></div>
       ) : bookings.length===0 ? (
-        <div className="text-center py-12 text-gray-600 font-medium">Geen afspraken gevonden</div>
+        <div className="text-center py-12 text-gray-500 font-medium">Geen afspraken gevonden</div>
       ) : (
         <div className="space-y-3">
           {bookings.map(b=>{
             const status = getStatus(b.date)
             return (
-              <div key={b.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center gap-4">
-                <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0">
+              <div key={b.id} className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-4 flex items-center gap-4">
+                <div className="w-9 h-9 rounded-lg bg-[#1e1e1e] flex items-center justify-center text-xs font-bold text-[#c8a84b] shrink-0">
                   {serviceInitial(b.service)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 flex-wrap">
                     <div className="min-w-0">
-                      <p className="font-black text-gray-900 truncate">{b.name}</p>
-                      <p className="text-sm text-gray-600 truncate">{b.service} · {formatMedDate(b.date)} · {b.time}</p>
+                      <p className="font-black text-white truncate">{b.name}</p>
+                      <p className="text-sm text-gray-400 truncate">{b.service} · {formatMedDate(b.date)} · {b.time}</p>
                       <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
-                        <a href={`tel:${b.phone}`} className="text-xs text-brand hover:underline">{b.phone}</a>
-                        <a href={`mailto:${b.email}`} className="text-xs text-brand hover:underline truncate">{b.email}</a>
+                        <a href={`tel:${b.phone}`} className="text-xs text-[#c8a84b] hover:underline">{b.phone}</a>
+                        <a href={`mailto:${b.email}`} className="text-xs text-[#c8a84b] hover:underline truncate">{b.email}</a>
                       </div>
                       <div className="mt-1">{statusBadge[status]}</div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-black text-gray-900">€{b.price}</p>
-                      <p className="text-xs text-gray-600 font-mono">{b.code}</p>
+                      <p className="font-black text-white">€{b.price}</p>
+                      <p className="text-xs text-gray-500 font-mono">{b.code}</p>
                       {confirmDel===b.id ? (
                         <div className="flex gap-1 mt-1">
                           <button onClick={()=>del(b.id)} disabled={deleting===b.id} className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-lg font-bold disabled:opacity-50">{deleting===b.id?'...':'Ja'}</button>
-                          <button onClick={()=>setConfirmDel(null)} className="text-xs border border-gray-300 text-gray-600 px-2 py-0.5 rounded-lg font-bold">Nee</button>
+                          <button onClick={()=>setConfirmDel(null)} className="text-xs border border-[#333] text-gray-400 px-2 py-0.5 rounded-lg font-bold">Nee</button>
                         </div>
                       ) : (
-                        <button onClick={()=>setConfirmDel(b.id)} className="text-xs text-red-400 hover:text-red-600 mt-1">Verwijder</button>
+                        <button onClick={()=>setConfirmDel(b.id)} className="text-xs text-red-400 hover:text-red-500 mt-1">Verwijder</button>
                       )}
                     </div>
                   </div>
@@ -746,46 +746,46 @@ function ServicesView() {
   return (
     <div className="max-w-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-gray-900">Diensten</h1>
-        <button onClick={openNew} className="px-4 py-2 bg-brand text-white rounded-xl font-bold text-sm hover:bg-brand-hover transition-colors">
+        <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Diensten</h1>
+        <button onClick={openNew} className="px-4 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] transition-colors">
           + Toevoegen
         </button>
       </div>
-      {msg && <div className="mb-4 bg-brand-light border border-brand-muted text-brand text-sm font-bold px-4 py-3 rounded-xl">{msg}</div>}
+      {msg && <div className="mb-4 bg-[#c8a84b]/10 border border-[#c8a84b]/20 text-[#c8a84b] text-sm font-bold px-4 py-3 rounded-xl">{msg}</div>}
 
       {form && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-4">{services.find(s=>s.id===form.id) ? 'Dienst bewerken' : 'Nieuwe dienst'}</h2>
+        <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-5 mb-6">
+          <h2 className="font-semibold text-white mb-4">{services.find(s=>s.id===form.id) ? 'Dienst bewerken' : 'Nieuwe dienst'}</h2>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Naam</label>
+              <label className="block text-xs font-bold text-gray-400 mb-1">Naam</label>
               <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="bijv. Normale Knipbeurt"
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand transition-colors"/>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">Prijs (€)</label>
+                <label className="block text-xs font-bold text-gray-400 mb-1">Prijs (€)</label>
                 <input type="number" min="0" value={form.price} onChange={e=>setForm({...form,price:Number(e.target.value)})}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand transition-colors"/>
+                  className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">Duur</label>
+                <label className="block text-xs font-bold text-gray-400 mb-1">Duur</label>
                 <select value={form.duration} onChange={e=>setForm({...form,duration:Number(e.target.value)})}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-brand transition-colors">
+                  className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-[#c8a84b] transition-colors">
                   {durations.map(d=><option key={d} value={d}>{d} min</option>)}
                 </select>
               </div>
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Omschrijving</label>
+              <label className="block text-xs font-bold text-gray-400 mb-1">Omschrijving</label>
               <input value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} placeholder="bijv. 30 minuten"
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand transition-colors"/>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
             </div>
           </div>
           <div className="flex gap-3 mt-4">
-            <button onClick={()=>setForm(null)} className="px-4 py-2 border-2 border-gray-200 rounded-xl font-bold text-gray-600 text-sm">Annuleren</button>
+            <button onClick={()=>setForm(null)} className="px-4 py-2 border-2 border-[#333] rounded-xl font-bold text-gray-400 text-sm hover:border-[#444] transition-colors">Annuleren</button>
             <button onClick={saveForm} disabled={!form.name || saving}
-              className="px-6 py-2 bg-brand text-white rounded-xl font-bold text-sm hover:bg-brand-hover disabled:opacity-50">
+              className="px-6 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] disabled:opacity-50 transition-colors">
               {saving ? 'Opslaan...' : 'Opslaan'}
             </button>
           </div>
@@ -794,31 +794,31 @@ function ServicesView() {
 
       <div className="space-y-3">
         {services.map(s=>(
-          <div key={s.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center gap-4">
-            <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0">
+          <div key={s.id} className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-4 flex items-center gap-4">
+            <div className="w-9 h-9 rounded-lg bg-[#1e1e1e] flex items-center justify-center text-xs font-bold text-[#c8a84b] shrink-0">
               {serviceInitial(s.name)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-black text-gray-900">{s.name}</p>
-              <p className="text-sm text-gray-600">{s.desc} · {s.duration} min</p>
+              <p className="font-black text-white">{s.name}</p>
+              <p className="text-sm text-gray-400">{s.desc} · {s.duration} min</p>
             </div>
             <div className="text-right shrink-0">
-              <p className="font-black text-gray-900 text-lg">€{s.price}</p>
+              <p className="font-black text-[#c8a84b] text-lg">€{s.price}</p>
               <div className="flex gap-3 mt-1 justify-end">
-                <button onClick={()=>setForm({...s})} className="text-xs text-brand hover:underline">Bewerken</button>
+                <button onClick={()=>setForm({...s})} className="text-xs text-[#c8a84b] hover:underline">Bewerken</button>
                 {confirmRemove===s.id ? (
                   <span className="flex gap-1">
                     <button onClick={()=>remove(s.id)} className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-lg font-bold">Ja</button>
-                    <button onClick={()=>setConfirmRemove(null)} className="text-xs border border-gray-300 text-gray-600 px-2 py-0.5 rounded-lg font-bold">Nee</button>
+                    <button onClick={()=>setConfirmRemove(null)} className="text-xs border border-[#333] text-gray-400 px-2 py-0.5 rounded-lg font-bold">Nee</button>
                   </span>
                 ) : (
-                  <button onClick={()=>setConfirmRemove(s.id)} className="text-xs text-red-400 hover:text-red-600">Verwijder</button>
+                  <button onClick={()=>setConfirmRemove(s.id)} className="text-xs text-red-400 hover:text-red-500">Verwijder</button>
                 )}
               </div>
             </div>
           </div>
         ))}
-        {services.length===0 && <p className="text-center text-gray-600 py-8 font-medium">Geen diensten</p>}
+        {services.length===0 && <p className="text-center text-gray-500 py-8 font-medium">Geen diensten</p>}
       </div>
     </div>
   )
@@ -860,57 +860,57 @@ function ManagementView() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold text-gray-900">Beheer</h1>
-        <button onClick={()=>setShowForm(f=>!f)} className="px-4 py-2 bg-brand text-white rounded-lg font-medium text-sm hover:bg-brand-hover transition-colors">
+        <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Beheer</h1>
+        <button onClick={()=>setShowForm(f=>!f)} className="px-4 py-2 bg-[#c8a84b] text-black rounded-lg font-bold text-sm hover:bg-[#d4b462] transition-colors">
           Email bannen
         </button>
       </div>
-      {banMsg && <div className="mb-4 bg-brand-light border border-brand-muted text-brand text-sm font-bold px-4 py-3 rounded-xl">{banMsg}</div>}
+      {banMsg && <div className="mb-4 bg-[#c8a84b]/10 border border-[#c8a84b]/20 text-[#c8a84b] text-sm font-bold px-4 py-3 rounded-xl">{banMsg}</div>}
       {showForm && (
-        <form onSubmit={ban} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Nieuw ban</h2>
+        <form onSubmit={ban} className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-5 mb-6">
+          <h2 className="font-semibold text-white mb-4">Nieuw ban</h2>
           <div className="grid sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">E-mailadres</label>
+              <label className="block text-sm font-bold text-gray-400 mb-1">E-mailadres</label>
               <input type="email" required value={newEmail} onChange={e=>setNewEmail(e.target.value)} placeholder="email@example.com"
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand transition-colors"/>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Reden (optioneel)</label>
+              <label className="block text-sm font-bold text-gray-400 mb-1">Reden (optioneel)</label>
               <input type="text" value={reason} onChange={e=>setReason(e.target.value)} placeholder="Reden voor ban"
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand transition-colors"/>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
             </div>
           </div>
           <div className="flex gap-3">
-            <button type="button" onClick={()=>setShowForm(false)} className="px-4 py-2 border-2 border-gray-200 rounded-xl font-bold text-gray-600 text-sm">Annuleren</button>
-            <button type="submit" disabled={loading} className="px-6 py-2 bg-red-500 text-white rounded-xl font-bold text-sm hover:bg-red-600 disabled:opacity-50">
+            <button type="button" onClick={()=>setShowForm(false)} className="px-4 py-2 border-2 border-[#333] rounded-xl font-bold text-gray-400 text-sm hover:border-[#444] transition-colors">Annuleren</button>
+            <button type="submit" disabled={loading} className="px-6 py-2 bg-red-600 text-white rounded-xl font-bold text-sm hover:bg-red-700 disabled:opacity-50">
               {loading?'Bezig...':'Bannen'}
             </button>
           </div>
         </form>
       )}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900 text-sm">Gebande e-mails ({banned.length})</h2>
+      <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] overflow-hidden">
+        <div className="px-5 py-4 border-b border-[#1e1e1e]">
+          <h2 className="font-semibold text-white text-sm">Gebande e-mails ({banned.length})</h2>
         </div>
         {banned.length===0 ? (
-          <p className="text-center text-gray-600 font-medium py-10">Geen gebande e-mails</p>
+          <p className="text-center text-gray-500 font-medium py-10">Geen gebande e-mails</p>
         ) : (
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-[#1e1e1e]">
             {banned.map(b=>(
               <div key={b.id} className="flex items-center justify-between px-5 py-4 gap-4">
                 <div className="min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{b.email}</p>
-                  {b.reason && <p className="text-xs text-gray-600 mt-0.5">{b.reason}</p>}
+                  <p className="font-medium text-white truncate">{b.email}</p>
+                  {b.reason && <p className="text-xs text-gray-500 mt-0.5">{b.reason}</p>}
                 </div>
                 {confirmUnban===b.email ? (
                   <div className="flex gap-1 shrink-0">
-                    <button onClick={()=>unban(b.email)} disabled={actionLoading===b.email} className="text-xs bg-brand text-white px-2 py-1 rounded-lg font-bold disabled:opacity-50">{actionLoading===b.email?'...':'Ja'}</button>
-                    <button onClick={()=>setConfirmUnban(null)} className="text-xs border border-gray-300 text-gray-600 px-2 py-1 rounded-lg font-bold">Nee</button>
+                    <button onClick={()=>unban(b.email)} disabled={actionLoading===b.email} className="text-xs bg-[#c8a84b] text-black px-2 py-1 rounded-lg font-bold disabled:opacity-50">{actionLoading===b.email?'...':'Ja'}</button>
+                    <button onClick={()=>setConfirmUnban(null)} className="text-xs border border-[#333] text-gray-400 px-2 py-1 rounded-lg font-bold">Nee</button>
                   </div>
                 ) : (
                   <button onClick={()=>setConfirmUnban(b.email)}
-                    className="shrink-0 px-3 py-1.5 border border-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors">
+                    className="shrink-0 px-3 py-1.5 border border-[#2a2a2a] text-gray-400 rounded-lg text-xs font-medium hover:bg-white/5 transition-colors">
                     Ontbannen
                   </button>
                 )}
@@ -943,15 +943,15 @@ function BlockedCalendar({blocked, onChange}: {blocked: string[]; onChange: (dat
     <div className="select-none">
       <div className="flex items-center justify-between mb-3">
         <button onClick={()=>setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth()-1,1))}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600 font-bold text-lg transition-colors">‹</button>
-        <span className="font-bold text-gray-800 capitalize text-sm">
+          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/5 text-gray-400 font-bold text-lg transition-colors">‹</button>
+        <span className="font-bold text-white capitalize text-sm">
           {viewMonth.toLocaleDateString('nl-NL',{month:'long',year:'numeric'})}
         </span>
         <button onClick={()=>setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth()+1,1))}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600 font-bold text-lg transition-colors">›</button>
+          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/5 text-gray-400 font-bold text-lg transition-colors">›</button>
       </div>
       <div className="grid grid-cols-7 mb-1">
-        {NL_DAYS_SHORT.map(d=><div key={d} className="text-center text-xs font-bold text-gray-600 py-1">{d}</div>)}
+        {NL_DAYS_SHORT.map(d=><div key={d} className="text-center text-xs font-bold text-gray-500 py-1">{d}</div>)}
       </div>
       <div className="grid grid-cols-7 gap-1">
         {cells.map((day,i)=>{
@@ -964,10 +964,10 @@ function BlockedCalendar({blocked, onChange}: {blocked: string[]; onChange: (dat
             <button key={i} disabled={isPast} onClick={()=>toggle(ds)}
               className={[
                 'aspect-square flex items-center justify-center rounded-xl text-xs font-bold transition-all',
-                isPast ? 'text-gray-200 cursor-not-allowed' :
-                isBlocked ? 'bg-red-500 text-white shadow hover:bg-red-600 scale-105' :
-                isToday ? 'ring-2 ring-brand text-brand hover:bg-red-50 hover:text-red-500 hover:ring-red-300' :
-                'text-gray-700 hover:bg-red-50 hover:text-red-500',
+                isPast ? 'text-gray-700 cursor-not-allowed' :
+                isBlocked ? 'bg-red-600 text-white shadow hover:bg-red-700 scale-105' :
+                isToday ? 'ring-2 ring-[#c8a84b] text-[#c8a84b] hover:bg-red-900/20 hover:text-red-400 hover:ring-red-500' :
+                'text-gray-300 hover:bg-red-900/20 hover:text-red-400',
               ].join(' ')}>
               {day.getDate()}
             </button>
@@ -982,7 +982,7 @@ function BlockedCalendar({blocked, onChange}: {blocked: string[]; onChange: (dat
 function Toggle({value, onChange}: {value:boolean; onChange:(v:boolean)=>void}) {
   return (
     <button onClick={()=>onChange(!value)}
-      className={`relative inline-flex w-12 h-6 rounded-full transition-colors ${value?'bg-brand':'bg-gray-300'}`}>
+      className={`relative inline-flex w-12 h-6 rounded-full transition-colors ${value?'bg-[#c8a84b]':'bg-[#333]'}`}>
       <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${value?'translate-x-6':'translate-x-0.5'}`}/>
     </button>
   )
@@ -1070,56 +1070,56 @@ function SettingsView() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-xl font-bold text-gray-900">Instellingen</h1>
+      <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Instellingen</h1>
 
       {/* Beschikbaarheid + Werktijden per dag */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-        <h2 className="font-semibold text-gray-900 mb-1">Beschikbaarheid & Werktijden</h2>
-        <p className="text-xs text-gray-600 mb-4">Zet dagen aan/uit en stel per dag uw begin- en eindtijd in</p>
+      <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-5">
+        <h2 className="font-semibold text-white mb-1">Beschikbaarheid & Werktijden</h2>
+        <p className="text-xs text-gray-500 mb-4">Zet dagen aan/uit en stel per dag uw begin- en eindtijd in</p>
         <div className="space-y-2 mb-4">
           {dayOrder.map(day => {
             const cfg = daySchedule[day]
             return (
-              <div key={day} className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-colors ${cfg.open ? 'border-brand-muted bg-brand-light/40' : 'border-gray-100 bg-gray-50'}`}>
+              <div key={day} className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-colors ${cfg.open ? 'border-[#c8a84b]/20 bg-[#c8a84b]/5' : 'border-[#1e1e1e] bg-[#111]'}`}>
                 <Toggle value={cfg.open} onChange={v => updateDay(day, {open: v})} />
-                <span className={`font-bold text-sm w-20 shrink-0 ${cfg.open ? 'text-gray-900' : 'text-gray-600'}`}>{NL_DAY_LABELS[day]}</span>
+                <span className={`font-bold text-sm w-20 shrink-0 ${cfg.open ? 'text-white' : 'text-gray-600'}`}>{NL_DAY_LABELS[day]}</span>
                 {cfg.open ? (
                   <div className="flex items-center gap-2 flex-1 flex-wrap">
                     <select value={cfg.start} onChange={e => updateDay(day, {start: e.target.value})}
-                      className="border-2 border-gray-200 rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-brand transition-colors bg-white">
+                      className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#c8a84b] transition-colors">
                       {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
-                    <span className="text-gray-600 font-bold text-sm">→</span>
+                    <span className="text-gray-500 font-bold text-sm">→</span>
                     <select value={cfg.end} onChange={e => updateDay(day, {end: e.target.value})}
-                      className="border-2 border-gray-200 rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-brand transition-colors bg-white">
+                      className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#c8a84b] transition-colors">
                       {timeOptions.filter(t => t > cfg.start).map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                 ) : (
-                  <span className="text-gray-400 text-sm font-medium italic flex-1">Gesloten</span>
+                  <span className="text-gray-600 text-sm font-medium italic flex-1">Gesloten</span>
                 )}
               </div>
             )
           })}
         </div>
         {/* Pauze */}
-        <div className="mt-4 pt-4 border-t border-gray-100">
+        <div className="mt-4 pt-4 border-t border-[#1e1e1e]">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="font-semibold text-gray-900 text-sm">Pauze</p>
-              <p className="text-xs text-gray-600">Geen boekingen tijdens pauze</p>
+              <p className="font-semibold text-white text-sm">Pauze</p>
+              <p className="text-xs text-gray-500">Geen boekingen tijdens pauze</p>
             </div>
             <Toggle value={breakEnabled} onChange={setBreakEnabled}/>
           </div>
           {breakEnabled && (
             <div className="flex items-center gap-2 mt-2">
               <select value={breakStart} onChange={e=>setBreakStart(e.target.value)}
-                className="border-2 border-gray-200 rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-brand transition-colors bg-white">
+                className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#c8a84b] transition-colors">
                 {timeOptions.map(t=><option key={t} value={t}>{t}</option>)}
               </select>
-              <span className="text-gray-600 font-bold text-sm">→</span>
+              <span className="text-gray-500 font-bold text-sm">→</span>
               <select value={breakEnd} onChange={e=>setBreakEnd(e.target.value)}
-                className="border-2 border-gray-200 rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-brand transition-colors bg-white">
+                className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#c8a84b] transition-colors">
                 {timeOptions.filter(t=>t>breakStart).map(t=><option key={t} value={t}>{t}</option>)}
               </select>
             </div>
@@ -1136,66 +1136,66 @@ function SettingsView() {
               ] : []),
             ])
           }} disabled={saving.schedule}
-            className="px-5 py-2 bg-brand text-white rounded-xl font-bold text-sm hover:bg-brand-hover disabled:opacity-50 transition-colors">
+            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] disabled:opacity-50 transition-colors">
             {saving.schedule ? 'Opslaan...' : 'Opslaan'}
           </button>
-          {msgs.schedule && <span className="text-brand text-sm">{msgs.schedule}</span>}
+          {msgs.schedule && <span className="text-[#c8a84b] text-sm">{msgs.schedule}</span>}
         </div>
       </div>
 
       {/* Geblokkeerde datums */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-        <h2 className="font-semibold text-gray-900 mb-1">Vrije dagen / Vakantie</h2>
-        <p className="text-xs text-gray-600 mb-4">Klik op meerdere datums om ze te blokkeren — klik opnieuw om te deblokkeren</p>
+      <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-5">
+        <h2 className="font-semibold text-white mb-1">Vrije dagen / Vakantie</h2>
+        <p className="text-xs text-gray-500 mb-4">Klik op meerdere datums om ze te blokkeren — klik opnieuw om te deblokkeren</p>
         <BlockedCalendar blocked={blockedDates} onChange={setBlockedDates}/>
         {blockedDates.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             {blockedDates.map(d=>(
-              <span key={d} className="inline-flex items-center gap-1 bg-red-50 border border-red-200 text-red-600 text-xs px-3 py-1.5 rounded-lg">
+              <span key={d} className="inline-flex items-center gap-1 bg-red-900/20 border border-red-800/40 text-red-400 text-xs px-3 py-1.5 rounded-lg">
                 {formatShortDate(d)}
                 <button onClick={()=>setBlockedDates(prev=>prev.filter(x=>x!==d))}
-                  className="ml-1 text-red-400 hover:text-red-700 font-black leading-none">×</button>
+                  className="ml-1 text-red-500 hover:text-red-300 font-black leading-none">×</button>
               </span>
             ))}
           </div>
         )}
         <div className="flex items-center gap-3 mt-4">
           <button onClick={()=>save('blocked_dates', JSON.stringify(blockedDates), 'blocked')} disabled={saving.blocked}
-            className="px-5 py-2 bg-brand text-white rounded-xl font-bold text-sm hover:bg-brand-hover disabled:opacity-50 transition-colors">
+            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] disabled:opacity-50 transition-colors">
             {saving.blocked ? 'Opslaan...' : 'Opslaan'}
           </button>
-          {msgs.blocked && <span className="text-brand text-sm">{msgs.blocked}</span>}
+          {msgs.blocked && <span className="text-[#c8a84b] text-sm">{msgs.blocked}</span>}
         </div>
       </div>
 
       {/* Exporteren */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-        <h2 className="font-semibold text-gray-900 mb-1">Exporteren</h2>
-        <p className="text-xs text-gray-600 mb-4">Download uw agenda als kalenderbestand</p>
-        <div className="flex items-center justify-between py-3 border border-gray-300 rounded-xl px-4">
+      <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-5">
+        <h2 className="font-semibold text-white mb-1">Exporteren</h2>
+        <p className="text-xs text-gray-500 mb-4">Download uw agenda als kalenderbestand</p>
+        <div className="flex items-center justify-between py-3 border border-[#2a2a2a] rounded-xl px-4">
           <div>
-            <p className="font-bold text-gray-900 text-sm">Exporteer alle afspraken</p>
-            <p className="text-xs text-brand font-medium">Download als .ics kalenderbestand</p>
+            <p className="font-bold text-white text-sm">Exporteer alle afspraken</p>
+            <p className="text-xs text-[#c8a84b] font-medium">Download als .ics kalenderbestand</p>
           </div>
-          <a href="/api/portaal/export" download className="bg-brand text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-brand-hover transition-colors">Downloaden</a>
+          <a href="/api/portaal/export" download className="bg-[#c8a84b] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#d4b462] transition-colors">Downloaden</a>
         </div>
       </div>
 
       {/* Wachtwoord */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-        <h2 className="font-semibold text-gray-900 mb-4">Wachtwoord wijzigen</h2>
+      <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-5">
+        <h2 className="font-semibold text-white mb-4">Wachtwoord wijzigen</h2>
         <form onSubmit={changePw} className="space-y-4">
-          {errs.pw && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm font-semibold">{errs.pw}</div>}
-          {msgs.pw && <div className="bg-brand-light border border-brand-muted text-brand rounded-xl px-4 py-3 text-sm font-semibold">{msgs.pw}</div>}
+          {errs.pw && <div className="bg-red-900/30 border border-red-700/50 text-red-400 rounded-xl px-4 py-3 text-sm font-semibold">{errs.pw}</div>}
+          {msgs.pw && <div className="bg-[#c8a84b]/10 border border-[#c8a84b]/20 text-[#c8a84b] rounded-xl px-4 py-3 text-sm font-semibold">{msgs.pw}</div>}
           {[{label:'Huidig wachtwoord',val:currentPw,set:setCurrentPw},{label:'Nieuw wachtwoord',val:newPw,set:setNewPw},{label:'Bevestig nieuw',val:confirmPw,set:setConfirmPw}].map(f=>(
             <div key={f.label}>
-              <label className="block text-sm font-bold text-gray-700 mb-1">{f.label}</label>
+              <label className="block text-sm font-bold text-gray-400 mb-1">{f.label}</label>
               <input type="password" required value={f.val} onChange={e=>f.set(e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand transition-colors"/>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
             </div>
           ))}
           <button type="submit" disabled={saving.pw}
-            className="px-5 py-2 bg-brand text-white rounded-xl font-bold text-sm hover:bg-brand-hover disabled:opacity-50 transition-colors">
+            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] disabled:opacity-50 transition-colors">
             {saving.pw?'Opslaan...':'Wachtwoord wijzigen'}
           </button>
         </form>
@@ -1224,18 +1224,18 @@ export default function PortaalPage() {
   }
 
   if(checking) return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-brand-light">
-      <div className="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin"/>
-      <p className="text-gray-600 text-sm font-medium">Even geduld...</p>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#0c0c0c]">
+      <div className="w-10 h-10 border-4 border-[#c8a84b] border-t-transparent rounded-full animate-spin"/>
+      <p className="text-gray-500 text-sm font-medium">Even geduld...</p>
     </div>
   )
 
   if(authError) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 max-w-sm w-full text-center">
-        <p className="font-bold text-gray-900 mb-2">Verbinding mislukt</p>
-        <p className="text-gray-600 text-sm mb-4">De server reageert niet. Controleer uw internetverbinding.</p>
-        <button onClick={()=>window.location.reload()} className="w-full py-2.5 bg-brand text-white rounded-xl font-bold text-sm">Opnieuw proberen</button>
+    <div className="min-h-screen flex items-center justify-center bg-[#0c0c0c] px-4">
+      <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-8 max-w-sm w-full text-center">
+        <p className="font-bold text-white mb-2">Verbinding mislukt</p>
+        <p className="text-gray-500 text-sm mb-4">De server reageert niet. Controleer uw internetverbinding.</p>
+        <button onClick={()=>window.location.reload()} className="w-full py-2.5 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] transition-colors">Opnieuw proberen</button>
       </div>
     </div>
   )

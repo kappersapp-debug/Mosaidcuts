@@ -1,11 +1,23 @@
 import type { Metadata } from 'next'
-import { Nunito } from 'next/font/google'
+import { Nunito, Barlow, Bebas_Neue } from 'next/font/google'
 import './globals.css'
 
 const nunito = Nunito({
   subsets: ['latin'],
   variable: '--font-nunito',
   weight: ['400', '500', '600', '700', '800', '900'],
+})
+
+const barlow = Barlow({
+  subsets: ['latin'],
+  variable: '--font-barlow',
+  weight: ['400', '500', '600', '700'],
+})
+
+const bebasNeue = Bebas_Neue({
+  subsets: ['latin'],
+  variable: '--font-bebas',
+  weight: ['400'],
 })
 
 export const metadata: Metadata = {
@@ -15,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="nl" className={nunito.variable}>
+    <html lang="nl" className={`${nunito.variable} ${barlow.variable} ${bebasNeue.variable}`}>
       <body className="min-h-screen bg-gray-50">{children}</body>
     </html>
   )
