@@ -375,24 +375,20 @@ export default function BookingPage() {
 
   /* ── Render ── */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-light via-white to-gray-50 flex flex-col">
-      <header className="bg-brand shadow-md">
-        <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="text-2xl text-white">✂</div>
-          <div>
-            <h1 className="text-white font-black text-xl leading-tight">MoSaidCuts</h1>
-            <p className="text-green-200 text-xs font-semibold">Barbershop</p>
-          </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <header className="bg-brand">
+        <div className="max-w-lg mx-auto px-4 py-4">
+          <h1 className="text-white font-bold text-base tracking-tight">MoSaidCuts</h1>
+          <p className="text-blue-200 text-xs">Barbershop</p>
         </div>
       </header>
 
       <main className="flex-1 flex items-start justify-center px-4 py-8">
-        <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="w-full max-w-lg bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
           {step === 'banned' && (
             <div className="p-8 text-center">
-              <div className="text-6xl mb-4">🚫</div>
-              <h2 className="text-2xl font-black text-gray-900 mb-2">Toegang Geblokkeerd</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Toegang Geblokkeerd</h2>
               <p className="text-gray-600 mb-1">Uw e-mailadres is geblokkeerd voor het maken van afspraken.</p>
               <p className="text-gray-600 text-sm">Neem contact op met de barbershop voor meer informatie.</p>
             </div>
@@ -401,8 +397,8 @@ export default function BookingPage() {
           {step === 'confirmation' && booking && (
             <div className="p-6 sm:p-8">
               <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-brand rounded-full flex items-center justify-center mx-auto mb-3 text-3xl text-white shadow-lg">✓</div>
-                <h2 className="text-2xl font-black text-gray-900">Afspraak Bevestigd!</h2>
+                <div className="w-14 h-14 bg-brand rounded-full flex items-center justify-center mx-auto mb-3 text-lg font-bold text-white">✓</div>
+                <h2 className="text-xl font-bold text-gray-900">Afspraak Bevestigd</h2>
                 <p className="text-gray-600 text-sm mt-1">U ontvangt een bevestiging per e-mail</p>
               </div>
               <div className="bg-brand-light rounded-xl p-5 mb-5 text-center">
@@ -418,11 +414,11 @@ export default function BookingPage() {
                 ))}
               </div>
               <div className="space-y-3">
-                <button onClick={() => downloadICS(booking)} className="w-full py-3 px-4 rounded-xl border-2 border-brand text-brand font-bold hover:bg-brand-light transition-colors flex items-center justify-center gap-2">
-                  📅 Agenda download (.ics)
+                <button onClick={() => downloadICS(booking)} className="w-full py-3 px-4 rounded-lg border border-brand text-brand font-medium hover:bg-brand-light transition-colors">
+                  Agenda toevoegen (.ics)
                 </button>
-                <a href={googleCalLink(booking)} target="_blank" rel="noopener noreferrer" className="block w-full py-3 px-4 rounded-xl border-2 border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors text-center">
-                  🗓 Google Agenda
+                <a href={googleCalLink(booking)} target="_blank" rel="noopener noreferrer" className="block w-full py-3 px-4 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-center">
+                  Google Agenda
                 </a>
                 {!cancelConfirm ? (
                   <button onClick={() => setCancelConfirm(true)} className="w-full py-2 text-red-400 font-semibold text-sm hover:text-red-600 transition-colors">
@@ -566,8 +562,8 @@ export default function BookingPage() {
                     <>
                       <p className="text-gray-600 text-sm mb-1">We hebben een 6-cijferige code gestuurd naar</p>
                       <p className="font-bold text-gray-800 mb-3">{contact.email}</p>
-                      <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 mb-5 text-xs text-blue-600 font-medium">
-                        ⏱ Het kan 1 à 2 minuten duren voordat u de code ontvangt. Check ook uw spam/ongewenste mail.
+                      <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-2.5 mb-5 text-xs text-blue-600">
+                        Het kan 1 à 2 minuten duren voordat u de code ontvangt. Check ook uw spam.
                       </div>
                     </>
                   ) : (
@@ -605,14 +601,14 @@ export default function BookingPage() {
       {/* Afspraak opzoeken */}
       <div className="max-w-md mx-auto px-4 mb-6">
         {!lookup ? (
-          <button onClick={()=>setLookup(true)} className="w-full py-3 rounded-xl border-2 border-brand/30 bg-brand-light text-brand font-bold text-sm hover:bg-brand hover:text-white transition-colors flex items-center justify-center gap-2">
-            🔍 Afspraak opzoeken of annuleren
+          <button onClick={()=>setLookup(true)} className="w-full py-3 rounded-lg border border-gray-200 bg-white text-gray-600 text-sm hover:border-gray-300 hover:text-gray-800 transition-colors">
+            Afspraak opzoeken of annuleren
           </button>
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-black text-gray-900">🔍 Afspraak opzoeken</h3>
-              <button onClick={()=>{setLookup(false);setLookupResult(null);setLookupError('');setLookupCode('')}} className="text-gray-600 hover:text-gray-600 text-lg font-bold">×</button>
+              <h3 className="font-semibold text-gray-900 text-sm">Afspraak opzoeken</h3>
+              <button onClick={()=>{setLookup(false);setLookupResult(null);setLookupError('');setLookupCode('')}} className="text-gray-400 hover:text-gray-700 text-lg leading-none">×</button>
             </div>
             <form onSubmit={handleLookup} className="space-y-2 mb-4">
               <input value={lookupCode} onChange={e=>setLookupCode(e.target.value.toUpperCase())}
