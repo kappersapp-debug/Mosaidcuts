@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import Image from 'next/image'
 
 /* ─── Types ──────────────────────────────────────────────── */
 interface Booking {
@@ -102,9 +103,12 @@ function LoginScreen({onLogin}: {onLogin:()=>void}) {
   return (
     <div className="min-h-screen bg-[#0c0c0c] flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-[#141414] rounded-xl shadow-xl border border-[#2a2a2a] overflow-hidden">
-        <div className="bg-[#111] px-8 py-7 text-center border-b border-[#2a2a2a]">
-          <h1 className="text-[#2176d4] font-[family-name:var(--font-bebas)] tracking-widest text-2xl">MoSaidCuts</h1>
-          <p className="text-gray-500 text-xs mt-1">Kapper Portaal</p>
+        <div className="bg-[#111] px-8 py-8 text-center border-b border-[#1e1e1e]">
+          <div className="flex justify-center mb-3">
+            <Image src="/logo.jpg" alt="MoSaidCuts" width={80} height={80} className="rounded-full object-cover ring-2 ring-[#2176d4]/40 shadow-lg shadow-[#2176d4]/10"/>
+          </div>
+          <h1 className="text-white font-[family-name:var(--font-bebas)] tracking-widest text-xl">MoSaidCuts</h1>
+          <p className="text-gray-500 text-xs mt-0.5">Kapper Portaal</p>
         </div>
         <form onSubmit={submit} className="p-8">
           <h2 className="text-lg font-black text-white mb-6 text-center">Inloggen</h2>
@@ -253,9 +257,12 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
 
       {/* Sidebar */}
       <aside className="hidden lg:flex flex-col w-60 bg-[#0e0e0e] min-h-screen fixed left-0 top-0 z-30 border-r border-[#1e1e1e]">
-        <div className="px-6 py-6 border-b border-[#1e1e1e]">
-          <div className="text-[#2176d4] font-[family-name:var(--font-bebas)] tracking-widest text-2xl leading-none">MoSaidCuts</div>
-          <p className="text-gray-600 text-[11px] mt-1 tracking-wider uppercase">Kapper Portaal</p>
+        <div className="px-6 py-5 border-b border-[#1e1e1e] flex items-center gap-3">
+          <Image src="/logo.jpg" alt="MoSaidCuts" width={44} height={44} className="rounded-full object-cover shrink-0 ring-2 ring-[#2176d4]/30"/>
+          <div>
+            <div className="text-white font-[family-name:var(--font-bebas)] tracking-widest text-lg leading-none">MoSaidCuts</div>
+            <p className="text-gray-600 text-[10px] mt-0.5 tracking-wider uppercase">Kapper Portaal</p>
+          </div>
         </div>
         <nav className="flex-1 py-3 space-y-0.5 px-3">
           {NAV.map(n => (
@@ -294,8 +301,11 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
       </aside>
 
       {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-[#111] px-4 py-3 flex items-center justify-between border-b border-[#2a2a2a]">
-        <div className="text-[#2176d4] font-[family-name:var(--font-bebas)] tracking-widest text-lg">MoSaidCuts</div>
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-[#111] px-4 py-2.5 flex items-center justify-between border-b border-[#1e1e1e]">
+        <div className="flex items-center gap-2.5">
+          <Image src="/logo.jpg" alt="MoSaidCuts" width={34} height={34} className="rounded-full object-cover ring-1 ring-[#2176d4]/30"/>
+          <div className="text-white font-[family-name:var(--font-bebas)] tracking-widest text-base">MoSaidCuts</div>
+        </div>
         <div className="flex items-center gap-4">
           <button onClick={openNotifMobile} className="relative text-gray-400 hover:text-white transition-colors text-xs">
             Meldingen
@@ -316,8 +326,9 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
       {menuOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-black/80 animate-fade-in" onClick={()=>setMenuOpen(false)}>
           <div className="w-60 bg-[#0e0e0e] h-full border-r border-[#1e1e1e]" onClick={e=>e.stopPropagation()}>
-            <div className="px-6 py-6 border-b border-[#1e1e1e]">
-              <div className="text-[#2176d4] font-[family-name:var(--font-bebas)] tracking-widest text-2xl">MoSaidCuts</div>
+            <div className="px-6 py-5 border-b border-[#1e1e1e] flex items-center gap-3">
+              <Image src="/logo.jpg" alt="MoSaidCuts" width={40} height={40} className="rounded-full object-cover shrink-0 ring-2 ring-[#2176d4]/30"/>
+              <div className="text-white font-[family-name:var(--font-bebas)] tracking-widest text-lg leading-none">MoSaidCuts</div>
             </div>
             <nav className="py-3 space-y-0.5 px-3">
               {NAV.map(n => (
