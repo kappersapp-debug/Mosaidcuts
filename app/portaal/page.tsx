@@ -146,12 +146,15 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
 
   // Poll for new bookings — runs immediately on mount, then every 30 seconds
   useEffect(() => {
-    // Start 1 hour ago so bookings from the last hour show up on first load
-    lastCheckedRef.current = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const stored = localStorage.getItem('msc_notif_last_checked')
+    // Use stored timestamp so reopening the page doesn't re-show seen notifications.
+    // Fall back to 1 hour ago only on first ever visit.
+    lastCheckedRef.current = stored ?? new Date(Date.now() - 60 * 60 * 1000).toISOString()
     const poll = async () => {
       try {
         const r = await fetch(`/api/portaal/bookings?since=${encodeURIComponent(lastCheckedRef.current)}`)
         lastCheckedRef.current = new Date().toISOString()
+        localStorage.setItem('msc_notif_last_checked', lastCheckedRef.current)
         if (!r.ok) return
         const d = await r.json()
         const now2 = new Date()
