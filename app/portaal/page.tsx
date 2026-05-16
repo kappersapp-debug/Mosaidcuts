@@ -43,13 +43,14 @@ function serviceInitial(service: string) {
   return 'K'
 }
 
-type View = 'dashboard'|'calendar'|'appointments'|'services'|'management'|'settings'
+type View = 'dashboard'|'calendar'|'appointments'|'customers'|'services'|'management'|'settings'
 
 const NAV_ICONS: Record<string, React.ReactNode> = {
   dashboard: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>,
   calendar: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>,
   appointments: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>,
   services: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg>,
+  customers: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>,
   management: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>,
   settings: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>,
 }
@@ -58,6 +59,7 @@ const NAV: {id:View; label:string}[] = [
   {id:'dashboard', label:'Dashboard'},
   {id:'calendar', label:'Agenda'},
   {id:'appointments', label:'Afspraken'},
+  {id:'customers', label:'Klanten'},
   {id:'services', label:'Diensten'},
   {id:'management', label:'Beheer'},
   {id:'settings', label:'Instellingen'},
@@ -355,6 +357,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
           {view==='dashboard' && <DashboardView />}
           {view==='calendar' && <CalendarView />}
           {view==='appointments' && <AppointmentsView />}
+          {view==='customers' && <CustomersView />}
           {view==='services' && <ServicesView />}
           {view==='management' && <ManagementView />}
           {view==='settings' && <SettingsView/>}
@@ -419,12 +422,52 @@ function DashboardView() {
 
   const today = new Date().toISOString().split('T')[0]
 
+  const nextAppointment = (() => {
+    const now = new Date()
+    const nowMins = now.getHours() * 60 + now.getMinutes()
+    return (stats?.todayBookings ?? [])
+      .filter((b: Booking) => { const [h,m] = b.time.split(':').map(Number); return h*60+m > nowMins })
+      .sort((a: Booking, b: Booking) => a.time.localeCompare(b.time))[0] ?? null
+  })()
+
+  const minsUntilNext = nextAppointment ? (() => {
+    const [h,m] = nextAppointment.time.split(':').map(Number)
+    const now = new Date()
+    return h*60+m - (now.getHours()*60+now.getMinutes())
+  })() : null
+
   return (
     <div className="animate-fade-up">
       <div className="mb-8">
         <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Dashboard</h1>
         <p className="text-gray-500 text-sm mt-0.5 capitalize">{formatLongDate(today)}</p>
       </div>
+
+      {/* Volgende afspraak banner */}
+      {stats && (
+        <div className={`mb-6 rounded-2xl border p-4 flex items-center gap-4 ${nextAppointment ? 'bg-[#2176d4]/8 border-[#2176d4]/20' : 'bg-[#141414] border-[#222]'}`}>
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${nextAppointment ? 'bg-[#2176d4]/15' : 'bg-[#1e1e1e]'}`}>
+            <svg className={`w-5 h-5 ${nextAppointment ? 'text-[#2176d4]' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          {nextAppointment ? (
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-[#2176d4]/70 uppercase tracking-wider">Volgende afspraak</p>
+              <p className="text-white font-bold truncate">{nextAppointment.name} <span className="text-gray-400 font-normal">– {nextAppointment.service}</span></p>
+            </div>
+          ) : (
+            <div className="flex-1">
+              <p className="text-xs font-bold text-gray-600 uppercase tracking-wider">Volgende afspraak</p>
+              <p className="text-gray-500 font-medium text-sm">Geen afspraken meer vandaag</p>
+            </div>
+          )}
+          {nextAppointment && minsUntilNext !== null && (
+            <div className="text-right shrink-0">
+              <p className="text-2xl font-black text-[#2176d4]">{nextAppointment.time}</p>
+              <p className="text-xs text-gray-500">over {minsUntilNext < 60 ? `${minsUntilNext} min` : `${Math.floor(minsUntilNext/60)}u ${minsUntilNext%60}m`}</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -670,6 +713,112 @@ function CalendarView() {
   )
 }
 
+/* ─── Booking Form (add/edit) ────────────────────────────── */
+interface BookingForm { id?:string; name:string; phone:string; email:string; service:string; price:number; duration:number; date:string; time:string }
+const EMPTY_FORM: BookingForm = { name:'', phone:'', email:'', service:'', price:0, duration:30, date:'', time:'' }
+
+function BookingFormModal({ initial, onClose, onSaved }: { initial: BookingForm; onClose: ()=>void; onSaved: ()=>void }) {
+  const [form, setForm] = useState<BookingForm>(initial)
+  const [services, setServices] = useState<{id:string;name:string;price:number;duration:number}[]>([])
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const isEdit = !!initial.id
+
+  useEffect(()=>{
+    fetch('/api/portaal/settings').then(r=>r.json()).then(d=>{
+      const s = d.settings??{}
+      if (s.services) setServices(JSON.parse(s.services))
+    })
+  },[])
+
+  function pickService(name: string) {
+    const s = services.find(s=>s.name===name)
+    setForm(f=>({...f, service:name, price:s?.price??f.price, duration:s?.duration??f.duration}))
+  }
+
+  const timeOptions: string[] = []
+  for(let h=8;h<=20;h++) for(let m=0;m<60;m+=30)
+    timeOptions.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`)
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault(); setError(''); setSaving(true)
+    try {
+      const method = isEdit ? 'PATCH' : 'POST'
+      const body = isEdit ? { id: initial.id, ...form } : form
+      const r = await fetch('/api/portaal/bookings', { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+      const d = await r.json()
+      if (!r.ok) { setError(d.error ?? 'Fout'); return }
+      onSaved()
+    } catch { setError('Netwerkfout') } finally { setSaving(false) }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
+      <div className="bg-[#141414] rounded-2xl border border-[#2a2a2a] w-full max-w-md shadow-2xl" onClick={e=>e.stopPropagation()}>
+        <div className="px-6 py-5 border-b border-[#1e1e1e] flex items-center justify-between">
+          <h2 className="font-bold text-white">{isEdit ? 'Afspraak bewerken' : 'Afspraak toevoegen'}</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors text-xl leading-none">×</button>
+        </div>
+        <form onSubmit={submit} className="p-6 space-y-4">
+          {error && <div className="bg-red-900/30 border border-red-700/40 text-red-400 text-sm px-4 py-3 rounded-xl">{error}</div>}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-1">Naam *</label>
+              <input required value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))}
+                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-1">Telefoon</label>
+              <input value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))}
+                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 mb-1">E-mail *</label>
+            <input required type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))}
+              className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 mb-1">Dienst *</label>
+            {services.length > 0 ? (
+              <select value={form.service} onChange={e=>pickService(e.target.value)} required
+                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors">
+                <option value="">Kies dienst...</option>
+                {services.map(s=><option key={s.id} value={s.name}>{s.name} – €{s.price}</option>)}
+              </select>
+            ) : (
+              <input required value={form.service} onChange={e=>setForm(f=>({...f,service:e.target.value}))}
+                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-1">Datum *</label>
+              <input required type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))}
+                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors [color-scheme:dark]"/>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-1">Tijd *</label>
+              <select required value={form.time} onChange={e=>setForm(f=>({...f,time:e.target.value}))}
+                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors">
+                <option value="">Kies tijd...</option>
+                {timeOptions.map(t=><option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-[#333] text-gray-400 text-sm font-medium hover:border-[#444] transition-colors">Annuleren</button>
+            <button type="submit" disabled={saving}
+              className="flex-1 py-2.5 rounded-xl bg-[#2176d4] text-white text-sm font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-50 transition-all duration-200">
+              {saving ? 'Opslaan...' : isEdit ? 'Bijwerken' : 'Toevoegen'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 /* ─── Appointments ───────────────────────────────────────── */
 function AppointmentsView() {
   const [filter, setFilter] = useState<'upcoming'|'today'|'all'|'past'>('upcoming')
@@ -677,6 +826,7 @@ function AppointmentsView() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(false)
   const [deleting, setDeleting] = useState<string|null>(null)
+  const [formBooking, setFormBooking] = useState<BookingForm|null>(null)
 
   const load = useCallback(async()=>{
     setLoading(true)
@@ -710,7 +860,20 @@ function AppointmentsView() {
 
   return (
     <div>
-      <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white mb-6">Afspraken</h1>
+      {formBooking && (
+        <BookingFormModal
+          initial={formBooking}
+          onClose={()=>setFormBooking(null)}
+          onSaved={()=>{ setFormBooking(null); load() }}
+        />
+      )}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Afspraken</h1>
+        <button onClick={()=>setFormBooking({...EMPTY_FORM})}
+          className="px-4 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] transition-all duration-200">
+          + Toevoegen
+        </button>
+      </div>
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <input type="text" placeholder="Zoeken op naam, e-mail of code..." value={search} onChange={e=>setSearch(e.target.value)}
           className="flex-1 bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-[#2176d4] transition-colors"/>
@@ -758,7 +921,10 @@ function AppointmentsView() {
                           <button onClick={()=>setConfirmDel(null)} className="text-xs border border-[#333] text-gray-400 px-2 py-0.5 rounded-lg font-bold">Nee</button>
                         </div>
                       ) : (
-                        <button onClick={()=>setConfirmDel(b.id)} className="text-xs text-red-400 hover:text-red-500 mt-1">Verwijder</button>
+                        <div className="flex gap-2 mt-1 justify-end">
+                          <button onClick={()=>setFormBooking({id:b.id,name:b.name,phone:b.phone,email:b.email,service:b.service,price:b.price,duration:b.duration,date:b.date,time:b.time})} className="text-xs text-[#2176d4] hover:underline">Bewerken</button>
+                          <button onClick={()=>setConfirmDel(b.id)} className="text-xs text-red-400 hover:text-red-500">Verwijder</button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -766,6 +932,99 @@ function AppointmentsView() {
               </div>
             )
           })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Customers ─────────────────────────────────────────── */
+interface Customer { email:string; name:string; visits:number; totalSpent:number; lastDate:string; lastService:string; bookings:{code:string;service:string;price:number;date:string;time:string}[] }
+
+function CustomersView() {
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [expanded, setExpanded] = useState<string|null>(null)
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(()=>{ fetch('/api/portaal/customers').then(r=>r.json()).then(d=>{ setCustomers(d.customers??[]); setLoading(false) }) },[])
+
+  const filtered = customers.filter(c =>
+    c.email.includes(search.toLowerCase()) || c.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <div className="animate-fade-up">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Klanten</h1>
+          <p className="text-gray-500 text-sm mt-0.5">{customers.length} unieke klanten</p>
+        </div>
+      </div>
+      <div className="mb-5">
+        <input type="text" placeholder="Zoeken op naam of e-mail..." value={search} onChange={e=>setSearch(e.target.value)}
+          className="w-full bg-[#1a1a1a] border border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-[#2176d4] border-t-transparent rounded-full animate-spin"/></div>
+      ) : filtered.length === 0 ? (
+        <p className="text-center text-gray-500 py-12">Geen klanten gevonden</p>
+      ) : (
+        <div className="space-y-2">
+          {filtered.map(c=>(
+            <div key={c.email} className="bg-[#141414] rounded-2xl border border-[#222] overflow-hidden transition-all duration-200 hover:border-[#2a2a2a]">
+              <button onClick={()=>setExpanded(expanded===c.email ? null : c.email)}
+                className="w-full flex items-center gap-4 px-5 py-4 text-left">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2176d4]/20 to-[#2176d4]/5 flex items-center justify-center text-sm font-black text-[#2176d4] shrink-0 border border-[#2176d4]/10">
+                  {c.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-white truncate">{c.name}</p>
+                  <p className="text-xs text-gray-500 truncate">{c.email}</p>
+                </div>
+                <div className="flex items-center gap-4 shrink-0 text-right">
+                  <div className="hidden sm:block">
+                    <p className="text-xs text-gray-600">bezoeken</p>
+                    <p className="font-black text-white">{c.visits}</p>
+                  </div>
+                  <div className="hidden sm:block">
+                    <p className="text-xs text-gray-600">totaal</p>
+                    <p className="font-black text-[#2176d4]">€{c.totalSpent}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">laatste bezoek</p>
+                    <p className="font-bold text-white text-sm">{formatShortDate(c.lastDate)}</p>
+                  </div>
+                  <svg className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${expanded===c.email?'rotate-180':''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </button>
+              {expanded===c.email && (
+                <div className="border-t border-[#1e1e1e] divide-y divide-[#1a1a1a]">
+                  <div className="px-5 py-3 flex gap-6 sm:hidden">
+                    <div><p className="text-xs text-gray-600">bezoeken</p><p className="font-black text-white">{c.visits}</p></div>
+                    <div><p className="text-xs text-gray-600">totaal</p><p className="font-black text-[#2176d4]">€{c.totalSpent}</p></div>
+                  </div>
+                  {c.bookings.map((b,i)=>(
+                    <div key={i} className="flex items-center gap-3 px-5 py-3 hover:bg-white/2 transition-colors">
+                      <div className="w-8 h-8 rounded-lg bg-[#1e1e1e] flex items-center justify-center text-[10px] font-black text-gray-500 shrink-0">
+                        {serviceInitial(b.service)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{b.service}</p>
+                        <p className="text-xs text-gray-500">{formatMedDate(b.date)} · {b.time}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-bold text-[#2176d4]">€{b.price}</p>
+                        <p className="text-[10px] text-gray-600 font-mono">{b.code}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
