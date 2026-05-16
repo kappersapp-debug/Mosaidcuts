@@ -720,6 +720,8 @@ const EMPTY_FORM: BookingForm = { name:'', phone:'', email:'', service:'', price
 function BookingFormModal({ initial, onClose, onSaved }: { initial: BookingForm; onClose: ()=>void; onSaved: ()=>void }) {
   const [form, setForm] = useState<BookingForm>(initial)
   const [services, setServices] = useState<{id:string;name:string;price:number;duration:number}[]>([])
+  const [slots, setSlots] = useState<{time:string;available:boolean}[]>([])
+  const [loadingSlots, setLoadingSlots] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const isEdit = !!initial.id
@@ -731,14 +733,31 @@ function BookingFormModal({ initial, onClose, onSaved }: { initial: BookingForm;
     })
   },[])
 
+  useEffect(()=>{
+    if (!form.date) { setSlots([]); return }
+    setLoadingSlots(true)
+    fetch(`/api/slots?date=${form.date}&duration=${form.duration||30}`)
+      .then(r=>r.json())
+      .then(d=>{
+        const fetchedSlots: {time:string;available:boolean}[] = d.slots ?? []
+        // In edit mode: make current time slot available so it stays selectable
+        if (isEdit && initial.time && !fetchedSlots.find(s=>s.time===initial.time)) {
+          fetchedSlots.unshift({ time: initial.time, available: true })
+        }
+        setSlots(fetchedSlots)
+        // Clear time if no longer available (not in edit mode)
+        if (!isEdit && form.time && !fetchedSlots.find(s=>s.time===form.time && s.available)) {
+          setForm(f=>({...f, time:''}))
+        }
+      })
+      .finally(()=>setLoadingSlots(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[form.date, form.duration])
+
   function pickService(name: string) {
     const s = services.find(s=>s.name===name)
     setForm(f=>({...f, service:name, price:s?.price??f.price, duration:s?.duration??f.duration}))
   }
-
-  const timeOptions: string[] = []
-  for(let h=8;h<=20;h++) for(let m=0;m<60;m+=30)
-    timeOptions.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`)
 
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setError(''); setSaving(true)
@@ -752,64 +771,97 @@ function BookingFormModal({ initial, onClose, onSaved }: { initial: BookingForm;
     } catch { setError('Netwerkfout') } finally { setSaving(false) }
   }
 
+  const availableSlots = slots.filter(s=>s.available)
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-      <div className="bg-[#141414] rounded-2xl border border-[#2a2a2a] w-full max-w-md shadow-2xl" onClick={e=>e.stopPropagation()}>
-        <div className="px-6 py-5 border-b border-[#1e1e1e] flex items-center justify-between">
-          <h2 className="font-bold text-white">{isEdit ? 'Afspraak bewerken' : 'Afspraak toevoegen'}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors text-xl leading-none">×</button>
+    <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
+      <div className="bg-[#141414] rounded-2xl border border-[#2a2a2a] w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e=>e.stopPropagation()}>
+        <div className="px-6 py-5 border-b border-[#1e1e1e] flex items-center justify-between sticky top-0 bg-[#141414] z-10">
+          <h2 className="font-bold text-white text-lg">{isEdit ? 'Afspraak bewerken' : 'Afspraak toevoegen'}</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-[#1e1e1e] text-gray-400 hover:text-white hover:bg-[#2a2a2a] transition-all flex items-center justify-center text-lg leading-none">×</button>
         </div>
-        <form onSubmit={submit} className="p-6 space-y-4">
+        <form onSubmit={submit} className="p-6 space-y-5">
           {error && <div className="bg-red-900/30 border border-red-700/40 text-red-400 text-sm px-4 py-3 rounded-xl">{error}</div>}
+
+          {/* Naam + Telefoon */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">Naam *</label>
-              <input required value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))}
-                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Naam *</label>
+              <input required value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="Ahmed El Mansouri"
+                className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">Telefoon</label>
-              <input value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))}
-                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Telefoon</label>
+              <input value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="06 12345678"
+                className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
             </div>
           </div>
+
+          {/* Email */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">E-mail *</label>
-            <input required type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))}
-              className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+            <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">
+              E-mail <span className="text-gray-700 normal-case font-normal">(optioneel — klant ontvangt bevestiging)</span>
+            </label>
+            <input type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} placeholder="klant@email.com"
+              className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
           </div>
+
+          {/* Dienst */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">Dienst *</label>
+            <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Dienst *</label>
             {services.length > 0 ? (
-              <select value={form.service} onChange={e=>pickService(e.target.value)} required
-                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors">
-                <option value="">Kies dienst...</option>
-                {services.map(s=><option key={s.id} value={s.name}>{s.name} – €{s.price}</option>)}
-              </select>
+              <div className="grid grid-cols-1 gap-2">
+                {services.map(s=>(
+                  <button key={s.id} type="button" onClick={()=>pickService(s.name)}
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all ${form.service===s.name ? 'border-[#2176d4] bg-[#2176d4]/10 text-white' : 'border-[#2a2a2a] bg-[#0e0e0e] text-gray-400 hover:border-[#333] hover:text-white'}`}>
+                    <span>{s.name}</span>
+                    <span className={`font-black ${form.service===s.name ? 'text-[#2176d4]' : 'text-gray-600'}`}>€{s.price} · {s.duration}min</span>
+                  </button>
+                ))}
+              </div>
             ) : (
               <input required value={form.service} onChange={e=>setForm(f=>({...f,service:e.target.value}))}
-                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+                className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">Datum *</label>
-              <input required type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))}
-                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors [color-scheme:dark]"/>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">Tijd *</label>
-              <select required value={form.time} onChange={e=>setForm(f=>({...f,time:e.target.value}))}
-                className="w-full bg-[#1a1a1a] border border-[#333] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors">
-                <option value="">Kies tijd...</option>
-                {timeOptions.map(t=><option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
+
+          {/* Datum */}
+          <div>
+            <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Datum *</label>
+            <input required type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value,time:''}))}
+              className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors [color-scheme:dark]"/>
           </div>
-          <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-[#333] text-gray-400 text-sm font-medium hover:border-[#444] transition-colors">Annuleren</button>
-            <button type="submit" disabled={saving}
-              className="flex-1 py-2.5 rounded-xl bg-[#2176d4] text-white text-sm font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-50 transition-all duration-200">
+
+          {/* Tijdsloten */}
+          {form.date && (
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Tijd *</label>
+              {loadingSlots ? (
+                <div className="flex items-center gap-2 py-3 text-gray-500 text-sm">
+                  <div className="w-4 h-4 border-2 border-[#2176d4] border-t-transparent rounded-full animate-spin"/>
+                  Tijdsloten laden...
+                </div>
+              ) : availableSlots.length === 0 ? (
+                <div className="bg-[#0e0e0e] border border-[#2a2a2a] rounded-xl px-4 py-3 text-gray-500 text-sm">
+                  Geen beschikbare tijdsloten op deze dag
+                </div>
+              ) : (
+                <div className="grid grid-cols-4 gap-2">
+                  {availableSlots.map(s=>(
+                    <button key={s.time} type="button" onClick={()=>setForm(f=>({...f,time:s.time}))}
+                      className={`py-2.5 rounded-xl text-sm font-bold transition-all ${form.time===s.time ? 'bg-[#2176d4] text-white shadow-[0_0_15px_rgba(33,118,212,0.3)]' : 'bg-[#0e0e0e] border border-[#2a2a2a] text-gray-400 hover:border-[#2176d4]/50 hover:text-white'}`}>
+                      {s.time}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-1">
+            <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-[#2a2a2a] text-gray-400 text-sm font-medium hover:border-[#333] hover:text-white transition-all">Annuleren</button>
+            <button type="submit" disabled={saving || (!form.time && !!form.date)}
+              className="flex-1 py-2.5 rounded-xl bg-[#2176d4] text-white text-sm font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-40 transition-all duration-200">
               {saving ? 'Opslaan...' : isEdit ? 'Bijwerken' : 'Toevoegen'}
             </button>
           </div>

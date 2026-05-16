@@ -4,6 +4,14 @@ import { NextRequest } from 'next/server'
 import { transporter } from '@/lib/mailer'
 import { cancelMailHtml } from '@/app/api/bookings/cancel/route'
 
+const NL_DAYS = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag']
+const NL_MONTHS = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december']
+
+function formatDateNL(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00')
+  return `${NL_DAYS[d.getDay()]} ${d.getDate()} ${NL_MONTHS[d.getMonth()]} ${d.getFullYear()}`
+}
+
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   let code = 'MSC'
@@ -97,7 +105,7 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Niet ingelogd' }, { status: 401 })
   }
   const { name, phone, email, service, price, duration, date, time } = await request.json()
-  if (!name || !email || !service || !date || !time) {
+  if (!name || !service || !date || !time) {
     return Response.json({ error: 'Verplichte velden ontbreken' }, { status: 400 })
   }
 
@@ -108,11 +116,50 @@ export async function POST(request: Request) {
     code = generateCode()
   }
 
+  const normalizedEmail = email ? email.toLowerCase() : ''
+
   const { error } = await supabaseAdmin.from('bookings').insert({
-    code, name, phone: phone ?? '', email: email.toLowerCase(),
+    code, name, phone: phone ?? '', email: normalizedEmail,
     service, price: price ?? 0, duration: duration ?? 30, date, time,
   })
   if (error) return Response.json({ error: 'Opslaan mislukt' }, { status: 500 })
+
+  if (normalizedEmail) {
+    const cancelUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'}/?annuleer=${code}`
+    try {
+      await transporter.sendMail({
+        from: `MoSaidCuts ✂ <${process.env.GMAIL_USER}>`,
+        to: normalizedEmail,
+        subject: `Afspraak bevestigd – ${code}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;">
+            <div style="background:#1d4ed8;padding:24px 32px;border-radius:12px 12px 0 0;">
+              <h1 style="color:#fff;margin:0;font-size:24px;">✂ MoSaidCuts</h1>
+            </div>
+            <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;">
+              <h2 style="color:#1d4ed8;margin-top:0;">Afspraak bevestigd!</h2>
+              <p>Hallo <strong>${name}</strong>, uw afspraak is bevestigd.</p>
+              <div style="background:#dbeafe;border-radius:10px;padding:20px;margin:20px 0;">
+                <p style="margin:6px 0;"><strong>Boekingscode:</strong> <span style="font-size:18px;font-weight:800;color:#1d4ed8;">${code}</span></p>
+                <p style="margin:6px 0;"><strong>Dienst:</strong> ${service}</p>
+                <p style="margin:6px 0;"><strong>Datum:</strong> ${formatDateNL(date)}</p>
+                <p style="margin:6px 0;"><strong>Tijd:</strong> ${time}</p>
+                <p style="margin:6px 0;"><strong>Prijs:</strong> €${price ?? 0}</p>
+              </div>
+              <div style="text-align:center;margin:24px 0;">
+                <a href="${cancelUrl}"
+                  style="display:inline-block;background:#dc2626;color:#fff;font-weight:700;padding:12px 28px;border-radius:10px;text-decoration:none;font-size:15px;">
+                  Afspraak annuleren
+                </a>
+              </div>
+              <p style="color:#888;font-size:12px;text-align:center;">Of gebruik boekingscode <strong>${code}</strong> op de website.</p>
+            </div>
+          </div>
+        `,
+      })
+    } catch { /* non-fatal */ }
+  }
+
   return Response.json({ success: true, code })
 }
 
