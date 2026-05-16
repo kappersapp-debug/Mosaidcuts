@@ -34,11 +34,10 @@
   --color-brand-hover: #1e40af;
   --color-brand-light: #dbeafe;
   --color-brand-muted: #bfdbfe;
-  --color-gold: #c8a84b;
-  --color-gold-hover: #d4b462;
-  --color-gold-muted: #c8a84b33;
   --color-portal-bg: #0c0c0c;
   --color-portal-card: #141414;
   --color-portal-border: #2a2a2a;
-  --color-portal-sidebar: #111111;
+  --color-portal-sidebar: #0e0e0e;
+  --color-portal-accent: #2176d4;
+  --color-portal-accent-hover: #3080e0;
 }

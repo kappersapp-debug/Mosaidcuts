@@ -103,7 +103,7 @@ function LoginScreen({onLogin}: {onLogin:()=>void}) {
     <div className="min-h-screen bg-[#0c0c0c] flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-[#141414] rounded-xl shadow-xl border border-[#2a2a2a] overflow-hidden">
         <div className="bg-[#111] px-8 py-7 text-center border-b border-[#2a2a2a]">
-          <h1 className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-2xl">MoSaidCuts</h1>
+          <h1 className="text-[#2176d4] font-[family-name:var(--font-bebas)] tracking-widest text-2xl">MoSaidCuts</h1>
           <p className="text-gray-500 text-xs mt-1">Kapper Portaal</p>
         </div>
         <form onSubmit={submit} className="p-8">
@@ -113,11 +113,11 @@ function LoginScreen({onLogin}: {onLogin:()=>void}) {
             <label className="block text-sm font-bold text-gray-400 mb-1">Wachtwoord</label>
             <div className="relative">
               <input type={show?'text':'password'} value={pw} onChange={e=>setPw(e.target.value)} required
-                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-3 pr-12 font-medium focus:outline-none focus:border-[#c8a84b] transition-colors"/>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-3 pr-12 font-medium focus:outline-none focus:border-[#2176d4] transition-colors"/>
               <button type="button" onClick={()=>setShow(s=>!s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs font-medium hover:text-gray-300">{show?'Verberg':'Toon'}</button>
             </div>
           </div>
-          <button type="submit" disabled={loading} className="w-full py-3 rounded-xl bg-[#c8a84b] text-black font-bold hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.2)] disabled:opacity-50 transition-all duration-200">
+          <button type="submit" disabled={loading} className="w-full py-3 rounded-xl bg-[#2176d4] text-white font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-50 transition-all duration-200">
             {loading ? 'Bezig...' : 'Inloggen'}
           </button>
         </form>
@@ -222,7 +222,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
           <div className="px-4 py-2.5 border-b border-[#1e1e1e] flex items-center justify-between">
             <span className="font-semibold text-white text-sm">Meldingen</span>
             {notifications.length > 0 && (
-              <button onClick={() => { setNotifications([]); setNotifOpen(false) }} className="text-xs text-[#c8a84b] hover:underline">Wis alles</button>
+              <button onClick={() => { setNotifications([]); setNotifOpen(false) }} className="text-xs text-[#2176d4] hover:underline">Wis alles</button>
             )}
           </div>
           {notifications.length === 0 ? (
@@ -230,7 +230,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
           ) : (
             <div className="max-h-72 overflow-y-auto divide-y divide-[#1e1e1e]">
               {notifications.map(n => (
-                <div key={n.id} className={`px-4 py-3 hover:bg-white/5 border-l-2 ${(n as Booking & {_type?:string})._type==='cancelled' ? 'border-red-500' : 'border-[#c8a84b]'}`}>
+                <div key={n.id} className={`px-4 py-3 hover:bg-white/5 border-l-2 ${(n as Booking & {_type?:string})._type==='cancelled' ? 'border-red-500' : 'border-[#2176d4]'}`}>
                   <p className="font-semibold text-sm text-white">{n.name}</p>
                   <p className="text-xs text-gray-500">{n.service} · {n.date} · {n.time}</p>
                 </div>
@@ -242,19 +242,19 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
 
       {/* Toast popup — top of screen */}
       {toast && (
-        <div className="fixed top-16 right-4 lg:top-4 lg:right-6 z-50 bg-[#c8a84b] text-black px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-xs">
+        <div className="fixed top-16 right-4 lg:top-4 lg:right-6 z-50 bg-[#2176d4] text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-xs">
           <div className="flex-1 min-w-0">
             <p className="font-bold text-sm">Nieuwe melding</p>
-            <p className="text-xs text-black/70 truncate">{toast}</p>
+            <p className="text-xs text-white/70 truncate">{toast}</p>
           </div>
-          <button onClick={() => setToast(null)} className="text-black/50 hover:text-black shrink-0 leading-none text-lg">×</button>
+          <button onClick={() => setToast(null)} className="text-white/50 hover:text-white shrink-0 leading-none text-lg">×</button>
         </div>
       )}
 
       {/* Sidebar */}
       <aside className="hidden lg:flex flex-col w-60 bg-[#0e0e0e] min-h-screen fixed left-0 top-0 z-30 border-r border-[#1e1e1e]">
         <div className="px-6 py-6 border-b border-[#1e1e1e]">
-          <div className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-2xl leading-none">MoSaidCuts</div>
+          <div className="text-[#2176d4] font-[family-name:var(--font-bebas)] tracking-widest text-2xl leading-none">MoSaidCuts</div>
           <p className="text-gray-600 text-[11px] mt-1 tracking-wider uppercase">Kapper Portaal</p>
         </div>
         <nav className="flex-1 py-3 space-y-0.5 px-3">
@@ -262,18 +262,18 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
             <button key={n.id} onClick={()=>setView(n.id)}
               className={['flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm transition-all duration-200',
                 view===n.id
-                  ? 'bg-[#c8a84b]/12 text-[#c8a84b] font-semibold shadow-[inset_0_0_0_1px_rgba(200,168,75,0.15)]'
+                  ? 'bg-[#2176d4]/12 text-[#2176d4] font-semibold shadow-[inset_0_0_0_1px_rgba(33,118,212,0.2)]'
                   : 'text-gray-500 hover:bg-white/4 hover:text-gray-200'].join(' ')}>
-              <span className={view===n.id ? 'text-[#c8a84b]' : 'text-gray-600'}>{NAV_ICONS[n.id]}</span>
+              <span className={view===n.id ? 'text-[#2176d4]' : 'text-gray-600'}>{NAV_ICONS[n.id]}</span>
               {n.label}
             </button>
           ))}
           <button ref={notifBtnRef} onClick={openNotifDesktop}
             className={['flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm transition-all duration-200',
               notifOpen
-                ? 'bg-[#c8a84b]/12 text-[#c8a84b] font-semibold shadow-[inset_0_0_0_1px_rgba(200,168,75,0.15)]'
+                ? 'bg-[#2176d4]/12 text-[#2176d4] font-semibold shadow-[inset_0_0_0_1px_rgba(33,118,212,0.2)]'
                 : 'text-gray-500 hover:bg-white/4 hover:text-gray-200'].join(' ')}>
-            <span className={`relative ${notifOpen ? 'text-[#c8a84b]' : 'text-gray-600'}`}>
+            <span className={`relative ${notifOpen ? 'text-[#2176d4]' : 'text-gray-600'}`}>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
               {unreadCount > 0 && <span className="animate-pulse-ring absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 opacity-70"/>}
             </span>
@@ -295,7 +295,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
 
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-[#111] px-4 py-3 flex items-center justify-between border-b border-[#2a2a2a]">
-        <div className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-lg">MoSaidCuts</div>
+        <div className="text-[#2176d4] font-[family-name:var(--font-bebas)] tracking-widest text-lg">MoSaidCuts</div>
         <div className="flex items-center gap-4">
           <button onClick={openNotifMobile} className="relative text-gray-400 hover:text-white transition-colors text-xs">
             Meldingen
@@ -317,14 +317,14 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
         <div className="lg:hidden fixed inset-0 z-40 bg-black/80 animate-fade-in" onClick={()=>setMenuOpen(false)}>
           <div className="w-60 bg-[#0e0e0e] h-full border-r border-[#1e1e1e]" onClick={e=>e.stopPropagation()}>
             <div className="px-6 py-6 border-b border-[#1e1e1e]">
-              <div className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-2xl">MoSaidCuts</div>
+              <div className="text-[#2176d4] font-[family-name:var(--font-bebas)] tracking-widest text-2xl">MoSaidCuts</div>
             </div>
             <nav className="py-3 space-y-0.5 px-3">
               {NAV.map(n => (
                 <button key={n.id} onClick={()=>{setView(n.id);setMenuOpen(false)}}
                   className={['flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm transition-all',
-                    view===n.id?'bg-[#c8a84b]/12 text-[#c8a84b] font-semibold':'text-gray-500 hover:bg-white/4 hover:text-gray-200'].join(' ')}>
-                  <span className={view===n.id ? 'text-[#c8a84b]' : 'text-gray-600'}>{NAV_ICONS[n.id]}</span>
+                    view===n.id?'bg-[#2176d4]/12 text-[#2176d4] font-semibold':'text-gray-500 hover:bg-white/4 hover:text-gray-200'].join(' ')}>
+                  <span className={view===n.id ? 'text-[#2176d4]' : 'text-gray-600'}>{NAV_ICONS[n.id]}</span>
                   {n.label}
                 </button>
               ))}
@@ -423,15 +423,15 @@ function DashboardView() {
           {label:'Klanten', value:stats?.totalCustomers??'—', sub:'uniek totaal', gold:false, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>},
         ].map((c,i)=>(
           <div key={c.label} style={{animationDelay:`${i*60}ms`}}
-            className={`animate-fade-up rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${c.gold?'bg-gradient-to-br from-[#c8a84b]/15 to-[#c8a84b]/5 border-[#c8a84b]/25 hover:shadow-[#c8a84b]/10':'bg-[#141414] border-[#222] hover:border-[#2a2a2a] hover:shadow-black/40'}`}>
+            className={`animate-fade-up rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${c.gold?'bg-gradient-to-br from-[#2176d4]/15 to-[#2176d4]/5 border-[#2176d4]/25 hover:shadow-[#2176d4]/10':'bg-[#141414] border-[#222] hover:border-[#2a2a2a] hover:shadow-black/40'}`}>
             <div className="flex items-start justify-between mb-3">
-              <p className={`text-[11px] font-bold uppercase tracking-widest ${c.gold?'text-[#c8a84b]/60':'text-gray-600'}`}>{c.label}</p>
-              <span className={c.gold ? 'text-[#c8a84b]/40' : 'text-gray-700'}>{c.icon}</span>
+              <p className={`text-[11px] font-bold uppercase tracking-widest ${c.gold?'text-[#2176d4]/60':'text-gray-600'}`}>{c.label}</p>
+              <span className={c.gold ? 'text-[#2176d4]/40' : 'text-gray-700'}>{c.icon}</span>
             </div>
-            <p className={`text-4xl font-black leading-none ${c.gold?'text-[#c8a84b]':'text-white'}`}>
+            <p className={`text-4xl font-black leading-none ${c.gold?'text-[#2176d4]':'text-white'}`}>
               <AnimatedNumber value={c.value as number|string}/>
             </p>
-            <p className={`text-xs mt-2 ${c.gold?'text-[#c8a84b]/50':'text-gray-600'}`}>{c.sub}</p>
+            <p className={`text-xs mt-2 ${c.gold?'text-[#2176d4]/50':'text-gray-600'}`}>{c.sub}</p>
           </div>
         ))}
       </div>
@@ -444,7 +444,7 @@ function DashboardView() {
               <h2 className="font-bold text-white text-sm">Aankomende afspraken</h2>
               <p className="text-xs text-gray-600 mt-0.5">{upcoming.length} gepland</p>
             </div>
-            <span className="w-8 h-8 rounded-xl bg-[#c8a84b]/10 flex items-center justify-center text-[#c8a84b]">
+            <span className="w-8 h-8 rounded-xl bg-[#2176d4]/10 flex items-center justify-center text-[#2176d4]">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/></svg>
             </span>
           </div>
@@ -456,9 +456,9 @@ function DashboardView() {
             <div className="divide-y divide-[#1a1a1a]">
               {upcoming.map(b=>(
                 <div key={b.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-white/2 transition-colors">
-                  <div className="shrink-0 w-10 h-10 rounded-xl bg-[#c8a84b]/10 flex flex-col items-center justify-center">
-                    <p className="text-[9px] font-bold text-[#c8a84b]/70 uppercase leading-none">{formatShortDate(b.date).split(' ')[0]}</p>
-                    <p className="text-sm font-black text-[#c8a84b] leading-none mt-0.5">{b.time}</p>
+                  <div className="shrink-0 w-10 h-10 rounded-xl bg-[#2176d4]/10 flex flex-col items-center justify-center">
+                    <p className="text-[9px] font-bold text-[#2176d4]/70 uppercase leading-none">{formatShortDate(b.date).split(' ')[0]}</p>
+                    <p className="text-sm font-black text-[#2176d4] leading-none mt-0.5">{b.time}</p>
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-white text-sm truncate">{b.name}</p>
@@ -488,8 +488,8 @@ function DashboardView() {
               const b = stats?.todayBookings?.find(b=>b.time===slot)
               const isPause = isBreak(slot, breakEnabled, breakStart, breakEnd)
               return (
-                <div key={slot} className={`flex items-center gap-3 px-4 py-2.5 border-b border-[#1a1a1a] transition-colors ${b?'bg-[#c8a84b]/4 hover:bg-[#c8a84b]/6':isPause?'bg-amber-900/8':'hover:bg-white/2'}`}>
-                  <span className={`font-black text-[11px] w-12 text-center shrink-0 px-1.5 py-1 rounded-lg ${b?'bg-[#c8a84b] text-black':isPause?'bg-amber-900/30 text-amber-500':'bg-[#1e1e1e] text-gray-500'}`}>{slot}</span>
+                <div key={slot} className={`flex items-center gap-3 px-4 py-2.5 border-b border-[#1a1a1a] transition-colors ${b?'bg-[#2176d4]/4 hover:bg-[#2176d4]/6':isPause?'bg-amber-900/8':'hover:bg-white/2'}`}>
+                  <span className={`font-black text-[11px] w-12 text-center shrink-0 px-1.5 py-1 rounded-lg ${b?'bg-[#2176d4] text-white':isPause?'bg-amber-900/30 text-amber-500':'bg-[#1e1e1e] text-gray-500'}`}>{slot}</span>
                   {isPause ? (
                     <span className="text-amber-500/70 text-xs">Pauze</span>
                   ) : b ? (
@@ -498,7 +498,7 @@ function DashboardView() {
                         <p className="font-bold text-white text-sm truncate">{b.name}</p>
                         <p className="text-xs text-gray-500 truncate">{b.service}</p>
                       </div>
-                      <span className="ml-auto bg-[#c8a84b] text-black font-black text-xs px-2.5 py-1 rounded-lg shrink-0">€{b.price}</span>
+                      <span className="ml-auto bg-[#2176d4] text-white font-black text-xs px-2.5 py-1 rounded-lg shrink-0">€{b.price}</span>
                     </>
                   ) : <span className="text-gray-700 text-xs">Vrij</span>}
                 </div>
@@ -570,12 +570,12 @@ function CalendarView() {
         <div className="bg-[#141414] rounded-2xl border border-[#222] p-5 transition-all duration-300 hover:border-[#2a2a2a] hover:shadow-lg hover:shadow-black/30">
           <div className="flex items-center justify-between mb-4">
             <button onClick={()=>setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth()-1,1))}
-              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#c8a84b]/10 text-[#c8a84b] font-bold text-xl transition-colors">‹</button>
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#2176d4]/10 text-[#2176d4] font-bold text-xl transition-colors">‹</button>
             <span className="font-black text-white capitalize">
               {viewMonth.toLocaleDateString('nl-NL',{month:'long',year:'numeric'})}
             </span>
             <button onClick={()=>setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth()+1,1))}
-              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#c8a84b]/10 text-[#c8a84b] font-bold text-xl transition-colors">›</button>
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#2176d4]/10 text-[#2176d4] font-bold text-xl transition-colors">›</button>
           </div>
           <div className="grid grid-cols-7 mb-1">
             {NL_DAYS_SHORT.map(d=><div key={d} className="text-center text-xs font-bold text-gray-500 py-1">{d}</div>)}
@@ -593,17 +593,17 @@ function CalendarView() {
                 <button key={i} onClick={()=>setSelectedDay(ds)}
                   className={[
                     'flex flex-col items-center py-1.5 rounded-xl m-0.5 transition-colors font-bold text-sm relative',
-                    isSelected ? 'bg-[#c8a84b] text-black shadow-md' :
+                    isSelected ? 'bg-[#2176d4] text-white shadow-md' :
                     isBlocked ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' :
                     isClosed ? 'bg-[#1a1a1a] text-gray-600 hover:bg-[#222]' :
-                    isToday ? 'ring-2 ring-[#c8a84b] text-[#c8a84b]' :
-                    'hover:bg-[#c8a84b]/10 text-gray-300',
+                    isToday ? 'ring-2 ring-[#2176d4] text-[#2176d4]' :
+                    'hover:bg-[#2176d4]/10 text-gray-300',
                   ].join(' ')}>
                   <span>{day.getDate()}</span>
                   {!isBlocked && count>0 && (
                     <div className="flex gap-0.5 mt-0.5">
                       {Array.from({length:Math.min(count,3)}).map((_,j)=>(
-                        <div key={j} className={`w-1.5 h-1.5 rounded-full ${isSelected?'bg-black':'bg-[#c8a84b]'}`}/>
+                        <div key={j} className={`w-1.5 h-1.5 rounded-full ${isSelected?'bg-black':'bg-[#2176d4]'}`}/>
                       ))}
                     </div>
                   )}
@@ -613,7 +613,7 @@ function CalendarView() {
           </div>
           {/* Legend */}
           <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t border-[#1e1e1e] text-xs font-semibold text-gray-500">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#c8a84b] inline-block"/>Geselecteerd</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#2176d4] inline-block"/>Geselecteerd</span>
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-900/40 inline-block"/>Geblokkeerd</span>
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#1a1a1a] inline-block"/>Gesloten</span>
           </div>
@@ -639,8 +639,8 @@ function CalendarView() {
               const b = dayBookings.find(b=>b.time===slot)
               const isPause = isBreak(slot, breakEnabled, breakStart, breakEnd)
               return (
-                <div key={slot} className={`flex items-center gap-3 px-3 py-2.5 border-b border-[#1e1e1e] ${b?'bg-[#c8a84b]/5':isPause?'bg-amber-900/10':'bg-[#161616]'}`}>
-                  <span className={`font-black text-xs w-14 text-center shrink-0 px-2 py-1 rounded-lg ${b?'bg-[#c8a84b] text-black':isPause?'bg-amber-900/30 text-amber-400':'bg-[#1e1e1e] text-[#c8a84b] border border-[#c8a84b]/20'}`}>{slot}</span>
+                <div key={slot} className={`flex items-center gap-3 px-3 py-2.5 border-b border-[#1e1e1e] ${b?'bg-[#2176d4]/5':isPause?'bg-amber-900/10':'bg-[#161616]'}`}>
+                  <span className={`font-black text-xs w-14 text-center shrink-0 px-2 py-1 rounded-lg ${b?'bg-[#2176d4] text-white':isPause?'bg-amber-900/30 text-amber-400':'bg-[#1e1e1e] text-[#2176d4] border border-[#2176d4]/20'}`}>{slot}</span>
                   {isPause ? (
                     <span className="text-amber-400 text-xs font-medium">Pauze</span>
                   ) : b ? (
@@ -691,7 +691,7 @@ function AppointmentsView() {
 
   const statusBadge = {
     today: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-amber-900/30 text-amber-400">VANDAAG</span>,
-    upcoming: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#c8a84b]/10 text-[#c8a84b]">AANKOMEND</span>,
+    upcoming: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#2176d4]/10 text-[#2176d4]">AANKOMEND</span>,
     past: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#1e1e1e] text-gray-500">VERLEDEN</span>,
   }
 
@@ -702,12 +702,12 @@ function AppointmentsView() {
       <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white mb-6">Afspraken</h1>
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <input type="text" placeholder="Zoeken op naam, e-mail of code..." value={search} onChange={e=>setSearch(e.target.value)}
-          className="flex-1 bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-[#c8a84b] transition-colors"/>
+          className="flex-1 bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-[#2176d4] transition-colors"/>
         <div className="flex gap-1 bg-[#1a1a1a] rounded-xl p-1 border border-[#2a2a2a]">
           {filters.map(f=>(
             <button key={f.id} onClick={()=>setFilter(f.id)}
               className={['px-3 py-1.5 rounded-lg text-xs font-bold transition-colors',
-                filter===f.id?'bg-[#c8a84b] text-black shadow-sm':'text-gray-500 hover:text-gray-300'].join(' ')}>
+                filter===f.id?'bg-[#2176d4] text-white shadow-sm':'text-gray-500 hover:text-gray-300'].join(' ')}>
               {f.label}
             </button>
           ))}
@@ -715,7 +715,7 @@ function AppointmentsView() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-[#c8a84b] border-t-transparent rounded-full animate-spin"/></div>
+        <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-[#2176d4] border-t-transparent rounded-full animate-spin"/></div>
       ) : bookings.length===0 ? (
         <div className="text-center py-12 text-gray-500 font-medium">Geen afspraken gevonden</div>
       ) : (
@@ -724,7 +724,7 @@ function AppointmentsView() {
             const status = getStatus(b.date)
             return (
               <div key={b.id} className="bg-[#141414] rounded-2xl border border-[#222] p-4 flex items-center gap-4 transition-all duration-200 hover:border-[#2a2a2a] hover:-translate-y-px hover:shadow-md hover:shadow-black/30">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#c8a84b]/20 to-[#c8a84b]/5 flex items-center justify-center text-xs font-black text-[#c8a84b] shrink-0 border border-[#c8a84b]/10">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2176d4]/20 to-[#2176d4]/5 flex items-center justify-center text-xs font-black text-[#2176d4] shrink-0 border border-[#2176d4]/10">
                   {serviceInitial(b.service)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -733,8 +733,8 @@ function AppointmentsView() {
                       <p className="font-black text-white truncate">{b.name}</p>
                       <p className="text-sm text-gray-400 truncate">{b.service} · {formatMedDate(b.date)} · {b.time}</p>
                       <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
-                        <a href={`tel:${b.phone}`} className="text-xs text-[#c8a84b] hover:underline">{b.phone}</a>
-                        <a href={`mailto:${b.email}`} className="text-xs text-[#c8a84b] hover:underline truncate">{b.email}</a>
+                        <a href={`tel:${b.phone}`} className="text-xs text-[#2176d4] hover:underline">{b.phone}</a>
+                        <a href={`mailto:${b.email}`} className="text-xs text-[#2176d4] hover:underline truncate">{b.email}</a>
                       </div>
                       <div className="mt-1">{statusBadge[status]}</div>
                     </div>
@@ -814,11 +814,11 @@ function ServicesView() {
     <div className="max-w-2xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Diensten</h1>
-        <button onClick={openNew} className="px-4 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.25)] transition-all duration-200">
+        <button onClick={openNew} className="px-4 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.35)] transition-all duration-200">
           + Toevoegen
         </button>
       </div>
-      {msg && <div className="mb-4 bg-[#c8a84b]/10 border border-[#c8a84b]/20 text-[#c8a84b] text-sm font-bold px-4 py-3 rounded-xl">{msg}</div>}
+      {msg && <div className="mb-4 bg-[#2176d4]/10 border border-[#2176d4]/20 text-[#2176d4] text-sm font-bold px-4 py-3 rounded-xl">{msg}</div>}
 
       {form && (
         <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-5 mb-6">
@@ -827,18 +827,18 @@ function ServicesView() {
             <div>
               <label className="block text-xs font-bold text-gray-400 mb-1">Naam</label>
               <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="bijv. Normale Knipbeurt"
-                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-1">Prijs (€)</label>
                 <input type="number" min="0" value={form.price} onChange={e=>setForm({...form,price:Number(e.target.value)})}
-                  className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
+                  className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-1">Duur</label>
                 <select value={form.duration} onChange={e=>setForm({...form,duration:Number(e.target.value)})}
-                  className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-[#c8a84b] transition-colors">
+                  className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
                   {durations.map(d=><option key={d} value={d}>{d} min</option>)}
                 </select>
               </div>
@@ -846,13 +846,13 @@ function ServicesView() {
             <div>
               <label className="block text-xs font-bold text-gray-400 mb-1">Omschrijving</label>
               <input value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} placeholder="bijv. 30 minuten"
-                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
             </div>
           </div>
           <div className="flex gap-3 mt-4">
             <button onClick={()=>setForm(null)} className="px-4 py-2 border-2 border-[#333] rounded-xl font-bold text-gray-400 text-sm hover:border-[#444] transition-colors">Annuleren</button>
             <button onClick={saveForm} disabled={!form.name || saving}
-              className="px-6 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.2)] disabled:opacity-50 transition-all duration-200">
+              className="px-6 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-50 transition-all duration-200">
               {saving ? 'Opslaan...' : 'Opslaan'}
             </button>
           </div>
@@ -862,7 +862,7 @@ function ServicesView() {
       <div className="space-y-3">
         {services.map(s=>(
           <div key={s.id} className="bg-[#141414] rounded-2xl border border-[#222] p-4 flex items-center gap-4 transition-all duration-200 hover:border-[#2a2a2a] hover:-translate-y-px hover:shadow-md hover:shadow-black/30">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#c8a84b]/20 to-[#c8a84b]/5 flex items-center justify-center text-xs font-black text-[#c8a84b] shrink-0 border border-[#c8a84b]/10">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2176d4]/20 to-[#2176d4]/5 flex items-center justify-center text-xs font-black text-[#2176d4] shrink-0 border border-[#2176d4]/10">
               {serviceInitial(s.name)}
             </div>
             <div className="flex-1 min-w-0">
@@ -870,9 +870,9 @@ function ServicesView() {
               <p className="text-sm text-gray-400">{s.desc} · {s.duration} min</p>
             </div>
             <div className="text-right shrink-0">
-              <p className="font-black text-[#c8a84b] text-lg">€{s.price}</p>
+              <p className="font-black text-[#2176d4] text-lg">€{s.price}</p>
               <div className="flex gap-3 mt-1 justify-end">
-                <button onClick={()=>setForm({...s})} className="text-xs text-[#c8a84b] hover:underline">Bewerken</button>
+                <button onClick={()=>setForm({...s})} className="text-xs text-[#2176d4] hover:underline">Bewerken</button>
                 {confirmRemove===s.id ? (
                   <span className="flex gap-1">
                     <button onClick={()=>remove(s.id)} className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-lg font-bold">Ja</button>
@@ -928,11 +928,11 @@ function ManagementView() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Beheer</h1>
-        <button onClick={()=>setShowForm(f=>!f)} className="px-4 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.25)] transition-all duration-200">
+        <button onClick={()=>setShowForm(f=>!f)} className="px-4 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.35)] transition-all duration-200">
           Email bannen
         </button>
       </div>
-      {banMsg && <div className="mb-4 bg-[#c8a84b]/10 border border-[#c8a84b]/20 text-[#c8a84b] text-sm font-bold px-4 py-3 rounded-xl">{banMsg}</div>}
+      {banMsg && <div className="mb-4 bg-[#2176d4]/10 border border-[#2176d4]/20 text-[#2176d4] text-sm font-bold px-4 py-3 rounded-xl">{banMsg}</div>}
       {showForm && (
         <form onSubmit={ban} className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-5 mb-6">
           <h2 className="font-semibold text-white mb-4">Nieuw ban</h2>
@@ -940,12 +940,12 @@ function ManagementView() {
             <div>
               <label className="block text-sm font-bold text-gray-400 mb-1">E-mailadres</label>
               <input type="email" required value={newEmail} onChange={e=>setNewEmail(e.target.value)} placeholder="email@example.com"
-                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-400 mb-1">Reden (optioneel)</label>
               <input type="text" value={reason} onChange={e=>setReason(e.target.value)} placeholder="Reden voor ban"
-                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
             </div>
           </div>
           <div className="flex gap-3">
@@ -972,7 +972,7 @@ function ManagementView() {
                 </div>
                 {confirmUnban===b.email ? (
                   <div className="flex gap-1 shrink-0">
-                    <button onClick={()=>unban(b.email)} disabled={actionLoading===b.email} className="text-xs bg-[#c8a84b] text-black px-2 py-1 rounded-lg font-bold disabled:opacity-50">{actionLoading===b.email?'...':'Ja'}</button>
+                    <button onClick={()=>unban(b.email)} disabled={actionLoading===b.email} className="text-xs bg-[#2176d4] text-white px-2 py-1 rounded-lg font-bold disabled:opacity-50">{actionLoading===b.email?'...':'Ja'}</button>
                     <button onClick={()=>setConfirmUnban(null)} className="text-xs border border-[#333] text-gray-400 px-2 py-1 rounded-lg font-bold">Nee</button>
                   </div>
                 ) : (
@@ -1033,7 +1033,7 @@ function BlockedCalendar({blocked, onChange}: {blocked: string[]; onChange: (dat
                 'aspect-square flex items-center justify-center rounded-xl text-xs font-bold transition-all',
                 isPast ? 'text-gray-700 cursor-not-allowed' :
                 isBlocked ? 'bg-red-600 text-white shadow hover:bg-red-700 scale-105' :
-                isToday ? 'ring-2 ring-[#c8a84b] text-[#c8a84b] hover:bg-red-900/20 hover:text-red-400 hover:ring-red-500' :
+                isToday ? 'ring-2 ring-[#2176d4] text-[#2176d4] hover:bg-red-900/20 hover:text-red-400 hover:ring-red-500' :
                 'text-gray-300 hover:bg-red-900/20 hover:text-red-400',
               ].join(' ')}>
               {day.getDate()}
@@ -1049,7 +1049,7 @@ function BlockedCalendar({blocked, onChange}: {blocked: string[]; onChange: (dat
 function Toggle({value, onChange}: {value:boolean; onChange:(v:boolean)=>void}) {
   return (
     <button onClick={()=>onChange(!value)}
-      className={`relative inline-flex w-12 h-6 rounded-full transition-colors ${value?'bg-[#c8a84b]':'bg-[#333]'}`}>
+      className={`relative inline-flex w-12 h-6 rounded-full transition-colors ${value?'bg-[#2176d4]':'bg-[#333]'}`}>
       <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${value?'translate-x-6':'translate-x-0.5'}`}/>
     </button>
   )
@@ -1147,18 +1147,18 @@ function SettingsView() {
           {dayOrder.map(day => {
             const cfg = daySchedule[day]
             return (
-              <div key={day} className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-colors ${cfg.open ? 'border-[#c8a84b]/20 bg-[#c8a84b]/5' : 'border-[#1e1e1e] bg-[#111]'}`}>
+              <div key={day} className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-colors ${cfg.open ? 'border-[#2176d4]/20 bg-[#2176d4]/5' : 'border-[#1e1e1e] bg-[#111]'}`}>
                 <Toggle value={cfg.open} onChange={v => updateDay(day, {open: v})} />
                 <span className={`font-bold text-sm w-20 shrink-0 ${cfg.open ? 'text-white' : 'text-gray-600'}`}>{NL_DAY_LABELS[day]}</span>
                 {cfg.open ? (
                   <div className="flex items-center gap-2 flex-1 flex-wrap">
                     <select value={cfg.start} onChange={e => updateDay(day, {start: e.target.value})}
-                      className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#c8a84b] transition-colors">
+                      className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
                       {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                     <span className="text-gray-500 font-bold text-sm">→</span>
                     <select value={cfg.end} onChange={e => updateDay(day, {end: e.target.value})}
-                      className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#c8a84b] transition-colors">
+                      className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
                       {timeOptions.filter(t => t > cfg.start).map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
@@ -1181,12 +1181,12 @@ function SettingsView() {
           {breakEnabled && (
             <div className="flex items-center gap-2 mt-2">
               <select value={breakStart} onChange={e=>setBreakStart(e.target.value)}
-                className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#c8a84b] transition-colors">
+                className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
                 {timeOptions.map(t=><option key={t} value={t}>{t}</option>)}
               </select>
               <span className="text-gray-500 font-bold text-sm">→</span>
               <select value={breakEnd} onChange={e=>setBreakEnd(e.target.value)}
-                className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#c8a84b] transition-colors">
+                className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
                 {timeOptions.filter(t=>t>breakStart).map(t=><option key={t} value={t}>{t}</option>)}
               </select>
             </div>
@@ -1203,10 +1203,10 @@ function SettingsView() {
               ] : []),
             ])
           }} disabled={saving.schedule}
-            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.2)] disabled:opacity-50 transition-all duration-200">
+            className="px-5 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-50 transition-all duration-200">
             {saving.schedule ? 'Opslaan...' : 'Opslaan'}
           </button>
-          {msgs.schedule && <span className="text-[#c8a84b] text-sm">{msgs.schedule}</span>}
+          {msgs.schedule && <span className="text-[#2176d4] text-sm">{msgs.schedule}</span>}
         </div>
       </div>
 
@@ -1228,10 +1228,10 @@ function SettingsView() {
         )}
         <div className="flex items-center gap-3 mt-4">
           <button onClick={()=>save('blocked_dates', JSON.stringify(blockedDates), 'blocked')} disabled={saving.blocked}
-            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.2)] disabled:opacity-50 transition-all duration-200">
+            className="px-5 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-50 transition-all duration-200">
             {saving.blocked ? 'Opslaan...' : 'Opslaan'}
           </button>
-          {msgs.blocked && <span className="text-[#c8a84b] text-sm">{msgs.blocked}</span>}
+          {msgs.blocked && <span className="text-[#2176d4] text-sm">{msgs.blocked}</span>}
         </div>
       </div>
 
@@ -1242,9 +1242,9 @@ function SettingsView() {
         <div className="flex items-center justify-between py-3 border border-[#2a2a2a] rounded-xl px-4">
           <div>
             <p className="font-bold text-white text-sm">Exporteer alle afspraken</p>
-            <p className="text-xs text-[#c8a84b] font-medium">Download als .ics kalenderbestand</p>
+            <p className="text-xs text-[#2176d4] font-medium">Download als .ics kalenderbestand</p>
           </div>
-          <a href="/api/portaal/export" download className="bg-[#c8a84b] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#d4b462] transition-colors">Downloaden</a>
+          <a href="/api/portaal/export" download className="bg-[#2176d4] text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#3080e0] transition-colors">Downloaden</a>
         </div>
       </div>
 
@@ -1253,16 +1253,16 @@ function SettingsView() {
         <h2 className="font-semibold text-white mb-4">Wachtwoord wijzigen</h2>
         <form onSubmit={changePw} className="space-y-4">
           {errs.pw && <div className="bg-red-900/30 border border-red-700/50 text-red-400 rounded-xl px-4 py-3 text-sm font-semibold">{errs.pw}</div>}
-          {msgs.pw && <div className="bg-[#c8a84b]/10 border border-[#c8a84b]/20 text-[#c8a84b] rounded-xl px-4 py-3 text-sm font-semibold">{msgs.pw}</div>}
+          {msgs.pw && <div className="bg-[#2176d4]/10 border border-[#2176d4]/20 text-[#2176d4] rounded-xl px-4 py-3 text-sm font-semibold">{msgs.pw}</div>}
           {[{label:'Huidig wachtwoord',val:currentPw,set:setCurrentPw},{label:'Nieuw wachtwoord',val:newPw,set:setNewPw},{label:'Bevestig nieuw',val:confirmPw,set:setConfirmPw}].map(f=>(
             <div key={f.label}>
               <label className="block text-sm font-bold text-gray-400 mb-1">{f.label}</label>
               <input type="password" required value={f.val} onChange={e=>f.set(e.target.value)}
-                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c8a84b] transition-colors"/>
+                className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
             </div>
           ))}
           <button type="submit" disabled={saving.pw}
-            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.2)] disabled:opacity-50 transition-all duration-200">
+            className="px-5 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-50 transition-all duration-200">
             {saving.pw?'Opslaan...':'Wachtwoord wijzigen'}
           </button>
         </form>
@@ -1292,7 +1292,7 @@ export default function PortaalPage() {
 
   if(checking) return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#0c0c0c]">
-      <div className="w-10 h-10 border-4 border-[#c8a84b] border-t-transparent rounded-full animate-spin"/>
+      <div className="w-10 h-10 border-4 border-[#2176d4] border-t-transparent rounded-full animate-spin"/>
       <p className="text-gray-500 text-sm font-medium">Even geduld...</p>
     </div>
   )
@@ -1302,7 +1302,7 @@ export default function PortaalPage() {
       <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-8 max-w-sm w-full text-center">
         <p className="font-bold text-white mb-2">Verbinding mislukt</p>
         <p className="text-gray-500 text-sm mb-4">De server reageert niet. Controleer uw internetverbinding.</p>
-        <button onClick={()=>window.location.reload()} className="w-full py-2.5 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] transition-colors">Opnieuw proberen</button>
+        <button onClick={()=>window.location.reload()} className="w-full py-2.5 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] transition-colors">Opnieuw proberen</button>
       </div>
     </div>
   )
