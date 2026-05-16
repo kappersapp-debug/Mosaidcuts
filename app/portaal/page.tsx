@@ -43,6 +43,16 @@ function serviceInitial(service: string) {
 }
 
 type View = 'dashboard'|'calendar'|'appointments'|'services'|'management'|'settings'
+
+const NAV_ICONS: Record<string, React.ReactNode> = {
+  dashboard: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>,
+  calendar: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>,
+  appointments: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>,
+  services: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg>,
+  management: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>,
+  settings: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>,
+}
+
 const NAV: {id:View; label:string}[] = [
   {id:'dashboard', label:'Dashboard'},
   {id:'calendar', label:'Agenda'},
@@ -51,6 +61,22 @@ const NAV: {id:View; label:string}[] = [
   {id:'management', label:'Beheer'},
   {id:'settings', label:'Instellingen'},
 ]
+
+function AnimatedNumber({ value }: { value: number | string }) {
+  const [display, setDisplay] = useState<number|string>(typeof value === 'number' ? 0 : value)
+  useEffect(() => {
+    if (typeof value !== 'number') { setDisplay(value); return }
+    let current = 0
+    const step = Math.max(1, Math.ceil(value / 25))
+    const timer = setInterval(() => {
+      current = Math.min(current + step, value)
+      setDisplay(current)
+      if (current >= value) clearInterval(timer)
+    }, 40)
+    return () => clearInterval(timer)
+  }, [value])
+  return <>{display}</>
+}
 
 function generateWorkSlots(start='09:00', end='17:00') {
   const [sh,sm] = start.split(':').map(Number)
@@ -91,7 +117,7 @@ function LoginScreen({onLogin}: {onLogin:()=>void}) {
               <button type="button" onClick={()=>setShow(s=>!s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs font-medium hover:text-gray-300">{show?'Verberg':'Toon'}</button>
             </div>
           </div>
-          <button type="submit" disabled={loading} className="w-full py-3 rounded-xl bg-[#c8a84b] text-black font-bold hover:bg-[#d4b462] disabled:opacity-50 transition-colors">
+          <button type="submit" disabled={loading} className="w-full py-3 rounded-xl bg-[#c8a84b] text-black font-bold hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.2)] disabled:opacity-50 transition-all duration-200">
             {loading ? 'Bezig...' : 'Inloggen'}
           </button>
         </form>
@@ -226,33 +252,45 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
       )}
 
       {/* Sidebar */}
-      <aside className="hidden lg:flex flex-col w-56 bg-[#111] min-h-screen fixed left-0 top-0 z-30 border-r border-[#2a2a2a]">
-        <div className="px-6 py-5 border-b border-[#2a2a2a]">
-          <div className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-xl">MoSaidCuts</div>
-          <p className="text-gray-500 text-xs mt-0.5">Kapper Portaal</p>
+      <aside className="hidden lg:flex flex-col w-60 bg-[#0e0e0e] min-h-screen fixed left-0 top-0 z-30 border-r border-[#1e1e1e]">
+        <div className="px-6 py-6 border-b border-[#1e1e1e]">
+          <div className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-2xl leading-none">MoSaidCuts</div>
+          <p className="text-gray-600 text-[11px] mt-1 tracking-wider uppercase">Kapper Portaal</p>
         </div>
-        <nav className="flex-1 py-2">
+        <nav className="flex-1 py-3 space-y-0.5 px-3">
           {NAV.map(n => (
             <button key={n.id} onClick={()=>setView(n.id)}
-              className={['flex items-center w-full px-6 py-2.5 text-sm transition-colors',
-                view===n.id ? 'bg-[#c8a84b]/10 text-[#c8a84b] font-semibold border-r-2 border-[#c8a84b]' : 'text-gray-400 hover:bg-white/5 hover:text-white'].join(' ')}>
+              className={['flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm transition-all duration-200',
+                view===n.id
+                  ? 'bg-[#c8a84b]/12 text-[#c8a84b] font-semibold shadow-[inset_0_0_0_1px_rgba(200,168,75,0.15)]'
+                  : 'text-gray-500 hover:bg-white/4 hover:text-gray-200'].join(' ')}>
+              <span className={view===n.id ? 'text-[#c8a84b]' : 'text-gray-600'}>{NAV_ICONS[n.id]}</span>
               {n.label}
             </button>
           ))}
           <button ref={notifBtnRef} onClick={openNotifDesktop}
-            className={['flex items-center w-full px-6 py-2.5 text-sm transition-colors',
-              notifOpen ? 'bg-[#c8a84b]/10 text-[#c8a84b] font-semibold border-r-2 border-[#c8a84b]' : 'text-gray-400 hover:bg-white/5 hover:text-white'].join(' ')}>
+            className={['flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm transition-all duration-200',
+              notifOpen
+                ? 'bg-[#c8a84b]/12 text-[#c8a84b] font-semibold shadow-[inset_0_0_0_1px_rgba(200,168,75,0.15)]'
+                : 'text-gray-500 hover:bg-white/4 hover:text-gray-200'].join(' ')}>
+            <span className={`relative ${notifOpen ? 'text-[#c8a84b]' : 'text-gray-600'}`}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+              {unreadCount > 0 && <span className="animate-pulse-ring absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 opacity-70"/>}
+            </span>
             <span className="flex-1 text-left">Meldingen</span>
             {unreadCount > 0 && (
-              <span className="bg-red-500 text-white text-[10px] font-bold min-w-4 h-4 rounded-full flex items-center justify-center px-1 leading-none">
+              <span className="bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 leading-none">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
           </button>
         </nav>
-        <button onClick={onLogout} className="m-4 py-2 rounded-lg border border-[#2a2a2a] text-gray-400 text-sm hover:bg-white/5 hover:text-white transition-colors">
-          Uitloggen
-        </button>
+        <div className="px-3 pb-4">
+          <button onClick={onLogout} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl border border-[#1e1e1e] text-gray-500 text-sm hover:bg-white/4 hover:text-gray-300 hover:border-[#2a2a2a] transition-all duration-200">
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+            Uitloggen
+          </button>
+        </div>
       </aside>
 
       {/* Mobile top bar */}
@@ -276,26 +314,32 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
       </div>
 
       {menuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-black/70" onClick={()=>setMenuOpen(false)}>
-          <div className="w-56 bg-[#111] h-full border-r border-[#2a2a2a]" onClick={e=>e.stopPropagation()}>
-            <div className="px-6 py-5 border-b border-[#2a2a2a]">
-              <div className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-xl">MoSaidCuts</div>
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/80 animate-fade-in" onClick={()=>setMenuOpen(false)}>
+          <div className="w-60 bg-[#0e0e0e] h-full border-r border-[#1e1e1e]" onClick={e=>e.stopPropagation()}>
+            <div className="px-6 py-6 border-b border-[#1e1e1e]">
+              <div className="text-[#c8a84b] font-[family-name:var(--font-bebas)] tracking-widest text-2xl">MoSaidCuts</div>
             </div>
-            <nav className="py-2">
+            <nav className="py-3 space-y-0.5 px-3">
               {NAV.map(n => (
                 <button key={n.id} onClick={()=>{setView(n.id);setMenuOpen(false)}}
-                  className={['flex items-center w-full px-6 py-2.5 text-sm',
-                    view===n.id?'bg-[#c8a84b]/10 text-[#c8a84b] font-semibold border-r-2 border-[#c8a84b]':'text-gray-400 hover:bg-white/5 hover:text-white'].join(' ')}>
+                  className={['flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm transition-all',
+                    view===n.id?'bg-[#c8a84b]/12 text-[#c8a84b] font-semibold':'text-gray-500 hover:bg-white/4 hover:text-gray-200'].join(' ')}>
+                  <span className={view===n.id ? 'text-[#c8a84b]' : 'text-gray-600'}>{NAV_ICONS[n.id]}</span>
                   {n.label}
                 </button>
               ))}
             </nav>
-            <button onClick={onLogout} className="m-4 py-2 w-[calc(100%-32px)] rounded-lg border border-[#2a2a2a] text-gray-400 text-sm hover:bg-white/5 hover:text-white transition-colors">Uitloggen</button>
+            <div className="px-3 mt-2">
+              <button onClick={onLogout} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl border border-[#1e1e1e] text-gray-500 text-sm">
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+                Uitloggen
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      <main className="flex-1 lg:ml-56 pt-14 lg:pt-0 min-h-screen">
+      <main className="flex-1 lg:ml-60 pt-14 lg:pt-0 min-h-screen">
         <div className="p-4 sm:p-6 lg:p-8 max-w-5xl">
           {view==='dashboard' && <DashboardView />}
           {view==='calendar' && <CalendarView />}
@@ -365,45 +409,62 @@ function DashboardView() {
   const today = new Date().toISOString().split('T')[0]
 
   return (
-    <div>
-      <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white mb-6">Dashboard</h1>
+    <div className="animate-fade-up">
+      <div className="mb-8">
+        <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Dashboard</h1>
+        <p className="text-gray-500 text-sm mt-0.5 capitalize">{formatLongDate(today)}</p>
+      </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {[
-          {label:'Vandaag', value:stats?.today??'—', sub:'afspraken', gold:true},
-          {label:'Deze week', value:stats?.week??'—', sub:'afspraken', gold:false},
-          {label:'Klanten', value:stats?.totalCustomers??'—', sub:'uniek totaal', gold:false},
-        ].map(c=>(
-          <div key={c.label} className={`rounded-xl p-5 border ${c.gold?'bg-[#c8a84b]/10 border-[#c8a84b]/30':'bg-[#141414] border-[#2a2a2a]'}`}>
-            <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${c.gold?'text-[#c8a84b]/70':'text-gray-500'}`}>{c.label}</p>
-            <p className={`text-3xl font-black ${c.gold?'text-[#c8a84b]':'text-white'}`}>{c.value}</p>
-            <p className={`text-xs font-semibold mt-0.5 ${c.gold?'text-[#c8a84b]/70':'text-gray-500'}`}>{c.sub}</p>
+          {label:'Vandaag', value:stats?.today??'—', sub:'afspraken', gold:true, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>},
+          {label:'Deze week', value:stats?.week??'—', sub:'afspraken', gold:false, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>},
+          {label:'Klanten', value:stats?.totalCustomers??'—', sub:'uniek totaal', gold:false, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>},
+        ].map((c,i)=>(
+          <div key={c.label} style={{animationDelay:`${i*60}ms`}}
+            className={`animate-fade-up rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${c.gold?'bg-gradient-to-br from-[#c8a84b]/15 to-[#c8a84b]/5 border-[#c8a84b]/25 hover:shadow-[#c8a84b]/10':'bg-[#141414] border-[#222] hover:border-[#2a2a2a] hover:shadow-black/40'}`}>
+            <div className="flex items-start justify-between mb-3">
+              <p className={`text-[11px] font-bold uppercase tracking-widest ${c.gold?'text-[#c8a84b]/60':'text-gray-600'}`}>{c.label}</p>
+              <span className={c.gold ? 'text-[#c8a84b]/40' : 'text-gray-700'}>{c.icon}</span>
+            </div>
+            <p className={`text-4xl font-black leading-none ${c.gold?'text-[#c8a84b]':'text-white'}`}>
+              <AnimatedNumber value={c.value as number|string}/>
+            </p>
+            <p className={`text-xs mt-2 ${c.gold?'text-[#c8a84b]/50':'text-gray-600'}`}>{c.sub}</p>
           </div>
         ))}
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Aankomende afspraken */}
-        <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#1e1e1e]">
-            <h2 className="font-semibold text-white text-sm">Aankomende afspraken</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Volgende {upcoming.length} afspraken</p>
+        <div className="bg-[#141414] rounded-2xl border border-[#222] overflow-hidden transition-all duration-300 hover:border-[#2a2a2a] hover:shadow-lg hover:shadow-black/30">
+          <div className="px-5 py-4 border-b border-[#1a1a1a] flex items-center justify-between">
+            <div>
+              <h2 className="font-bold text-white text-sm">Aankomende afspraken</h2>
+              <p className="text-xs text-gray-600 mt-0.5">{upcoming.length} gepland</p>
+            </div>
+            <span className="w-8 h-8 rounded-xl bg-[#c8a84b]/10 flex items-center justify-center text-[#c8a84b]">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/></svg>
+            </span>
           </div>
           {upcoming.length===0 ? (
-            <p className="text-center text-gray-500 py-8 text-sm font-medium">Geen aankomende afspraken</p>
+            <div className="py-10 text-center">
+              <p className="text-gray-600 text-sm">Geen aankomende afspraken</p>
+            </div>
           ) : (
-            <div className="divide-y divide-[#1e1e1e]">
+            <div className="divide-y divide-[#1a1a1a]">
               {upcoming.map(b=>(
-                <div key={b.id} className="flex items-center gap-4 px-5 py-3.5">
-                  <div className="text-center shrink-0 w-14">
-                    <p className="text-xs font-black text-[#c8a84b]">{formatShortDate(b.date)}</p>
-                    <p className="text-lg font-black text-white leading-tight">{b.time}</p>
+                <div key={b.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-white/2 transition-colors">
+                  <div className="shrink-0 w-10 h-10 rounded-xl bg-[#c8a84b]/10 flex flex-col items-center justify-center">
+                    <p className="text-[9px] font-bold text-[#c8a84b]/70 uppercase leading-none">{formatShortDate(b.date).split(' ')[0]}</p>
+                    <p className="text-sm font-black text-[#c8a84b] leading-none mt-0.5">{b.time}</p>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-black text-white truncate">{b.name}</p>
-                    <p className="text-xs text-gray-400 font-medium">{b.service}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-white text-sm truncate">{b.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{b.service}</p>
                   </div>
+                  <p className="text-xs text-gray-600 shrink-0">{formatShortDate(b.date)}</p>
                 </div>
               ))}
             </div>
@@ -411,29 +472,35 @@ function DashboardView() {
         </div>
 
         {/* Vandaag schema */}
-        <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#1e1e1e]">
-            <h2 className="font-semibold text-white text-sm">Schema vandaag</h2>
-            <p className="text-xs text-gray-500 mt-0.5 capitalize">{formatLongDate(today)}</p>
+        <div className="bg-[#141414] rounded-2xl border border-[#222] overflow-hidden transition-all duration-300 hover:border-[#2a2a2a] hover:shadow-lg hover:shadow-black/30">
+          <div className="px-5 py-4 border-b border-[#1a1a1a] flex items-center justify-between">
+            <div>
+              <h2 className="font-bold text-white text-sm">Schema vandaag</h2>
+              <p className="text-xs text-gray-600 mt-0.5 capitalize">{formatLongDate(today)}</p>
+            </div>
+            <span className="w-8 h-8 rounded-xl bg-[#1e1e1e] flex items-center justify-center text-gray-500">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </span>
           </div>
           <div className="overflow-y-auto max-h-72">
+            {workSlots.length === 0 && <p className="text-center text-gray-600 text-sm py-10">Geen werkrooster vandaag</p>}
             {workSlots.map(slot=>{
               const b = stats?.todayBookings?.find(b=>b.time===slot)
               const isPause = isBreak(slot, breakEnabled, breakStart, breakEnd)
               return (
-                <div key={slot} className={`flex items-center gap-3 px-3 py-2.5 border-b border-[#1e1e1e] ${b?'bg-[#c8a84b]/5':isPause?'bg-amber-900/10':'bg-[#161616]'}`}>
-                  <span className={`font-black text-xs w-14 text-center shrink-0 px-2 py-1 rounded-lg ${b?'bg-[#c8a84b] text-black':isPause?'bg-amber-900/30 text-amber-400':'bg-[#1e1e1e] text-[#c8a84b] border border-[#c8a84b]/20'}`}>{slot}</span>
+                <div key={slot} className={`flex items-center gap-3 px-4 py-2.5 border-b border-[#1a1a1a] transition-colors ${b?'bg-[#c8a84b]/4 hover:bg-[#c8a84b]/6':isPause?'bg-amber-900/8':'hover:bg-white/2'}`}>
+                  <span className={`font-black text-[11px] w-12 text-center shrink-0 px-1.5 py-1 rounded-lg ${b?'bg-[#c8a84b] text-black':isPause?'bg-amber-900/30 text-amber-500':'bg-[#1e1e1e] text-gray-500'}`}>{slot}</span>
                   {isPause ? (
-                    <span className="text-amber-400 text-xs font-medium">Pauze</span>
+                    <span className="text-amber-500/70 text-xs">Pauze</span>
                   ) : b ? (
                     <>
                       <div className="min-w-0 flex-1">
                         <p className="font-bold text-white text-sm truncate">{b.name}</p>
-                        <p className="text-xs text-gray-400 truncate">{b.service}</p>
+                        <p className="text-xs text-gray-500 truncate">{b.service}</p>
                       </div>
-                      <span className="ml-auto bg-[#c8a84b] text-black font-bold text-xs px-2 py-1 rounded-lg shrink-0">€{b.price}</span>
+                      <span className="ml-auto bg-[#c8a84b] text-black font-black text-xs px-2.5 py-1 rounded-lg shrink-0">€{b.price}</span>
                     </>
-                  ) : <span className="text-gray-600 text-xs font-medium">Vrij</span>}
+                  ) : <span className="text-gray-700 text-xs">Vrij</span>}
                 </div>
               )
             })}
@@ -496,11 +563,11 @@ function CalendarView() {
 
   return (
     <div>
-      <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white mb-2">Agenda</h1>
+      <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white mb-1">Agenda</h1>
       <p className="text-gray-500 text-sm mb-6">Klik op een dag om het rooster te zien</p>
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Month */}
-        <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-5">
+        <div className="bg-[#141414] rounded-2xl border border-[#222] p-5 transition-all duration-300 hover:border-[#2a2a2a] hover:shadow-lg hover:shadow-black/30">
           <div className="flex items-center justify-between mb-4">
             <button onClick={()=>setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth()-1,1))}
               className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#c8a84b]/10 text-[#c8a84b] font-bold text-xl transition-colors">‹</button>
@@ -553,7 +620,7 @@ function CalendarView() {
         </div>
 
         {/* Day schedule */}
-        <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] overflow-hidden">
+        <div className="bg-[#141414] rounded-2xl border border-[#222] overflow-hidden transition-all duration-300 hover:border-[#2a2a2a] hover:shadow-lg hover:shadow-black/30">
           <div className={`px-5 py-4 border-b border-[#1e1e1e] ${blockedDates.includes(selectedDay) ? 'bg-red-900/10' : ''}`}>
             <h2 className="font-semibold text-white capitalize text-sm">{formatLongDate(selectedDay)}</h2>
             {blockedDates.includes(selectedDay) ? (
@@ -632,7 +699,7 @@ function AppointmentsView() {
 
   return (
     <div>
-      <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white mb-6">Afspraken</h1>
+      <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white mb-6">Afspraken</h1>
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <input type="text" placeholder="Zoeken op naam, e-mail of code..." value={search} onChange={e=>setSearch(e.target.value)}
           className="flex-1 bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-[#c8a84b] transition-colors"/>
@@ -656,8 +723,8 @@ function AppointmentsView() {
           {bookings.map(b=>{
             const status = getStatus(b.date)
             return (
-              <div key={b.id} className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-4 flex items-center gap-4">
-                <div className="w-9 h-9 rounded-lg bg-[#1e1e1e] flex items-center justify-center text-xs font-bold text-[#c8a84b] shrink-0">
+              <div key={b.id} className="bg-[#141414] rounded-2xl border border-[#222] p-4 flex items-center gap-4 transition-all duration-200 hover:border-[#2a2a2a] hover:-translate-y-px hover:shadow-md hover:shadow-black/30">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#c8a84b]/20 to-[#c8a84b]/5 flex items-center justify-center text-xs font-black text-[#c8a84b] shrink-0 border border-[#c8a84b]/10">
                   {serviceInitial(b.service)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -746,8 +813,8 @@ function ServicesView() {
   return (
     <div className="max-w-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Diensten</h1>
-        <button onClick={openNew} className="px-4 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] transition-colors">
+        <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Diensten</h1>
+        <button onClick={openNew} className="px-4 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.25)] transition-all duration-200">
           + Toevoegen
         </button>
       </div>
@@ -785,7 +852,7 @@ function ServicesView() {
           <div className="flex gap-3 mt-4">
             <button onClick={()=>setForm(null)} className="px-4 py-2 border-2 border-[#333] rounded-xl font-bold text-gray-400 text-sm hover:border-[#444] transition-colors">Annuleren</button>
             <button onClick={saveForm} disabled={!form.name || saving}
-              className="px-6 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] disabled:opacity-50 transition-colors">
+              className="px-6 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.2)] disabled:opacity-50 transition-all duration-200">
               {saving ? 'Opslaan...' : 'Opslaan'}
             </button>
           </div>
@@ -794,8 +861,8 @@ function ServicesView() {
 
       <div className="space-y-3">
         {services.map(s=>(
-          <div key={s.id} className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-4 flex items-center gap-4">
-            <div className="w-9 h-9 rounded-lg bg-[#1e1e1e] flex items-center justify-center text-xs font-bold text-[#c8a84b] shrink-0">
+          <div key={s.id} className="bg-[#141414] rounded-2xl border border-[#222] p-4 flex items-center gap-4 transition-all duration-200 hover:border-[#2a2a2a] hover:-translate-y-px hover:shadow-md hover:shadow-black/30">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#c8a84b]/20 to-[#c8a84b]/5 flex items-center justify-center text-xs font-black text-[#c8a84b] shrink-0 border border-[#c8a84b]/10">
               {serviceInitial(s.name)}
             </div>
             <div className="flex-1 min-w-0">
@@ -860,8 +927,8 @@ function ManagementView() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Beheer</h1>
-        <button onClick={()=>setShowForm(f=>!f)} className="px-4 py-2 bg-[#c8a84b] text-black rounded-lg font-bold text-sm hover:bg-[#d4b462] transition-colors">
+        <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Beheer</h1>
+        <button onClick={()=>setShowForm(f=>!f)} className="px-4 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.25)] transition-all duration-200">
           Email bannen
         </button>
       </div>
@@ -1070,7 +1137,7 @@ function SettingsView() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Instellingen</h1>
+      <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Instellingen</h1>
 
       {/* Beschikbaarheid + Werktijden per dag */}
       <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-5">
@@ -1136,7 +1203,7 @@ function SettingsView() {
               ] : []),
             ])
           }} disabled={saving.schedule}
-            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] disabled:opacity-50 transition-colors">
+            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.2)] disabled:opacity-50 transition-all duration-200">
             {saving.schedule ? 'Opslaan...' : 'Opslaan'}
           </button>
           {msgs.schedule && <span className="text-[#c8a84b] text-sm">{msgs.schedule}</span>}
@@ -1161,7 +1228,7 @@ function SettingsView() {
         )}
         <div className="flex items-center gap-3 mt-4">
           <button onClick={()=>save('blocked_dates', JSON.stringify(blockedDates), 'blocked')} disabled={saving.blocked}
-            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] disabled:opacity-50 transition-colors">
+            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.2)] disabled:opacity-50 transition-all duration-200">
             {saving.blocked ? 'Opslaan...' : 'Opslaan'}
           </button>
           {msgs.blocked && <span className="text-[#c8a84b] text-sm">{msgs.blocked}</span>}
@@ -1195,7 +1262,7 @@ function SettingsView() {
             </div>
           ))}
           <button type="submit" disabled={saving.pw}
-            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] disabled:opacity-50 transition-colors">
+            className="px-5 py-2 bg-[#c8a84b] text-black rounded-xl font-bold text-sm hover:bg-[#d4b462] hover:shadow-[0_0_20px_rgba(200,168,75,0.2)] disabled:opacity-50 transition-all duration-200">
             {saving.pw?'Opslaan...':'Wachtwoord wijzigen'}
           </button>
         </form>
