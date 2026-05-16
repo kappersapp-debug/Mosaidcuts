@@ -1139,10 +1139,6 @@ function CustomersView() {
                     <p className="text-xs text-gray-600">bezoeken</p>
                     <p className="font-black text-white">{c.visits}</p>
                   </div>
-                  <div className="hidden sm:block">
-                    <p className="text-xs text-gray-600">totaal</p>
-                    <p className="font-black text-[#2176d4]">€{c.totalSpent}</p>
-                  </div>
                   <div>
                     <p className="text-xs text-gray-600">laatste bezoek</p>
                     <p className="font-bold text-white text-sm">{formatShortDate(c.lastDate)}</p>
@@ -1154,7 +1150,6 @@ function CustomersView() {
                 <div className="border-t border-[#1e1e1e] divide-y divide-[#1a1a1a]">
                   <div className="px-5 py-3 flex gap-6 sm:hidden">
                     <div><p className="text-xs text-gray-600">bezoeken</p><p className="font-black text-white">{c.visits}</p></div>
-                    <div><p className="text-xs text-gray-600">totaal</p><p className="font-black text-[#2176d4]">€{c.totalSpent}</p></div>
                   </div>
                   {c.bookings.map((b,i)=>(
                     <div key={i} className="flex items-center gap-3 px-5 py-3 hover:bg-white/2 transition-colors">
@@ -1166,7 +1161,6 @@ function CustomersView() {
                         <p className="text-xs text-gray-500">{formatMedDate(b.date)} · {b.time}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-sm font-bold text-[#2176d4]">€{b.price}</p>
                         <p className="text-[10px] text-gray-600 font-mono">{b.code}</p>
                       </div>
                     </div>
