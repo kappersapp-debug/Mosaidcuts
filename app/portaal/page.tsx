@@ -717,6 +717,105 @@ function CalendarView() {
 interface BookingForm { id?:string; name:string; phone:string; email:string; service:string; price:number; duration:number; date:string; time:string }
 const EMPTY_FORM: BookingForm = { name:'', phone:'', email:'', service:'', price:0, duration:30, date:'', time:'' }
 
+function DatePicker({ value, onChange }: { value: string; onChange: (d: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const [viewDate, setViewDate] = useState(() => {
+    const base = value ? new Date(value + 'T12:00:00') : new Date()
+    return new Date(base.getFullYear(), base.getMonth(), 1)
+  })
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  useEffect(() => {
+    if (value) setViewDate(new Date(new Date(value + 'T12:00:00').getFullYear(), new Date(value + 'T12:00:00').getMonth(), 1))
+  }, [value])
+
+  const year = viewDate.getFullYear()
+  const month = viewDate.getMonth()
+  const todayStr = new Date().toISOString().split('T')[0]
+  const startOffset = (new Date(year, month, 1).getDay() + 6) % 7
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const cells: (number | null)[] = [...Array(startOffset).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)]
+  while (cells.length % 7 !== 0) cells.push(null)
+
+  function selectDay(day: number) {
+    const str = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    onChange(str)
+    setOpen(false)
+  }
+
+  const displayValue = value ? formatLongDate(value) : ''
+
+  return (
+    <div ref={ref} className="relative">
+      <button type="button" onClick={() => setOpen(o => !o)}
+        className={`w-full bg-[#0e0e0e] border rounded-xl px-3 py-2.5 text-sm text-left flex items-center justify-between transition-colors ${open ? 'border-[#2176d4]' : 'border-[#2a2a2a] hover:border-[#333]'}`}>
+        <span className={displayValue ? 'text-white' : 'text-gray-700'}>{displayValue || 'Kies een datum'}</span>
+        <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-2 z-50 w-full bg-[#141414] border border-[#2a2a2a] rounded-2xl shadow-2xl p-4 animate-fade-up">
+          <div className="flex items-center justify-between mb-4">
+            <button type="button" onClick={() => setViewDate(new Date(year, month - 1, 1))}
+              className="w-8 h-8 rounded-lg bg-[#1e1e1e] hover:bg-[#2a2a2a] flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <span className="text-white font-bold text-sm capitalize">
+              {NL_MONTHS_LONG[month]} {year}
+            </span>
+            <button type="button" onClick={() => setViewDate(new Date(year, month + 1, 1))}
+              className="w-8 h-8 rounded-lg bg-[#1e1e1e] hover:bg-[#2a2a2a] flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-7 mb-1">
+            {['Ma','Di','Wo','Do','Vr','Za','Zo'].map(d => (
+              <div key={d} className="text-center text-xs font-bold text-gray-600 py-1">{d}</div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-0.5">
+            {cells.map((day, i) => {
+              if (!day) return <div key={i} />
+              const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+              const isSelected = dayStr === value
+              const isToday = dayStr === todayStr
+              return (
+                <button key={i} type="button" onClick={() => selectDay(day)}
+                  className={`aspect-square rounded-lg text-sm font-medium transition-all flex items-center justify-center
+                    ${isSelected ? 'bg-[#2176d4] text-white shadow-[0_0_12px_rgba(33,118,212,0.35)]' : ''}
+                    ${isToday && !isSelected ? 'bg-[#2176d4]/15 text-[#2176d4] font-bold ring-1 ring-[#2176d4]/30' : ''}
+                    ${!isSelected && !isToday ? 'text-gray-400 hover:bg-[#1e1e1e] hover:text-white' : ''}
+                  `}>
+                  {day}
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="mt-3 pt-3 border-t border-[#1e1e1e] flex justify-end">
+            <button type="button" onClick={() => { onChange(todayStr); setOpen(false) }}
+              className="text-xs font-bold text-[#2176d4] hover:text-[#3080e0] transition-colors">
+              Vandaag
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function BookingFormModal({ initial, onClose, onSaved }: { initial: BookingForm; onClose: ()=>void; onSaved: ()=>void }) {
   const [form, setForm] = useState<BookingForm>(initial)
   const [services, setServices] = useState<{id:string;name:string;price:number;duration:number}[]>([])
@@ -828,8 +927,7 @@ function BookingFormModal({ initial, onClose, onSaved }: { initial: BookingForm;
           {/* Datum */}
           <div>
             <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Datum *</label>
-            <input required type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value,time:''}))}
-              className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors [color-scheme:dark]"/>
+            <DatePicker value={form.date} onChange={d => setForm(f => ({ ...f, date: d, time: '' }))} />
           </div>
 
           {/* Tijdsloten */}
@@ -860,7 +958,7 @@ function BookingFormModal({ initial, onClose, onSaved }: { initial: BookingForm;
 
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-[#2a2a2a] text-gray-400 text-sm font-medium hover:border-[#333] hover:text-white transition-all">Annuleren</button>
-            <button type="submit" disabled={saving || (!form.time && !!form.date)}
+            <button type="submit" disabled={saving || !form.date || !form.time}
               className="flex-1 py-2.5 rounded-xl bg-[#2176d4] text-white text-sm font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-40 transition-all duration-200">
               {saving ? 'Opslaan...' : isEdit ? 'Bijwerken' : 'Toevoegen'}
             </button>
