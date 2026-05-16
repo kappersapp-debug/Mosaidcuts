@@ -135,7 +135,7 @@ function LoginScreen({onLogin}: {onLogin:()=>void}) {
 /* ─── Shell ──────────────────────────────────────────────── */
 function PortalShell({onLogout}: {onLogout:()=>void}) {
   const [view, setView] = useState<View>('dashboard')
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
   const [notifications, setNotifications] = useState<Booking[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifOpen, setNotifOpen] = useState(false)
@@ -217,7 +217,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
   }
 
   function openNotifMobile() {
-    setPanelStyle({ top: 56, right: 16 })
+    setPanelStyle({ bottom: 72, right: 16 })
     setNotifOpen(o => !o)
     setUnreadCount(0)
   }
@@ -227,7 +227,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
 
       {/* Notification panel */}
       {notifOpen && (
-        <div id="notif-panel" style={panelStyle} className="fixed z-50 w-72 bg-[#141414] rounded-xl shadow-2xl border border-[#2a2a2a] overflow-hidden">
+        <div id="notif-panel" style={panelStyle} className="fixed z-50 w-[calc(100vw-32px)] sm:w-72 bg-[#141414] rounded-xl shadow-2xl border border-[#2a2a2a] overflow-hidden">
           <div className="px-4 py-2.5 border-b border-[#1e1e1e] flex items-center justify-between">
             <span className="font-semibold text-white text-sm">Meldingen</span>
             {notifications.length > 0 && (
@@ -306,47 +306,35 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
       </aside>
 
       {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-[#111] px-4 py-2.5 flex items-center justify-between border-b border-[#1e1e1e]">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-[#0e0e0e] px-4 h-14 flex items-center justify-between border-b border-[#1e1e1e]">
         <div className="flex items-center gap-2.5">
-          <Image src="/logo.jpg" alt="MoSaidCuts" width={34} height={34} className="rounded-full object-cover ring-1 ring-[#2176d4]/30"/>
-          <div className="text-white font-[family-name:var(--font-bebas)] tracking-widest text-base">MoSaidCuts</div>
+          <Image src="/logo.jpg" alt="MoSaidCuts" width={32} height={32} className="rounded-full object-cover ring-1 ring-[#2176d4]/30"/>
+          <span className="text-white font-[family-name:var(--font-bebas)] tracking-widest text-base">MoSaidCuts</span>
         </div>
-        <div className="flex items-center gap-4">
-          <button onClick={openNotifMobile} className="relative text-gray-400 hover:text-white transition-colors text-xs">
-            Meldingen
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </button>
-          <button onClick={()=>setMenuOpen(o=>!o)} className="text-gray-300 hover:text-white">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
+        <button onClick={openNotifMobile} className="relative w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+          {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-[#0e0e0e]"/>}
+        </button>
       </div>
 
-      {menuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-black/80 animate-fade-in" onClick={()=>setMenuOpen(false)}>
-          <div className="w-60 bg-[#0e0e0e] h-full border-r border-[#1e1e1e]" onClick={e=>e.stopPropagation()}>
-            <div className="px-6 py-5 border-b border-[#1e1e1e] flex items-center gap-3">
-              <Image src="/logo.jpg" alt="MoSaidCuts" width={40} height={40} className="rounded-full object-cover shrink-0 ring-2 ring-[#2176d4]/30"/>
-              <div className="text-white font-[family-name:var(--font-bebas)] tracking-widest text-lg leading-none">MoSaidCuts</div>
-            </div>
-            <nav className="py-3 space-y-0.5 px-3">
-              {NAV.map(n => (
-                <button key={n.id} onClick={()=>{setView(n.id);setMenuOpen(false)}}
-                  className={['flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm transition-all',
-                    view===n.id?'bg-[#2176d4]/12 text-[#2176d4] font-semibold':'text-gray-500 hover:bg-white/4 hover:text-gray-200'].join(' ')}>
-                  <span className={view===n.id ? 'text-[#2176d4]' : 'text-gray-600'}>{NAV_ICONS[n.id]}</span>
-                  {n.label}
-                </button>
-              ))}
-            </nav>
-            <div className="px-3 mt-2">
-              <button onClick={onLogout} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl border border-[#1e1e1e] text-gray-500 text-sm">
+      {/* Mobile "Meer" bottom sheet */}
+      {moreOpen && (
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/70 animate-fade-in" onClick={() => setMoreOpen(false)}>
+          <div className="absolute bottom-16 left-0 right-0 bg-[#0e0e0e] rounded-t-2xl border-t border-[#1e1e1e] px-4 pt-4 pb-6 animate-fade-up" onClick={e => e.stopPropagation()}>
+            <div className="w-10 h-1 rounded-full bg-[#333] mx-auto mb-5"/>
+            <div className="space-y-0.5">
+              {(['services','management','settings'] as View[]).map(id => {
+                const n = NAV.find(n => n.id === id)!
+                return (
+                  <button key={id} onClick={() => { setView(id); setMoreOpen(false) }}
+                    className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm transition-all ${view===id?'bg-[#2176d4]/12 text-[#2176d4] font-semibold':'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
+                    <span className={view===id?'text-[#2176d4]':'text-gray-600'}>{NAV_ICONS[id]}</span>
+                    {n.label}
+                  </button>
+                )
+              })}
+              <div className="my-2 border-t border-[#1e1e1e]"/>
+              <button onClick={onLogout} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm text-red-400 hover:bg-red-900/10 transition-all">
                 <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
                 Uitloggen
               </button>
@@ -355,7 +343,27 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
         </div>
       )}
 
-      <main className="flex-1 lg:ml-60 pt-14 lg:pt-0 min-h-screen">
+      {/* Mobile bottom nav */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0e0e0e] border-t border-[#1e1e1e] flex h-16">
+        {(['dashboard','calendar','appointments','customers'] as View[]).map(id => {
+          const n = NAV.find(n => n.id === id)!
+          const active = view === id
+          return (
+            <button key={id} onClick={() => { setView(id); setMoreOpen(false) }}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 text-[10px] font-bold transition-colors ${active ? 'text-[#2176d4]' : 'text-gray-600 hover:text-gray-400'}`}>
+              <span className={active ? 'text-[#2176d4]' : 'text-gray-600'}>{NAV_ICONS[id]}</span>
+              {n.label === 'Dashboard' ? 'Home' : n.label}
+            </button>
+          )
+        })}
+        <button onClick={() => setMoreOpen(o => !o)}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 text-[10px] font-bold transition-colors ${moreOpen || ['services','management','settings'].includes(view) ? 'text-[#2176d4]' : 'text-gray-600 hover:text-gray-400'}`}>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+          Meer
+        </button>
+      </nav>
+
+      <main className="flex-1 lg:ml-60 pt-14 lg:pt-0 pb-20 lg:pb-0 min-h-screen">
         <div className="p-4 sm:p-6 lg:p-8 max-w-5xl">
           {view==='dashboard' && <DashboardView />}
           {view==='calendar' && <CalendarView />}
@@ -876,8 +884,8 @@ function BookingFormModal({ initial, onClose, onSaved }: { initial: BookingForm;
   const availableSlots = slots.filter(s=>s.available)
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-      <div className="bg-[#141414] rounded-2xl border border-[#2a2a2a] w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e=>e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 bg-black/75 flex items-end sm:items-center justify-center sm:p-4 animate-fade-in" onClick={onClose}>
+      <div className="bg-[#141414] rounded-t-2xl sm:rounded-2xl border-t sm:border border-[#2a2a2a] w-full sm:max-w-lg shadow-2xl max-h-[92vh] overflow-y-auto" onClick={e=>e.stopPropagation()}>
         <div className="px-6 py-5 border-b border-[#1e1e1e] flex items-center justify-between sticky top-0 bg-[#141414] z-10">
           <h2 className="font-bold text-white text-lg">{isEdit ? 'Afspraak bewerken' : 'Afspraak toevoegen'}</h2>
           <button onClick={onClose} className="w-8 h-8 rounded-lg bg-[#1e1e1e] text-gray-400 hover:text-white hover:bg-[#2a2a2a] transition-all flex items-center justify-center text-lg leading-none">×</button>
@@ -1027,13 +1035,13 @@ function AppointmentsView() {
           + Toevoegen
         </button>
       </div>
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="flex flex-col gap-3 mb-6">
         <input type="text" placeholder="Zoeken op naam, e-mail of code..." value={search} onChange={e=>setSearch(e.target.value)}
-          className="flex-1 bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-[#2176d4] transition-colors"/>
-        <div className="flex gap-1 bg-[#1a1a1a] rounded-xl p-1 border border-[#2a2a2a]">
+          className="w-full bg-[#1a1a1a] border-2 border-[#333] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-[#2176d4] transition-colors"/>
+        <div className="flex gap-1 bg-[#1a1a1a] rounded-xl p-1 border border-[#2a2a2a] overflow-x-auto">
           {filters.map(f=>(
             <button key={f.id} onClick={()=>setFilter(f.id)}
-              className={['px-3 py-1.5 rounded-lg text-xs font-bold transition-colors',
+              className={['flex-1 min-w-fit px-3 py-2 rounded-lg text-xs font-bold transition-colors whitespace-nowrap',
                 filter===f.id?'bg-[#2176d4] text-white shadow-sm':'text-gray-500 hover:text-gray-300'].join(' ')}>
               {f.label}
             </button>
