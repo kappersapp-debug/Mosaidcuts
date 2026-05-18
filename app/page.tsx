@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 
 /* ─── Types ──────────────────────────────────────────────── */
 interface Service { id: string; name: string; price: number; duration: number; desc: string }
@@ -95,25 +96,20 @@ function Calendar({ value, onChange, availability, blockedDates }: {
   return (
     <div className="select-none">
       <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={prevMonth}
-          disabled={!canPrev}
-          className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-light disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-brand font-bold text-lg"
-        >‹</button>
-        <span className="font-bold text-gray-800 capitalize">
+        <button onClick={prevMonth} disabled={!canPrev}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#1e1e1e] hover:bg-[#2a2a2a] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-[#2176d4] font-bold text-lg">‹</button>
+        <span className="font-bold text-white capitalize">
           {viewMonth.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })}
         </span>
-        <button
-          onClick={nextMonth}
-          className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-light transition-colors text-brand font-bold text-lg"
-        >›</button>
+        <button onClick={nextMonth}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#1e1e1e] hover:bg-[#2a2a2a] transition-colors text-[#2176d4] font-bold text-lg">›</button>
       </div>
       <div className="grid grid-cols-7 mb-1">
         {NL_DAYS_SHORT.map(d => (
-          <div key={d} className="text-center text-xs font-semibold text-gray-600 py-1">{d}</div>
+          <div key={d} className="text-center text-xs font-bold text-gray-600 py-1">{d}</div>
         ))}
       </div>
-      <div className="grid grid-cols-7">
+      <div className="grid grid-cols-7 gap-0.5">
         {cells.map((day, i) => {
           if (!day) return <div key={i} />
           const ds = toDateStr(day)
@@ -125,17 +121,13 @@ function Calendar({ value, onChange, availability, blockedDates }: {
           const selected = ds === value
           const isToday = day.getTime() === today.getTime()
           return (
-            <button
-              key={i}
-              disabled={disabled}
-              onClick={() => onChange(ds)}
+            <button key={i} disabled={disabled} onClick={() => onChange(ds)}
               className={[
-                'aspect-square flex items-center justify-center rounded-full text-sm font-semibold transition-colors m-0.5',
-                selected ? 'bg-brand text-white shadow' : '',
-                isToday && !selected ? 'ring-2 ring-brand text-brand' : '',
-                disabled ? 'text-gray-300 cursor-not-allowed' : !selected ? 'hover:bg-brand-light text-gray-700' : '',
-              ].join(' ')}
-            >
+                'aspect-square flex items-center justify-center rounded-xl text-sm font-semibold transition-all',
+                selected ? 'bg-[#2176d4] text-white shadow-[0_0_12px_rgba(33,118,212,0.35)]' : '',
+                isToday && !selected ? 'ring-1 ring-[#2176d4] text-[#2176d4] bg-[#2176d4]/10' : '',
+                disabled ? 'text-gray-700 cursor-not-allowed' : !selected ? 'hover:bg-[#2176d4]/15 text-gray-400 hover:text-white' : '',
+              ].join(' ')}>
               {day.getDate()}
             </button>
           )
@@ -157,15 +149,15 @@ function Progress({ step }: { step: number }) {
         return (
           <div key={n} className="flex flex-col items-center flex-1 relative">
             {i > 0 && (
-              <div className={`absolute top-4 right-1/2 w-full h-0.5 -translate-y-1/2 ${done ? 'bg-brand' : 'bg-gray-200'}`} />
+              <div className={`absolute top-4 right-1/2 w-full h-0.5 -translate-y-1/2 ${done ? 'bg-[#2176d4]' : 'bg-[#2a2a2a]'}`} />
             )}
             <div className={[
               'w-8 h-8 rounded-full flex items-center justify-center text-xs font-black mb-1 relative z-10 transition-all',
-              done ? 'bg-brand text-white' : active ? 'bg-brand text-white ring-4 ring-brand/20' : 'bg-gray-200 text-gray-600',
+              done ? 'bg-[#2176d4] text-white' : active ? 'bg-[#2176d4] text-white ring-4 ring-[#2176d4]/20' : 'bg-[#222] text-gray-600',
             ].join(' ')}>
               {done ? '✓' : n}
             </div>
-            <span className={`text-xs font-semibold ${active || done ? 'text-brand' : 'text-gray-600'}`}>{label}</span>
+            <span className={`text-xs font-semibold ${active || done ? 'text-[#2176d4]' : 'text-gray-600'}`}>{label}</span>
           </div>
         )
       })}
@@ -384,42 +376,44 @@ export default function BookingPage() {
 
   /* ── Render ── */
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-brand">
-        <div className="max-w-lg mx-auto px-4 py-4">
-          <h1 className="text-white font-bold text-base tracking-tight">MoSaidCuts</h1>
-          <p className="text-blue-200 text-xs">Barbershop</p>
+    <div className="min-h-screen bg-[#0c0c0c] flex flex-col font-[family-name:var(--font-barlow)]">
+      <header className="bg-[#0e0e0e] border-b border-[#1e1e1e]">
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
+          <Image src="/logo.jpg" alt="MoSaidCuts" width={38} height={38} className="rounded-full object-cover ring-2 ring-[#2176d4]/30 shrink-0"/>
+          <div>
+            <h1 className="text-white font-[family-name:var(--font-bebas)] tracking-widest text-xl leading-none">MoSaidCuts</h1>
+            <p className="text-gray-600 text-[10px] tracking-wider uppercase">Barbershop</p>
+          </div>
         </div>
       </header>
 
       <main className="flex-1 flex items-start justify-center px-4 py-8">
-        <div className="w-full max-w-lg bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="w-full max-w-lg bg-[#141414] rounded-2xl border border-[#2a2a2a] overflow-hidden shadow-2xl">
 
           {step === 'banned' && (
             <div className="p-8 text-center">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Toegang Geblokkeerd</h2>
-              <p className="text-gray-600 mb-1">Uw e-mailadres is geblokkeerd voor het maken van afspraken.</p>
+              <div className="w-14 h-14 bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">✗</div>
+              <h2 className="text-xl font-bold text-white mb-2">Toegang Geblokkeerd</h2>
+              <p className="text-gray-500 mb-1">Uw e-mailadres is geblokkeerd voor het maken van afspraken.</p>
               <p className="text-gray-600 text-sm">Neem contact op met de barbershop voor meer informatie.</p>
             </div>
           )}
 
           {step === 'confirmation' && booking && cancelStatus === 'checking' && (
             <div className="p-8 flex justify-center">
-              <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin"/>
+              <div className="w-8 h-8 border-4 border-[#2176d4] border-t-transparent rounded-full animate-spin"/>
             </div>
           )}
 
           {step === 'confirmation' && booking && (cancelStatus === 'cancelled' || cancelStatus === 'not_found') && (
             <div className="p-8 text-center">
-              <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">✗</div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Afspraak niet gevonden</h2>
-              <p className="text-gray-600 text-sm">
-                {cancelStatus === 'cancelled'
-                  ? 'Deze afspraak is al geannuleerd.'
-                  : 'Deze afspraak bestaat niet.'}
+              <div className="w-14 h-14 bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-red-400 text-2xl">✗</div>
+              <h2 className="text-xl font-bold text-white mb-2">Afspraak niet gevonden</h2>
+              <p className="text-gray-500 text-sm">
+                {cancelStatus === 'cancelled' ? 'Deze afspraak is al geannuleerd.' : 'Deze afspraak bestaat niet.'}
               </p>
               <button onClick={() => { setStep(1); setBooking(null); setCancelStatus('idle') }}
-                className="mt-6 px-6 py-2.5 bg-brand text-white rounded-xl font-bold text-sm hover:bg-brand-hover transition-colors">
+                className="mt-6 px-6 py-2.5 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] transition-colors">
                 Nieuwe afspraak maken
               </button>
             </div>
@@ -428,46 +422,50 @@ export default function BookingPage() {
           {step === 'confirmation' && booking && (cancelStatus === 'idle' || cancelStatus === 'active') && (
             <div className="p-6 sm:p-8">
               <div className="text-center mb-6">
-                <div className="w-14 h-14 bg-brand rounded-full flex items-center justify-center mx-auto mb-3 text-lg font-bold text-white">✓</div>
-                <h2 className="text-xl font-bold text-gray-900">Afspraak Bevestigd</h2>
-                <p className="text-gray-600 text-sm mt-1">U ontvangt een bevestiging per e-mail</p>
+                <div className="w-14 h-14 bg-[#2176d4]/15 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold text-[#2176d4]">✓</div>
+                <h2 className="text-xl font-bold text-white">Afspraak Bevestigd</h2>
+                <p className="text-gray-500 text-sm mt-1">U ontvangt een bevestiging per e-mail</p>
               </div>
-              <div className="bg-brand-light rounded-xl p-5 mb-5 text-center">
-                <p className="text-xs font-bold text-brand uppercase tracking-widest mb-1">Boekingscode</p>
-                <p className="text-3xl font-black text-brand tracking-widest">{booking.code}</p>
+              <div className="bg-[#2176d4]/10 border border-[#2176d4]/20 rounded-xl p-5 mb-5 text-center">
+                <p className="text-xs font-bold text-[#2176d4]/70 uppercase tracking-widest mb-1">Boekingscode</p>
+                <p className="text-3xl font-black text-[#2176d4] tracking-widest">{booking.code}</p>
               </div>
-              <div className="space-y-0 mb-6 border border-gray-100 rounded-xl overflow-hidden">
+              <div className="mb-6 rounded-xl overflow-hidden border border-[#2a2a2a] divide-y divide-[#1e1e1e]">
                 {[['Dienst', booking.service], ['Datum', formatDateNL(booking.date)], ['Tijd', booking.time], ['Prijs', `€${booking.price}`]].map(([k, v]) => (
-                  <div key={k} className="flex justify-between px-4 py-3 border-b border-gray-100 last:border-0 text-sm">
-                    <span className="text-gray-600 font-medium">{k}</span>
-                    <span className="font-bold text-gray-800">{v}</span>
+                  <div key={k} className="flex justify-between px-4 py-3 text-sm">
+                    <span className="text-gray-500 font-medium">{k}</span>
+                    <span className="font-bold text-white">{v}</span>
                   </div>
                 ))}
               </div>
               <div className="space-y-3">
-                <button onClick={() => downloadICS(booking)} className="w-full py-3 px-4 rounded-lg border border-brand text-brand font-medium hover:bg-brand-light transition-colors">
+                <button onClick={() => downloadICS(booking)}
+                  className="w-full py-3 px-4 rounded-xl border border-[#2a2a2a] text-gray-300 font-medium hover:border-[#2176d4]/50 hover:text-white transition-all">
                   Agenda toevoegen (.ics)
                 </button>
-                <a href={googleCalLink(booking)} target="_blank" rel="noopener noreferrer" className="block w-full py-3 px-4 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-center">
+                <a href={googleCalLink(booking)} target="_blank" rel="noopener noreferrer"
+                  className="block w-full py-3 px-4 rounded-xl border border-[#2a2a2a] text-gray-300 font-medium hover:border-[#2176d4]/50 hover:text-white transition-all text-center">
                   Google Agenda
                 </a>
                 {!cancelConfirm ? (
-                  <button onClick={() => setCancelConfirm(true)} className="w-full py-2 text-red-400 font-semibold text-sm hover:text-red-600 transition-colors">
+                  <button onClick={() => setCancelConfirm(true)}
+                    className="w-full py-2 text-red-400 font-semibold text-sm hover:text-red-300 transition-colors">
                     Afspraak annuleren
                   </button>
                 ) : (
-                  <div className="bg-red-50 rounded-xl p-4">
-                    <p className="text-gray-700 font-semibold mb-3 text-sm text-center">Weet u zeker dat u wilt annuleren?</p>
+                  <div className="bg-red-900/15 border border-red-700/30 rounded-xl p-4">
+                    <p className="text-gray-300 font-semibold mb-3 text-sm text-center">Weet u zeker dat u wilt annuleren?</p>
                     {!contact.email && !lookupResult && (
                       <input type="email" placeholder="Uw e-mailadres ter bevestiging" value={cancelEmail}
                         onChange={e => setCancelEmail(e.target.value)}
-                        className="w-full border-2 border-red-200 rounded-xl px-4 py-2.5 text-sm mb-3 focus:outline-none focus:border-red-400 bg-white"/>
+                        className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm mb-3 focus:outline-none focus:border-red-500 transition-colors"/>
                     )}
-                    {error && <p className="text-red-600 text-xs font-semibold mb-2">{error}</p>}
+                    {error && <p className="text-red-400 text-xs font-semibold mb-2">{error}</p>}
                     <div className="flex gap-3">
-                      <button onClick={() => { setCancelConfirm(false); setError('') }} className="flex-1 py-2 rounded-lg border-2 border-gray-200 font-bold text-gray-600 text-sm hover:bg-gray-50">Nee</button>
+                      <button onClick={() => { setCancelConfirm(false); setError('') }}
+                        className="flex-1 py-2.5 rounded-xl border border-[#2a2a2a] font-bold text-gray-400 text-sm hover:border-[#333] hover:text-white transition-all">Nee</button>
                       <button onClick={handleCancel} disabled={loading || (!contact.email && !lookupResult && !cancelEmail)}
-                        className="flex-1 py-2 rounded-lg bg-red-500 text-white font-bold text-sm hover:bg-red-600 disabled:opacity-50">
+                        className="flex-1 py-2.5 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-500 disabled:opacity-50 transition-colors">
                         {loading ? '...' : 'Ja, annuleren'}
                       </button>
                     </div>
@@ -482,25 +480,27 @@ export default function BookingPage() {
               <Progress step={step} />
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-5 text-sm font-semibold">
+                <div className="bg-red-900/30 border border-red-700/40 text-red-400 rounded-xl px-4 py-3 mb-5 text-sm font-semibold">
                   {error}
                 </div>
               )}
 
               {step === 1 && (
                 <div>
-                  <h2 className="text-xl font-black text-gray-900 mb-1">Kies een dienst</h2>
-                  <p className="text-gray-600 text-sm mb-5">Selecteer de gewenste behandeling</p>
+                  <h2 className="text-xl font-black text-white mb-1">Kies een dienst</h2>
+                  <p className="text-gray-500 text-sm mb-5">Selecteer de gewenste behandeling</p>
                   <div className="space-y-3">
                     {services.map(s => (
                       <button key={s.id} onClick={() => { setService(s); setStep(2) }}
-                        className={['w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all text-left',
-                          service?.id === s.id ? 'border-brand bg-brand-light' : 'border-gray-200 hover:border-brand hover:bg-brand-light/50'].join(' ')}>
+                        className={['w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left',
+                          service?.id === s.id
+                            ? 'border-[#2176d4] bg-[#2176d4]/10'
+                            : 'border-[#2a2a2a] bg-[#1a1a1a] hover:border-[#2176d4]/50 hover:bg-[#2176d4]/5'].join(' ')}>
                         <div>
-                          <p className="font-bold text-gray-900">{s.name}</p>
-                          <p className="text-sm text-gray-600">{s.desc}</p>
+                          <p className="font-bold text-white">{s.name}</p>
+                          <p className="text-sm text-gray-500">{s.desc}</p>
                         </div>
-                        <p className="text-2xl font-black text-brand ml-4">€{s.price}</p>
+                        <p className="text-2xl font-black text-[#2176d4] ml-4">€{s.price}</p>
                       </button>
                     ))}
                   </div>
@@ -509,13 +509,14 @@ export default function BookingPage() {
 
               {step === 2 && (
                 <div>
-                  <h2 className="text-xl font-black text-gray-900 mb-1">Kies een datum</h2>
-                  <p className="text-gray-600 text-sm mb-5">Selecteer een beschikbare dag</p>
+                  <h2 className="text-xl font-black text-white mb-1">Kies een datum</h2>
+                  <p className="text-gray-500 text-sm mb-5">Selecteer een beschikbare dag</p>
                   <Calendar value={date} availability={availability} blockedDates={blockedDates} onChange={d => setDate(d)} />
                   <div className="flex gap-3 mt-6">
-                    <button onClick={() => setStep(1)} className="flex-1 py-3 rounded-xl border-2 border-gray-200 font-bold text-gray-600 hover:bg-gray-50">‹ Terug</button>
+                    <button onClick={() => setStep(1)}
+                      className="flex-1 py-3 rounded-xl border border-[#2a2a2a] font-bold text-gray-400 hover:border-[#333] hover:text-white transition-all">‹ Terug</button>
                     <button disabled={!date} onClick={() => { fetchSlots(date, service!.duration); setStep(3) }}
-                      className="flex-1 py-3 rounded-xl bg-brand text-white font-bold hover:bg-brand-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                      className="flex-1 py-3 rounded-xl bg-[#2176d4] text-white font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-40 disabled:cursor-not-allowed transition-all">
                       Volgende ›
                     </button>
                   </div>
@@ -524,14 +525,14 @@ export default function BookingPage() {
 
               {step === 3 && (
                 <div>
-                  <h2 className="text-xl font-black text-gray-900 mb-1">Kies een tijd</h2>
-                  <p className="text-gray-600 text-sm mb-5 capitalize">{date ? formatDateNL(date) : ''}</p>
+                  <h2 className="text-xl font-black text-white mb-1">Kies een tijd</h2>
+                  <p className="text-gray-500 text-sm mb-5 capitalize">{date ? formatDateNL(date) : ''}</p>
                   {slotsLoading ? (
                     <div className="flex justify-center py-8">
-                      <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" />
+                      <div className="w-8 h-8 border-4 border-[#2176d4] border-t-transparent rounded-full animate-spin" />
                     </div>
                   ) : slots.length === 0 ? (
-                    <p className="text-center text-gray-600 py-8 font-medium">Geen beschikbare tijden op deze dag</p>
+                    <p className="text-center text-gray-500 py-8 font-medium">Geen beschikbare tijden op deze dag</p>
                   ) : (
                     <div className="grid grid-cols-4 gap-2">
                       {slots.map(slot => (
@@ -539,8 +540,10 @@ export default function BookingPage() {
                           onClick={() => { setTime(slot.time); setStep(4) }}
                           className={['py-3 rounded-xl text-sm font-bold transition-all',
                             slot.available
-                              ? time === slot.time ? 'bg-brand text-white shadow-md scale-105' : 'bg-brand-light text-brand hover:bg-brand hover:text-white'
-                              : 'bg-gray-100 text-gray-300 cursor-not-allowed',
+                              ? time === slot.time
+                                ? 'bg-[#2176d4] text-white shadow-[0_0_15px_rgba(33,118,212,0.3)]'
+                                : 'bg-[#1a1a1a] border border-[#2a2a2a] text-[#2176d4] hover:bg-[#2176d4] hover:text-white hover:border-[#2176d4]'
+                              : 'bg-[#161616] border border-[#1e1e1e] text-gray-700 cursor-not-allowed',
                           ].join(' ')}>
                           {slot.time}
                         </button>
@@ -548,9 +551,10 @@ export default function BookingPage() {
                     </div>
                   )}
                   <div className="flex gap-3 mt-6">
-                    <button onClick={() => setStep(2)} className="flex-1 py-3 rounded-xl border-2 border-gray-200 font-bold text-gray-600 hover:bg-gray-50">‹ Terug</button>
+                    <button onClick={() => setStep(2)}
+                      className="flex-1 py-3 rounded-xl border border-[#2a2a2a] font-bold text-gray-400 hover:border-[#333] hover:text-white transition-all">‹ Terug</button>
                     <button disabled={!time} onClick={() => setStep(4)}
-                      className="flex-1 py-3 rounded-xl bg-brand text-white font-bold hover:bg-brand-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                      className="flex-1 py-3 rounded-xl bg-[#2176d4] text-white font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-40 disabled:cursor-not-allowed transition-all">
                       Volgende ›
                     </button>
                   </div>
@@ -559,8 +563,8 @@ export default function BookingPage() {
 
               {step === 4 && (
                 <form onSubmit={handleContactSubmit}>
-                  <h2 className="text-xl font-black text-gray-900 mb-1">Uw gegevens</h2>
-                  <p className="text-gray-600 text-sm mb-5">Vul uw contactinformatie in</p>
+                  <h2 className="text-xl font-black text-white mb-1">Uw gegevens</h2>
+                  <p className="text-gray-500 text-sm mb-5">Vul uw contactinformatie in</p>
                   <div className="space-y-4">
                     {[
                       { label: 'Naam', key: 'name', type: 'text', placeholder: 'Uw volledige naam', autoComplete: 'name' },
@@ -568,18 +572,19 @@ export default function BookingPage() {
                       { label: 'E-mailadres', key: 'email', type: 'email', placeholder: 'uw@email.com', autoComplete: 'email' },
                     ].map(f => (
                       <div key={f.key}>
-                        <label className="block text-sm font-bold text-gray-700 mb-1">{f.label}</label>
+                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">{f.label}</label>
                         <input type={f.type} placeholder={f.placeholder} autoComplete={f.autoComplete} required
                           value={contact[f.key as keyof typeof contact]}
                           onChange={e => setContact(c => ({ ...c, [f.key]: e.target.value }))}
-                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-gray-800 font-medium focus:outline-none focus:border-brand transition-colors" />
+                          className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#2176d4] transition-colors" />
                       </div>
                     ))}
                   </div>
                   <div className="flex gap-3 mt-6">
-                    <button type="button" onClick={() => setStep(3)} className="flex-1 py-3 rounded-xl border-2 border-gray-200 font-bold text-gray-600 hover:bg-gray-50">‹ Terug</button>
+                    <button type="button" onClick={() => setStep(3)}
+                      className="flex-1 py-3 rounded-xl border border-[#2a2a2a] font-bold text-gray-400 hover:border-[#333] hover:text-white transition-all">‹ Terug</button>
                     <button type="submit" disabled={loading}
-                      className="flex-1 py-3 rounded-xl bg-brand text-white font-bold hover:bg-brand-hover disabled:opacity-50 transition-colors">
+                      className="flex-1 py-3 rounded-xl bg-[#2176d4] text-white font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-50 transition-all">
                       {loading ? 'Bezig...' : 'Volgende ›'}
                     </button>
                   </div>
@@ -588,19 +593,19 @@ export default function BookingPage() {
 
               {step === 5 && (
                 <div>
-                  <h2 className="text-xl font-black text-gray-900 mb-1">Verificatie</h2>
+                  <h2 className="text-xl font-black text-white mb-1">Verificatie</h2>
                   {emailSent ? (
                     <>
-                      <p className="text-gray-600 text-sm mb-1">We hebben een 6-cijferige code gestuurd naar</p>
-                      <p className="font-bold text-gray-800 mb-3">{contact.email}</p>
-                      <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-2.5 mb-5 text-xs text-blue-600">
+                      <p className="text-gray-500 text-sm mb-1">We hebben een 6-cijferige code gestuurd naar</p>
+                      <p className="font-bold text-white mb-3">{contact.email}</p>
+                      <div className="bg-[#2176d4]/8 border border-[#2176d4]/20 rounded-xl px-4 py-2.5 mb-5 text-xs text-[#2176d4]/80">
                         Het kan 1 à 2 minuten duren voordat u de code ontvangt. Check ook uw spam.
                       </div>
                     </>
                   ) : (
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6 text-sm">
-                      <p className="font-bold text-amber-800">E-mail kon niet worden verzonden</p>
-                      <p className="text-amber-700 mt-0.5">De code is alvast ingevuld.</p>
+                    <div className="bg-amber-900/20 border border-amber-700/30 rounded-xl px-4 py-3 mb-6 text-sm">
+                      <p className="font-bold text-amber-400">E-mail kon niet worden verzonden</p>
+                      <p className="text-amber-500/80 mt-0.5">De code is alvast ingevuld.</p>
                     </div>
                   )}
                   <div className="flex justify-center gap-2 mb-6" onPaste={handleCodePaste}>
@@ -610,18 +615,18 @@ export default function BookingPage() {
                         type="text" inputMode="numeric" maxLength={1} value={digit}
                         onChange={e => handleCodeInput(i, e.target.value)}
                         onKeyDown={e => handleCodeKey(i, e)}
-                        className="w-11 h-14 text-center text-2xl font-black border-2 border-gray-200 rounded-xl focus:outline-none focus:border-brand transition-colors text-gray-800 caret-transparent" />
+                        className="w-11 h-14 text-center text-2xl font-black bg-[#0e0e0e] border-2 border-[#2a2a2a] text-white rounded-xl focus:outline-none focus:border-[#2176d4] transition-colors caret-transparent" />
                     ))}
                   </div>
                   <button onClick={handleVerify} disabled={codeDigits.join('').length < 6 || loading}
-                    className="w-full py-3 rounded-xl bg-brand text-white font-bold hover:bg-brand-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors mb-3">
+                    className="w-full py-3 rounded-xl bg-[#2176d4] text-white font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-40 disabled:cursor-not-allowed transition-all mb-3">
                     {loading ? 'Bevestigen...' : 'Bevestigen'}
                   </button>
                   <button onClick={handleResendCode} disabled={resendCooldown > 0}
-                    className="w-full py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:text-gray-300 text-brand hover:underline">
+                    className="w-full py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:text-gray-700 text-[#2176d4] hover:text-[#3080e0]">
                     {resendCooldown > 0 ? `Code opnieuw sturen (${resendCooldown}s)` : 'Code opnieuw sturen'}
                   </button>
-                  <button onClick={() => setStep(4)} className="w-full py-2 text-gray-600 text-sm hover:underline mt-1">‹ Terug</button>
+                  <button onClick={() => setStep(4)} className="w-full py-2 text-gray-600 text-sm hover:text-gray-400 transition-colors mt-1">‹ Terug</button>
                 </div>
               )}
             </div>
@@ -630,45 +635,49 @@ export default function BookingPage() {
       </main>
 
       {/* Afspraak opzoeken */}
-      <div className="max-w-md mx-auto px-4 mb-6">
+      <div className="max-w-lg mx-auto w-full px-4 mb-6">
         {!lookup ? (
-          <button onClick={()=>setLookup(true)} className="w-full py-3 rounded-lg border border-gray-200 bg-white text-gray-600 text-sm hover:border-gray-300 hover:text-gray-800 transition-colors">
+          <button onClick={()=>setLookup(true)}
+            className="w-full py-3 rounded-xl border border-[#2a2a2a] bg-[#141414] text-gray-500 text-sm hover:border-[#333] hover:text-gray-300 transition-all">
             Afspraak opzoeken of annuleren
           </button>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <div className="bg-[#141414] rounded-2xl border border-[#2a2a2a] p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900 text-sm">Afspraak opzoeken</h3>
-              <button onClick={()=>{setLookup(false);setLookupResult(null);setLookupError('');setLookupCode('')}} className="text-gray-400 hover:text-gray-700 text-lg leading-none">×</button>
+              <h3 className="font-semibold text-white text-sm">Afspraak opzoeken</h3>
+              <button onClick={()=>{setLookup(false);setLookupResult(null);setLookupError('');setLookupCode('')}}
+                className="w-7 h-7 rounded-lg bg-[#1e1e1e] text-gray-500 hover:text-white flex items-center justify-center text-lg leading-none transition-colors">×</button>
             </div>
             <form onSubmit={handleLookup} className="space-y-2 mb-4">
               <input value={lookupCode} onChange={e=>setLookupCode(e.target.value.toUpperCase())}
                 placeholder="Boekingscode (bijv. MSCAB123)" maxLength={8}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono font-bold focus:outline-none focus:border-brand transition-colors uppercase"/>
+                className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-4 py-2.5 text-sm font-mono font-bold focus:outline-none focus:border-[#2176d4] transition-colors uppercase"/>
               <div className="flex gap-2">
                 <input type="email" value={lookupEmail} onChange={e=>setLookupEmail(e.target.value)}
                   placeholder="Uw e-mailadres"
-                  className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand transition-colors"/>
+                  className="flex-1 bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
                 <button type="submit" disabled={lookupCode.length<5||!lookupEmail||lookupLoading}
-                  className="px-4 py-2 bg-brand text-white rounded-xl font-bold text-sm hover:bg-brand-hover disabled:opacity-40 transition-colors">
+                  className="px-4 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] disabled:opacity-40 transition-colors">
                   {lookupLoading ? '...' : 'Zoek'}
                 </button>
               </div>
             </form>
-            {lookupError && <p className="text-red-500 text-sm font-semibold">{lookupError}</p>}
+            {lookupError && (
+              <div className="bg-red-900/30 border border-red-700/40 text-red-400 rounded-xl px-4 py-2.5 text-sm font-semibold mb-2">{lookupError}</div>
+            )}
             {lookupResult && (
-              <div className="bg-brand-light rounded-xl p-4 space-y-1.5">
-                <div className="flex justify-between text-sm"><span className="text-gray-600 font-medium">Code</span><span className="font-black text-brand">{lookupResult.code}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600 font-medium">Naam</span><span className="font-bold text-gray-800">{lookupResult.name}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600 font-medium">Dienst</span><span className="font-bold text-gray-800">{lookupResult.service}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600 font-medium">Datum</span><span className="font-bold text-gray-800">{formatDateNL(lookupResult.date)}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600 font-medium">Tijd</span><span className="font-bold text-gray-800">{lookupResult.time}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600 font-medium">Prijs</span><span className="font-bold text-gray-800">€{lookupResult.price}</span></div>
+              <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-4 divide-y divide-[#1e1e1e]">
+                {[['Code', lookupResult.code], ['Naam', lookupResult.name], ['Dienst', lookupResult.service], ['Datum', formatDateNL(lookupResult.date)], ['Tijd', lookupResult.time], ['Prijs', `€${lookupResult.price}`]].map(([k,v]) => (
+                  <div key={k} className="flex justify-between py-2 text-sm">
+                    <span className="text-gray-500 font-medium">{k}</span>
+                    <span className={`font-bold ${k==='Code' ? 'text-[#2176d4] font-black' : 'text-white'}`}>{v}</span>
+                  </div>
+                ))}
                 <button onClick={()=>{
                   setBooking({...lookupResult, duration:0})
                   setCancelEmail(lookupEmail)
                   setStep('confirmation'); setCancelConfirm(true); setCancelStatus('active'); setLookup(false)
-                }} className="w-full mt-2 py-2 text-red-500 border border-red-200 rounded-xl text-sm font-bold hover:bg-red-50 transition-colors">
+                }} className="w-full mt-2 pt-3 py-2 text-red-400 text-sm font-bold hover:text-red-300 transition-colors">
                   Afspraak annuleren
                 </button>
               </div>
@@ -677,7 +686,7 @@ export default function BookingPage() {
         )}
       </div>
 
-      <footer className="text-center text-gray-600 text-xs py-4 pb-8">
+      <footer className="text-center text-gray-700 text-xs py-4 pb-8">
         © {new Date().getFullYear()} MoSaidCuts Barbershop
       </footer>
     </div>
