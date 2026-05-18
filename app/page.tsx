@@ -196,24 +196,50 @@ export default function BookingPage() {
   const [lookupError, setLookupError] = useState('')
   const [lookupLoading, setLookupLoading] = useState(false)
   const [isReturning, setIsReturning] = useState(false)
+  const [cookieConsent, setCookieConsent] = useState<'yes'|'no'|null>(null)
   const codeRefs = useRef<(HTMLInputElement | null)[]>([])
 
+  function getCookie(name: string) {
+    return document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=').slice(1).join('=') ?? null
+  }
+
   function saveCustomerCookie(name: string, phone: string, email: string) {
+    if (getCookie('msc_consent') !== 'yes') return
     const val = encodeURIComponent(JSON.stringify({ name, phone, email }))
     const expires = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toUTCString()
     document.cookie = `msc_customer=${val}; expires=${expires}; path=/; SameSite=Lax`
   }
 
+  function acceptCookies() {
+    const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString()
+    document.cookie = `msc_consent=yes; expires=${expires}; path=/; SameSite=Lax`
+    setCookieConsent('yes')
+  }
+
+  function declineCookies() {
+    const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString()
+    document.cookie = `msc_consent=no; expires=${expires}; path=/; SameSite=Lax`
+    document.cookie = 'msc_customer=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/'
+    setCookieConsent('no')
+    setIsReturning(false)
+  }
+
   useEffect(() => {
-    const raw = document.cookie.split('; ').find(r => r.startsWith('msc_customer='))
-    if (raw) {
-      try {
-        const saved = JSON.parse(decodeURIComponent(raw.split('=').slice(1).join('=')))
-        if (saved.email && saved.name) {
-          setContact({ name: saved.name, phone: saved.phone ?? '', email: saved.email })
-          setIsReturning(true)
+    const consent = getCookie('msc_consent')
+    if (consent) {
+      setCookieConsent(consent as 'yes'|'no')
+      if (consent === 'yes') {
+        const raw = getCookie('msc_customer')
+        if (raw) {
+          try {
+            const saved = JSON.parse(decodeURIComponent(raw))
+            if (saved.email && saved.name) {
+              setContact({ name: saved.name, phone: saved.phone ?? '', email: saved.email })
+              setIsReturning(true)
+            }
+          } catch { /* ignore */ }
         }
-      } catch { /* ignore corrupt cookie */ }
+      }
     }
   }, [])
 
@@ -753,6 +779,27 @@ export default function BookingPage() {
       <footer className="text-center text-gray-700 text-xs py-4 pb-8">
         © {new Date().getFullYear()} MoSaidCuts Barbershop
       </footer>
+
+      {cookieConsent === null && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-fade-up">
+          <div className="max-w-lg mx-auto bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl p-4 shadow-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-semibold mb-0.5">Cookies</p>
+              <p className="text-gray-500 text-xs">We slaan uw naam en e-mail op zodat u volgende keer sneller kunt boeken.</p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button onClick={declineCookies}
+                className="px-4 py-2 rounded-xl border border-[#2a2a2a] text-gray-400 text-sm font-semibold hover:border-[#333] hover:text-white transition-all">
+                Weigeren
+              </button>
+              <button onClick={acceptCookies}
+                className="px-4 py-2 rounded-xl bg-[#2176d4] text-white text-sm font-bold hover:bg-[#3080e0] transition-all">
+                Accepteren
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
