@@ -18,7 +18,7 @@ export async function GET() {
     lastDate: string; lastService: string; bookings: typeof data
   }>()
 
-  for (const b of data ?? []) {
+  for (const b of (data ?? []).filter(b => b.email)) {
     const key = b.email.toLowerCase()
     if (!map.has(key)) {
       map.set(key, { email: key, name: b.name, visits: 0, totalSpent: 0, lastDate: '', lastService: '', bookings: [] })
