@@ -27,7 +27,7 @@ export async function GET() {
   ])
 
   const weekRevenue = (weekBookings ?? []).reduce((sum, b) => sum + (b.price ?? 0), 0)
-  const uniqueEmails = new Set((allBookings ?? []).map(b => b.email)).size
+  const uniqueEmails = new Set((allBookings ?? []).map(b => b.email).filter(Boolean)).size
 
   return Response.json({
     today: (todayBookings ?? []).length,

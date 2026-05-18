@@ -104,7 +104,7 @@ export async function POST(request: Request) {
   if (!(await verifyPortalAuth())) {
     return Response.json({ error: 'Niet ingelogd' }, { status: 401 })
   }
-  const { name, phone, email, service, price, duration, date, time } = await request.json()
+  const { name, phone, email, service, price, duration, date, time, notes } = await request.json()
   if (!name || !service || !date || !time) {
     return Response.json({ error: 'Verplichte velden ontbreken' }, { status: 400 })
   }
@@ -121,6 +121,7 @@ export async function POST(request: Request) {
   const { error } = await supabaseAdmin.from('bookings').insert({
     code, name, phone: phone ?? '', email: normalizedEmail,
     service, price: price ?? 0, duration: duration ?? 30, date, time,
+    notes: notes ?? '',
   })
   if (error) return Response.json({ error: 'Opslaan mislukt' }, { status: 500 })
 
@@ -167,13 +168,23 @@ export async function PATCH(request: Request) {
   if (!(await verifyPortalAuth())) {
     return Response.json({ error: 'Niet ingelogd' }, { status: 401 })
   }
-  const { id, name, phone, email, service, price, duration, date, time } = await request.json()
+  const body = await request.json()
+  const { id } = body
   if (!id) return Response.json({ error: 'id vereist' }, { status: 400 })
 
+  // Quick no-show toggle — only id + no_show sent
+  if ('no_show' in body && !body.name) {
+    const { error } = await supabaseAdmin.from('bookings').update({ no_show: body.no_show }).eq('id', id)
+    if (error) return Response.json({ error: 'Bijwerken mislukt' }, { status: 500 })
+    return Response.json({ success: true })
+  }
+
+  const { name, phone, email, service, price, duration, date, time, notes } = body
   const normalizedEmail = email ? email.toLowerCase() : ''
 
   const { data: updated, error } = await supabaseAdmin.from('bookings').update({
     name, phone, email: normalizedEmail, service, price, duration, date, time,
+    notes: notes ?? '',
   }).eq('id', id).select('code').single()
   if (error) return Response.json({ error: 'Bijwerken mislukt' }, { status: 500 })
 

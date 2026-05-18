@@ -198,6 +198,10 @@ export default function BookingPage() {
   const [isReturning, setIsReturning] = useState(false)
   const savedEmailRef = useRef('')
   const [cookieConsent, setCookieConsent] = useState<'yes'|'no'|null>(null)
+  const [showWaitlist, setShowWaitlist] = useState(false)
+  const [waitlistForm, setWaitlistForm] = useState({ name: '', phone: '', note: '' })
+  const [waitlistLoading, setWaitlistLoading] = useState(false)
+  const [waitlistDone, setWaitlistDone] = useState(false)
   const codeRefs = useRef<(HTMLInputElement | null)[]>([])
 
   function getCookie(name: string) {
@@ -593,7 +597,7 @@ export default function BookingPage() {
                 <div>
                   <h2 className="text-xl font-black text-white mb-1">Kies een datum</h2>
                   <p className="text-gray-500 text-sm mb-5">Selecteer een beschikbare dag</p>
-                  <Calendar value={date} availability={availability} blockedDates={blockedDates} onChange={d => setDate(d)} />
+                  <Calendar value={date} availability={availability} blockedDates={blockedDates} onChange={d => { setDate(d); setShowWaitlist(false); setWaitlistDone(false) }} />
                   <div className="flex gap-3 mt-6">
                     <button onClick={() => setStep(1)}
                       className="flex-1 py-3 rounded-xl border border-[#2a2a2a] font-bold text-gray-400 hover:border-[#333] hover:text-white transition-all">‹ Terug</button>
@@ -614,7 +618,58 @@ export default function BookingPage() {
                       <div className="w-8 h-8 border-4 border-[#2176d4] border-t-transparent rounded-full animate-spin" />
                     </div>
                   ) : slots.length === 0 ? (
-                    <p className="text-center text-gray-500 py-8 font-medium">Geen beschikbare tijden op deze dag</p>
+                    <div className="py-4">
+                      <p className="text-center text-gray-500 py-2 font-medium">Geen beschikbare tijden op deze dag</p>
+                      {!waitlistDone ? (
+                        !showWaitlist ? (
+                          <div className="text-center mt-3">
+                            <button onClick={() => setShowWaitlist(true)}
+                              className="text-sm font-bold text-[#2176d4] border border-[#2176d4]/30 px-4 py-2 rounded-xl hover:bg-[#2176d4]/10 transition-colors">
+                              Zet me op de wachtlijst →
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="mt-4 bg-[#141414] rounded-2xl border border-[#2a2a2a] p-5 space-y-4">
+                            <h3 className="font-bold text-white text-sm">Wachtlijst voor {date ? new Date(date+'T12:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'long'}) : 'deze dag'}</h3>
+                            <div>
+                              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Naam *</label>
+                              <input value={waitlistForm.name} onChange={e=>setWaitlistForm(f=>({...f,name:e.target.value}))} placeholder="Uw naam"
+                                className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Telefoon *</label>
+                              <input value={waitlistForm.phone} onChange={e=>setWaitlistForm(f=>({...f,phone:e.target.value}))} placeholder="06 12345678" type="tel"
+                                className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Opmerking <span className="text-gray-700 normal-case font-normal">(optioneel)</span></label>
+                              <input value={waitlistForm.note} onChange={e=>setWaitlistForm(f=>({...f,note:e.target.value}))} placeholder="bijv. voorkeurstijd"
+                                className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+                            </div>
+                            <div className="flex gap-3 pt-1">
+                              <button onClick={() => setShowWaitlist(false)}
+                                className="flex-1 py-2.5 rounded-xl border border-[#2a2a2a] text-gray-400 text-sm font-medium hover:border-[#333] transition-all">
+                                Annuleren
+                              </button>
+                              <button disabled={!waitlistForm.name || !waitlistForm.phone || waitlistLoading}
+                                onClick={async () => {
+                                  setWaitlistLoading(true)
+                                  await fetch('/api/waitlist', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: waitlistForm.name, phone: waitlistForm.phone, note: waitlistForm.note, preferred_date: date, service: service?.name ?? '' }) })
+                                  setWaitlistLoading(false); setWaitlistDone(true)
+                                }}
+                                className="flex-1 py-2.5 rounded-xl bg-[#2176d4] text-white text-sm font-bold hover:bg-[#3080e0] disabled:opacity-40 transition-all">
+                                {waitlistLoading ? 'Bezig...' : 'Aanmelden'}
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      ) : (
+                        <div className="mt-4 bg-[#2176d4]/10 border border-[#2176d4]/20 rounded-2xl px-5 py-4 text-center">
+                          <p className="font-bold text-[#2176d4] text-sm">✓ Je staat op de wachtlijst!</p>
+                          <p className="text-xs text-gray-500 mt-1">We nemen contact op als er een plek vrijkomt.</p>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="grid grid-cols-4 gap-2">
                       {slots.map(slot => (

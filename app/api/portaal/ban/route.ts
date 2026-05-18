@@ -2,6 +2,13 @@ import { verifyPortalAuth } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { transporter } from '@/lib/mailer'
 
+const NL_DAYS = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag']
+const NL_MONTHS = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december']
+function formatDateNL(dateStr: string) {
+  const d = new Date(dateStr + 'T12:00:00')
+  return `${NL_DAYS[d.getDay()]} ${d.getDate()} ${NL_MONTHS[d.getMonth()]} ${d.getFullYear()}`
+}
+
 export async function GET() {
   if (!(await verifyPortalAuth())) {
     return Response.json({ error: 'Niet ingelogd' }, { status: 401 })
@@ -61,7 +68,7 @@ export async function POST(request: Request) {
               <div style="background:#fee2e2;border-radius:10px;padding:16px;margin:16px 0;">
                 <p style="margin:4px 0;"><strong>Code:</strong> ${b.code}</p>
                 <p style="margin:4px 0;"><strong>Dienst:</strong> ${b.service}</p>
-                <p style="margin:4px 0;"><strong>Datum:</strong> ${b.date}</p>
+                <p style="margin:4px 0;"><strong>Datum:</strong> ${formatDateNL(b.date)}</p>
                 <p style="margin:4px 0;"><strong>Tijd:</strong> ${b.time}</p>
               </div>
             </div>

@@ -7,7 +7,9 @@ import Image from 'next/image'
 interface Booking {
   id: string; code: string; name: string; phone: string; email: string
   service: string; price: number; duration: number; date: string; time: string; created_at: string
+  notes?: string; no_show?: boolean
 }
+interface WaitlistEntry { id: string; name: string; phone: string; email: string; preferred_date: string; service: string; note: string; created_at: string }
 interface BannedEmail { id: string; email: string; reason: string; banned_at: string }
 
 /* ─── Helpers ────────────────────────────────────────────── */
@@ -725,8 +727,8 @@ function CalendarView() {
 }
 
 /* ─── Booking Form (add/edit) ────────────────────────────── */
-interface BookingForm { id?:string; name:string; phone:string; email:string; service:string; price:number; duration:number; date:string; time:string }
-const EMPTY_FORM: BookingForm = { name:'', phone:'', email:'', service:'', price:0, duration:30, date:'', time:'' }
+interface BookingForm { id?:string; name:string; phone:string; email:string; service:string; price:number; duration:number; date:string; time:string; notes:string }
+const EMPTY_FORM: BookingForm = { name:'', phone:'', email:'', service:'', price:0, duration:30, date:'', time:'', notes:'' }
 
 function DatePicker({ value, onChange }: { value: string; onChange: (d: string) => void }) {
   const [open, setOpen] = useState(false)
@@ -967,6 +969,13 @@ function BookingFormModal({ initial, onClose, onSaved }: { initial: BookingForm;
             </div>
           )}
 
+          {/* Notities */}
+          <div>
+            <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Notities <span className="text-gray-700 normal-case font-normal">(intern)</span></label>
+            <textarea value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} rows={2} placeholder="bijv. altijd kort aan zijkanten"
+              className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors resize-none"/>
+          </div>
+
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-[#2a2a2a] text-gray-400 text-sm font-medium hover:border-[#333] hover:text-white transition-all">Annuleren</button>
             <button type="submit" disabled={saving || !form.date || !form.time}
@@ -987,6 +996,7 @@ function AppointmentsView() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(false)
   const [deleting, setDeleting] = useState<string|null>(null)
+  const [noShowLoading, setNoShowLoading] = useState<string|null>(null)
   const [formBooking, setFormBooking] = useState<BookingForm|null>(null)
 
   const load = useCallback(async()=>{
@@ -1011,11 +1021,18 @@ function AppointmentsView() {
     setDeleting(null); setConfirmDel(null); load()
   }
 
+  async function toggleNoShow(id: string, current: boolean) {
+    setNoShowLoading(id)
+    await fetch('/api/portaal/bookings',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id, no_show: !current})})
+    setNoShowLoading(null); load()
+  }
+
   const statusBadge = {
     today: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-amber-900/30 text-amber-400">VANDAAG</span>,
     upcoming: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#2176d4]/10 text-[#2176d4]">AANKOMEND</span>,
     past: <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#1e1e1e] text-gray-500">VERLEDEN</span>,
   }
+  const noShowBadge = <span className="text-xs font-black px-2 py-0.5 rounded-full bg-orange-900/30 text-orange-400">NO-SHOW</span>
 
   const filters = [{id:'upcoming',label:'Aankomend'},{id:'today',label:'Vandaag'},{id:'all',label:'Alle'},{id:'past',label:'Verleden'}] as const
 
@@ -1071,7 +1088,10 @@ function AppointmentsView() {
                         <a href={`tel:${b.phone}`} className="text-xs text-[#2176d4] hover:underline">{b.phone}</a>
                         <a href={`mailto:${b.email}`} className="text-xs text-[#2176d4] hover:underline truncate">{b.email}</a>
                       </div>
-                      <div className="mt-1">{statusBadge[status]}</div>
+                      {b.notes && <p className="text-xs text-gray-500 italic mt-1 truncate">📝 {b.notes}</p>}
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {b.no_show ? noShowBadge : statusBadge[status]}
+                      </div>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-black text-white">€{b.price}</p>
@@ -1083,7 +1103,10 @@ function AppointmentsView() {
                         </div>
                       ) : (
                         <div className="flex gap-2 mt-1 justify-end">
-                          <button onClick={()=>setFormBooking({id:b.id,name:b.name,phone:b.phone,email:b.email,service:b.service,price:b.price,duration:b.duration,date:b.date,time:b.time})} className="text-xs text-[#2176d4] hover:underline">Bewerken</button>
+                          <button onClick={()=>setFormBooking({id:b.id,name:b.name,phone:b.phone,email:b.email,service:b.service,price:b.price,duration:b.duration,date:b.date,time:b.time,notes:b.notes??''})} className="text-xs text-[#2176d4] hover:underline">Bewerken</button>
+                          <button onClick={()=>toggleNoShow(b.id, !!b.no_show)} disabled={noShowLoading===b.id} className={`text-xs hover:underline disabled:opacity-50 ${b.no_show ? 'text-gray-500' : 'text-orange-400 hover:text-orange-300'}`}>
+                            {noShowLoading===b.id ? '...' : b.no_show ? 'Herstel' : 'No-show'}
+                          </button>
                           <button onClick={()=>setConfirmDel(b.id)} className="text-xs text-red-400 hover:text-red-500">Verwijder</button>
                         </div>
                       )}
@@ -1411,6 +1434,78 @@ function ManagementView() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+/* ─── Waitlist Section (used in ManagementView) ──────────── */
+function WaitlistSection() {
+  const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [removing, setRemoving] = useState<string|null>(null)
+  const [confirmRemove, setConfirmRemove] = useState<string|null>(null)
+
+  async function load() {
+    const r = await fetch('/api/portaal/waitlist')
+    const d = await r.json()
+    setWaitlist(d.waitlist ?? [])
+    setLoading(false)
+  }
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(()=>{ load() },[])
+
+  async function remove(id: string) {
+    setRemoving(id)
+    await fetch('/api/portaal/waitlist',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})})
+    setRemoving(null); setConfirmRemove(null); load()
+  }
+
+  return (
+    <div className="mt-8">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-lg font-[family-name:var(--font-bebas)] tracking-widest text-white">Wachtlijst</h2>
+          <p className="text-xs text-gray-500">Klanten die willen boeken maar geen slot hadden</p>
+        </div>
+        <button onClick={load} className="text-xs text-[#2176d4] hover:underline">Vernieuwen</button>
+      </div>
+      <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] overflow-hidden">
+        {loading ? (
+          <div className="flex justify-center py-8"><div className="w-6 h-6 border-4 border-[#2176d4] border-t-transparent rounded-full animate-spin"/></div>
+        ) : waitlist.length === 0 ? (
+          <p className="text-center text-gray-500 font-medium py-8">Geen wachtlijst inschrijvingen</p>
+        ) : (
+          <div className="divide-y divide-[#1e1e1e]">
+            {waitlist.map(w=>(
+              <div key={w.id} className="px-5 py-4 flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold text-white">{w.name}</p>
+                    <span className="text-xs bg-[#1e1e1e] text-gray-400 px-2 py-0.5 rounded-full">{formatShortDate(w.preferred_date)}</span>
+                    {w.service && <span className="text-xs text-gray-500">{w.service}</span>}
+                  </div>
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
+                    {w.phone && <a href={`tel:${w.phone}`} className="text-xs text-[#2176d4] hover:underline">{w.phone}</a>}
+                    {w.email && <a href={`mailto:${w.email}`} className="text-xs text-[#2176d4] hover:underline">{w.email}</a>}
+                  </div>
+                  {w.note && <p className="text-xs text-gray-500 italic mt-1">{w.note}</p>}
+                </div>
+                {confirmRemove===w.id ? (
+                  <div className="flex gap-1 shrink-0">
+                    <button onClick={()=>remove(w.id)} disabled={removing===w.id} className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg font-bold disabled:opacity-50">{removing===w.id?'...':'Ja'}</button>
+                    <button onClick={()=>setConfirmRemove(null)} className="text-xs border border-[#333] text-gray-400 px-2 py-1 rounded-lg font-bold">Nee</button>
+                  </div>
+                ) : (
+                  <button onClick={()=>setConfirmRemove(w.id)} className="shrink-0 px-3 py-1.5 border border-[#2a2a2a] text-gray-400 rounded-lg text-xs font-medium hover:bg-white/5 transition-colors">
+                    Verwijder
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <WaitlistSection />
     </div>
   )
 }
