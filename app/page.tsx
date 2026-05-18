@@ -195,7 +195,27 @@ export default function BookingPage() {
   const [lookupResult, setLookupResult] = useState<{code:string;name:string;service:string;price:number;date:string;time:string}|null>(null)
   const [lookupError, setLookupError] = useState('')
   const [lookupLoading, setLookupLoading] = useState(false)
+  const [isReturning, setIsReturning] = useState(false)
   const codeRefs = useRef<(HTMLInputElement | null)[]>([])
+
+  function saveCustomerCookie(name: string, phone: string, email: string) {
+    const val = encodeURIComponent(JSON.stringify({ name, phone, email }))
+    const expires = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toUTCString()
+    document.cookie = `msc_customer=${val}; expires=${expires}; path=/; SameSite=Lax`
+  }
+
+  useEffect(() => {
+    const raw = document.cookie.split('; ').find(r => r.startsWith('msc_customer='))
+    if (raw) {
+      try {
+        const saved = JSON.parse(decodeURIComponent(raw.split('=').slice(1).join('=')))
+        if (saved.email && saved.name) {
+          setContact({ name: saved.name, phone: saved.phone ?? '', email: saved.email })
+          setIsReturning(true)
+        }
+      } catch { /* ignore corrupt cookie */ }
+    }
+  }, [])
 
   useEffect(() => {
     fetch('/api/portaal/settings')
@@ -262,6 +282,31 @@ export default function BookingPage() {
     if (Object.keys(errs).length) { setFieldErrors(errs); return }
     setFieldErrors({})
     setLoading(true)
+
+    if (isReturning) {
+      try {
+        const br = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: contact.name, phone: contact.phone, email: contact.email,
+            service: service!.name, price: service!.price, duration: service!.duration,
+            date, time,
+          }),
+        })
+        const bd = await br.json()
+        if (!br.ok) { setError(bd.error ?? 'Boeking mislukt'); return }
+        saveCustomerCookie(contact.name, contact.phone, contact.email)
+        setBooking(bd)
+        setStep('confirmation')
+      } catch {
+        setError('Netwerkfout, probeer opnieuw')
+      } finally {
+        setLoading(false)
+      }
+      return
+    }
+
     try {
       const r = await fetch('/api/verify/send', {
         method: 'POST',
@@ -309,6 +354,7 @@ export default function BookingPage() {
       })
       const bd = await br.json()
       if (!br.ok) { setError(bd.error ?? 'Boeking mislukt'); return }
+      saveCustomerCookie(contact.name, contact.phone, contact.email)
       setBooking(bd)
       setStep('confirmation')
     } catch {
@@ -572,7 +618,14 @@ export default function BookingPage() {
               {step === 4 && (
                 <form onSubmit={handleContactSubmit} noValidate>
                   <h2 className="text-xl font-black text-white mb-1">Uw gegevens</h2>
-                  <p className="text-gray-500 text-sm mb-5">Vul uw contactinformatie in</p>
+                  {isReturning ? (
+                    <div className="flex items-center gap-2 bg-[#2176d4]/10 border border-[#2176d4]/20 rounded-xl px-4 py-2.5 mb-5">
+                      <svg className="w-4 h-4 text-[#2176d4] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                      <p className="text-sm text-[#2176d4]">Welkom terug, <strong>{contact.name}</strong> — geen verificatie nodig</p>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm mb-5">Vul uw contactinformatie in</p>
+                  )}
                   <div className="space-y-4">
                     {[
                       { label: 'Naam', key: 'name', type: 'text', placeholder: 'Uw volledige naam', autoComplete: 'name' },
