@@ -178,6 +178,7 @@ export default function BookingPage() {
   const [booking, setBooking] = useState<BookingResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string,string>>({})
   const [services, setServices] = useState<Service[]>(FALLBACK_SERVICES)
   const [availability, setAvailability] = useState<Record<string, boolean>>({
     '0': false, '1': true, '2': true, '3': true, '4': true, '5': true, '6': false,
@@ -253,6 +254,13 @@ export default function BookingPage() {
   async function handleContactSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    const errs: Record<string,string> = {}
+    if (!contact.name.trim()) errs.name = 'Naam is verplicht'
+    if (!contact.phone.trim()) errs.phone = 'Telefoonnummer is verplicht'
+    if (!contact.email.trim()) errs.email = 'E-mailadres is verplicht'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)) errs.email = 'Ongeldig e-mailadres'
+    if (Object.keys(errs).length) { setFieldErrors(errs); return }
+    setFieldErrors({})
     setLoading(true)
     try {
       const r = await fetch('/api/verify/send', {
@@ -562,7 +570,7 @@ export default function BookingPage() {
               )}
 
               {step === 4 && (
-                <form onSubmit={handleContactSubmit}>
+                <form onSubmit={handleContactSubmit} noValidate>
                   <h2 className="text-xl font-black text-white mb-1">Uw gegevens</h2>
                   <p className="text-gray-500 text-sm mb-5">Vul uw contactinformatie in</p>
                   <div className="space-y-4">
@@ -573,10 +581,13 @@ export default function BookingPage() {
                     ].map(f => (
                       <div key={f.key}>
                         <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">{f.label}</label>
-                        <input type={f.type} placeholder={f.placeholder} autoComplete={f.autoComplete} required
+                        <input type={f.type} placeholder={f.placeholder} autoComplete={f.autoComplete}
                           value={contact[f.key as keyof typeof contact]}
-                          onChange={e => setContact(c => ({ ...c, [f.key]: e.target.value }))}
-                          className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#2176d4] transition-colors" />
+                          onChange={e => { setContact(c => ({ ...c, [f.key]: e.target.value })); setFieldErrors(fe => ({ ...fe, [f.key]: '' })) }}
+                          className={`w-full bg-[#0e0e0e] border text-white placeholder-gray-700 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none transition-colors ${fieldErrors[f.key] ? 'border-red-500/70 focus:border-red-500' : 'border-[#2a2a2a] focus:border-[#2176d4]'}`} />
+                        {fieldErrors[f.key] && (
+                          <p className="mt-1.5 text-xs text-red-400 font-semibold">{fieldErrors[f.key]}</p>
+                        )}
                       </div>
                     ))}
                   </div>
