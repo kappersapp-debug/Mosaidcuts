@@ -149,7 +149,7 @@ function Progress({ step }: { step: number }) {
         return (
           <div key={n} className="flex flex-col items-center flex-1 relative">
             {i > 0 && (
-              <div className={`absolute top-4 right-1/2 w-full h-0.5 -translate-y-1/2 ${done ? 'bg-[#2176d4]' : 'bg-[#2a2a2a]'}`} />
+              <div className={`absolute top-4 right-1/2 w-full h-0.5 -translate-y-1/2 ${n <= step ? 'bg-[#2176d4]' : 'bg-[#333]'}`} />
             )}
             <div className={[
               'w-8 h-8 rounded-full flex items-center justify-center text-xs font-black mb-1 relative z-10 transition-all',
