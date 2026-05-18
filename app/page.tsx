@@ -192,6 +192,7 @@ export default function BookingPage() {
   })
   const [blockedDates, setBlockedDates] = useState<string[]>([])
   const [cancelConfirm, setCancelConfirm] = useState(false)
+  const [cancelStatus, setCancelStatus] = useState<'idle'|'checking'|'active'|'cancelled'|'not_found'>('idle')
   const [emailSent, setEmailSent] = useState(true)
   const [resendCooldown, setResendCooldown] = useState(0)
   const [cancelEmail, setCancelEmail] = useState('')
@@ -225,10 +226,18 @@ export default function BookingPage() {
     const params = new URLSearchParams(window.location.search)
     const cancelCode = params.get('annuleer')
     if (cancelCode) {
+      const code = cancelCode.toUpperCase()
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setBooking({ code: cancelCode.toUpperCase(), service: '', price: 0, duration: 0, date: '', time: '', name: '' })
+      setBooking({ code, service: '', price: 0, duration: 0, date: '', time: '', name: '' })
       setStep('confirmation')
-      setCancelConfirm(true)
+      setCancelStatus('checking')
+      fetch(`/api/bookings/cancel?code=${encodeURIComponent(code)}`)
+        .then(r => r.json())
+        .then(d => {
+          setCancelStatus(d.status)
+          if (d.status === 'active') setCancelConfirm(true)
+        })
+        .catch(() => setCancelStatus('active'))
     }
   }, [])
 
@@ -394,7 +403,29 @@ export default function BookingPage() {
             </div>
           )}
 
-          {step === 'confirmation' && booking && (
+          {step === 'confirmation' && booking && cancelStatus === 'checking' && (
+            <div className="p-8 flex justify-center">
+              <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin"/>
+            </div>
+          )}
+
+          {step === 'confirmation' && booking && (cancelStatus === 'cancelled' || cancelStatus === 'not_found') && (
+            <div className="p-8 text-center">
+              <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">✗</div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Afspraak niet gevonden</h2>
+              <p className="text-gray-600 text-sm">
+                {cancelStatus === 'cancelled'
+                  ? 'Deze afspraak is al geannuleerd.'
+                  : 'Deze afspraak bestaat niet.'}
+              </p>
+              <button onClick={() => { setStep(1); setBooking(null); setCancelStatus('idle') }}
+                className="mt-6 px-6 py-2.5 bg-brand text-white rounded-xl font-bold text-sm hover:bg-brand-hover transition-colors">
+                Nieuwe afspraak maken
+              </button>
+            </div>
+          )}
+
+          {step === 'confirmation' && booking && (cancelStatus === 'idle' || cancelStatus === 'active') && (
             <div className="p-6 sm:p-8">
               <div className="text-center mb-6">
                 <div className="w-14 h-14 bg-brand rounded-full flex items-center justify-center mx-auto mb-3 text-lg font-bold text-white">✓</div>
@@ -636,7 +667,7 @@ export default function BookingPage() {
                 <button onClick={()=>{
                   setBooking({...lookupResult, duration:0})
                   setCancelEmail(lookupEmail)
-                  setStep('confirmation'); setCancelConfirm(true); setLookup(false)
+                  setStep('confirmation'); setCancelConfirm(true); setCancelStatus('active'); setLookup(false)
                 }} className="w-full mt-2 py-2 text-red-500 border border-red-200 rounded-xl text-sm font-bold hover:bg-red-50 transition-colors">
                   Afspraak annuleren
                 </button>

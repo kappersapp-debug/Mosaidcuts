@@ -29,6 +29,22 @@ export function cancelMailHtml(b: { name: string; code: string; service: string;
   `
 }
 
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const code = searchParams.get('code')?.toUpperCase()
+  if (!code) return Response.json({ status: 'not_found' })
+
+  const { data: active } = await supabaseAdmin
+    .from('bookings').select('id').eq('code', code).single()
+  if (active) return Response.json({ status: 'active' })
+
+  const { data: cancelled } = await supabaseAdmin
+    .from('cancelled_bookings').select('code').eq('code', code).single()
+  if (cancelled) return Response.json({ status: 'cancelled' })
+
+  return Response.json({ status: 'not_found' })
+}
+
 const attempts = new Map<string, { count: number; lockedUntil: number }>()
 
 export async function POST(request: Request) {
