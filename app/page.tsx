@@ -196,6 +196,7 @@ export default function BookingPage() {
   const [lookupError, setLookupError] = useState('')
   const [lookupLoading, setLookupLoading] = useState(false)
   const [isReturning, setIsReturning] = useState(false)
+  const savedEmailRef = useRef('')
   const [cookieConsent, setCookieConsent] = useState<'yes'|'no'|null>(null)
   const codeRefs = useRef<(HTMLInputElement | null)[]>([])
 
@@ -235,6 +236,7 @@ export default function BookingPage() {
             const saved = JSON.parse(decodeURIComponent(raw))
             if (saved.email && saved.name) {
               setContact({ name: saved.name, phone: saved.phone ?? '', email: saved.email })
+              savedEmailRef.current = saved.email
               setIsReturning(true)
             }
           } catch { /* ignore */ }
@@ -309,7 +311,7 @@ export default function BookingPage() {
     setFieldErrors({})
     setLoading(true)
 
-    if (isReturning) {
+    if (isReturning && contact.email.toLowerCase() === savedEmailRef.current.toLowerCase()) {
       try {
         const br = await fetch('/api/bookings', {
           method: 'POST',
@@ -644,7 +646,7 @@ export default function BookingPage() {
               {step === 4 && (
                 <form onSubmit={handleContactSubmit} noValidate>
                   <h2 className="text-xl font-black text-white mb-1">Uw gegevens</h2>
-                  {isReturning ? (
+                  {isReturning && contact.email.toLowerCase() === savedEmailRef.current.toLowerCase() ? (
                     <div className="flex items-center gap-2 bg-[#2176d4]/10 border border-[#2176d4]/20 rounded-xl px-4 py-2.5 mb-5">
                       <svg className="w-4 h-4 text-[#2176d4] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
                       <p className="text-sm text-[#2176d4]">Welkom terug, <strong>{contact.name}</strong> — geen verificatie nodig</p>
