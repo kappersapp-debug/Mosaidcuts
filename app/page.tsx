@@ -199,9 +199,14 @@ export default function BookingPage() {
   const savedEmailRef = useRef('')
   const [cookieConsent, setCookieConsent] = useState<'yes'|'no'|null>(null)
   const [showWaitlist, setShowWaitlist] = useState(false)
-  const [waitlistForm, setWaitlistForm] = useState({ name: '', phone: '', note: '' })
+  const [waitlistForm, setWaitlistForm] = useState({ name: '', phone: '', email: '', note: '' })
+  const [waitlistStep, setWaitlistStep] = useState<'form'|'verify'>('form')
+  const [waitlistCodeDigits, setWaitlistCodeDigits] = useState(['','','','','',''])
   const [waitlistLoading, setWaitlistLoading] = useState(false)
+  const [waitlistError, setWaitlistError] = useState('')
+  const [waitlistResendCooldown, setWaitlistResendCooldown] = useState(0)
   const [waitlistDone, setWaitlistDone] = useState(false)
+  const waitlistCodeRefs = useRef<(HTMLInputElement|null)[]>([])
   const codeRefs = useRef<(HTMLInputElement | null)[]>([])
 
   function getCookie(name: string) {
@@ -455,6 +460,45 @@ export default function BookingPage() {
     if (e.key === 'Backspace' && !codeDigits[i] && i > 0) codeRefs.current[i - 1]?.focus()
   }
 
+  async function handleWaitlistSubmit() {
+    setWaitlistError('')
+    if (!waitlistForm.name.trim() || !waitlistForm.phone.trim()) return
+    if (waitlistForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(waitlistForm.email)) {
+      setWaitlistError('Ongeldig e-mailadres'); return
+    }
+    setWaitlistLoading(true)
+    const skipVerify = !waitlistForm.email || (isReturning && waitlistForm.email.toLowerCase() === savedEmailRef.current.toLowerCase())
+    if (skipVerify) {
+      await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: waitlistForm.name, phone: waitlistForm.phone, email: waitlistForm.email, note: waitlistForm.note, preferred_date: date, service: service?.name ?? '' }) })
+      setWaitlistLoading(false); setWaitlistDone(true); return
+    }
+    try {
+      const r = await fetch('/api/verify/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: waitlistForm.email }) })
+      const d = await r.json()
+      if (!r.ok) { setWaitlistError(d.error ?? 'Fout bij verzenden code'); setWaitlistLoading(false); return }
+      if (d.devCode) setWaitlistCodeDigits(d.devCode.split(''))
+      setWaitlistStep('verify')
+      setWaitlistResendCooldown(60)
+      const interval = setInterval(() => setWaitlistResendCooldown(s => { if (s <= 1) { clearInterval(interval); return 0 } return s - 1 }), 1000)
+    } catch { setWaitlistError('Netwerkfout') }
+    setWaitlistLoading(false)
+  }
+
+  async function handleWaitlistVerify() {
+    setWaitlistError(''); setWaitlistLoading(true)
+    try {
+      const vr = await fetch('/api/verify/check', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: waitlistForm.email, code: waitlistCodeDigits.join('') }) })
+      const vd = await vr.json()
+      if (!vr.ok || !vd.valid) { setWaitlistError(vd.error ?? 'Ongeldige code'); return }
+      await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: waitlistForm.name, phone: waitlistForm.phone, email: waitlistForm.email, note: waitlistForm.note, preferred_date: date, service: service?.name ?? '' }) })
+      setWaitlistDone(true)
+    } catch { setWaitlistError('Netwerkfout') }
+    setWaitlistLoading(false)
+  }
+
   function handleCodePaste(e: React.ClipboardEvent) {
     const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
     if (text.length === 6) { setCodeDigits(text.split('')); codeRefs.current[5]?.focus(); e.preventDefault() }
@@ -597,7 +641,7 @@ export default function BookingPage() {
                 <div>
                   <h2 className="text-xl font-black text-white mb-1">Kies een datum</h2>
                   <p className="text-gray-500 text-sm mb-5">Selecteer een beschikbare dag</p>
-                  <Calendar value={date} availability={availability} blockedDates={blockedDates} onChange={d => { setDate(d); setShowWaitlist(false); setWaitlistDone(false) }} />
+                  <Calendar value={date} availability={availability} blockedDates={blockedDates} onChange={d => { setDate(d); setShowWaitlist(false); setWaitlistDone(false); setWaitlistStep('form'); setWaitlistCodeDigits(['','','','','','']); setWaitlistError('') }} />
                   <div className="flex gap-3 mt-6">
                     <button onClick={() => setStep(1)}
                       className="flex-1 py-3 rounded-xl border border-[#2a2a2a] font-bold text-gray-400 hover:border-[#333] hover:text-white transition-all">‹ Terug</button>
@@ -629,9 +673,41 @@ export default function BookingPage() {
                                 Zet me op de wachtlijst →
                               </button>
                             </div>
+                          ) : waitlistStep === 'verify' ? (
+                            <div className="bg-[#141414] rounded-2xl border border-[#2a2a2a] p-5 space-y-4">
+                              <div>
+                                <h3 className="font-bold text-white text-sm">Verificatie</h3>
+                                <p className="text-xs text-gray-500 mt-1">Code verstuurd naar <span className="text-white">{waitlistForm.email}</span></p>
+                              </div>
+                              {waitlistError && <p className="text-red-400 text-sm font-semibold">{waitlistError}</p>}
+                              <div className="flex justify-center gap-2">
+                                {waitlistCodeDigits.map((digit, i) => (
+                                  <input key={i} ref={el => { waitlistCodeRefs.current[i] = el }}
+                                    type="text" inputMode="numeric" maxLength={1} value={digit}
+                                    onChange={e => { const d = e.target.value.replace(/\D/g,'').slice(-1); const n=[...waitlistCodeDigits];n[i]=d;setWaitlistCodeDigits(n);if(d&&i<5)waitlistCodeRefs.current[i+1]?.focus() }}
+                                    onKeyDown={e => { if(e.key==='Backspace'&&!waitlistCodeDigits[i]&&i>0)waitlistCodeRefs.current[i-1]?.focus() }}
+                                    className="w-10 h-12 text-center text-xl font-black bg-[#0e0e0e] border-2 border-[#2a2a2a] text-white rounded-xl focus:outline-none focus:border-[#2176d4] transition-colors caret-transparent"/>
+                                ))}
+                              </div>
+                              <button onClick={handleWaitlistVerify} disabled={waitlistCodeDigits.join('').length < 6 || waitlistLoading}
+                                className="w-full py-2.5 rounded-xl bg-[#2176d4] text-white text-sm font-bold hover:bg-[#3080e0] disabled:opacity-40 transition-all">
+                                {waitlistLoading ? 'Bevestigen...' : 'Bevestigen'}
+                              </button>
+                              <button onClick={async () => { if(waitlistResendCooldown>0)return; setWaitlistCodeDigits(['','','','','','']); const r=await fetch('/api/verify/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:waitlistForm.email})}); if(r.ok){setWaitlistResendCooldown(60);const iv=setInterval(()=>setWaitlistResendCooldown(s=>{if(s<=1){clearInterval(iv);return 0}return s-1}),1000)} }} disabled={waitlistResendCooldown>0}
+                                className="w-full py-1.5 text-xs font-semibold text-[#2176d4] disabled:text-gray-700 disabled:cursor-not-allowed transition-colors">
+                                {waitlistResendCooldown > 0 ? `Opnieuw sturen (${waitlistResendCooldown}s)` : 'Code opnieuw sturen'}
+                              </button>
+                            </div>
                           ) : (
                             <div className="bg-[#141414] rounded-2xl border border-[#2a2a2a] p-5 space-y-4">
                               <h3 className="font-bold text-white text-sm">Wachtlijst voor {date ? new Date(date+'T12:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'long'}) : 'deze dag'}</h3>
+                              {isReturning && waitlistForm.email.toLowerCase() === savedEmailRef.current.toLowerCase() && (
+                                <div className="flex items-center gap-2 bg-[#2176d4]/10 border border-[#2176d4]/20 rounded-xl px-3 py-2">
+                                  <svg className="w-4 h-4 text-[#2176d4] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                                  <p className="text-xs text-[#2176d4]">Welkom terug, <strong>{waitlistForm.name}</strong> — geen verificatie nodig</p>
+                                </div>
+                              )}
+                              {waitlistError && <p className="text-red-400 text-sm font-semibold">{waitlistError}</p>}
                               <div>
                                 <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Naam *</label>
                                 <input value={waitlistForm.name} onChange={e=>setWaitlistForm(f=>({...f,name:e.target.value}))} placeholder="Uw naam"
@@ -640,6 +716,11 @@ export default function BookingPage() {
                               <div>
                                 <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Telefoon *</label>
                                 <input value={waitlistForm.phone} onChange={e=>setWaitlistForm(f=>({...f,phone:e.target.value}))} placeholder="06 12345678" type="tel"
+                                  className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+                              </div>
+                              <div>
+                                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">E-mail <span className="text-gray-700 normal-case font-normal">(optioneel)</span></label>
+                                <input type="email" value={waitlistForm.email} onChange={e=>setWaitlistForm(f=>({...f,email:e.target.value}))} placeholder="uw@email.com"
                                   className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
                               </div>
                               <div>
@@ -653,13 +734,9 @@ export default function BookingPage() {
                                   Annuleren
                                 </button>
                                 <button disabled={!waitlistForm.name || !waitlistForm.phone || waitlistLoading}
-                                  onClick={async () => {
-                                    setWaitlistLoading(true)
-                                    await fetch('/api/waitlist', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: waitlistForm.name, phone: waitlistForm.phone, note: waitlistForm.note, preferred_date: date, service: service?.name ?? '' }) })
-                                    setWaitlistLoading(false); setWaitlistDone(true)
-                                  }}
+                                  onClick={handleWaitlistSubmit}
                                   className="flex-1 py-2.5 rounded-xl bg-[#2176d4] text-white text-sm font-bold hover:bg-[#3080e0] disabled:opacity-40 transition-all">
-                                  {waitlistLoading ? 'Bezig...' : 'Aanmelden'}
+                                  {waitlistLoading ? 'Bezig...' : waitlistForm.email && !(isReturning && waitlistForm.email.toLowerCase() === savedEmailRef.current.toLowerCase()) ? 'Verificeren →' : 'Aanmelden'}
                                 </button>
                               </div>
                             </div>
