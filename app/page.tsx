@@ -29,30 +29,6 @@ function toDateStr(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function downloadICS(booking: BookingResult) {
-  const [year, month, day] = booking.date.split('-').map(Number)
-  const [hour, min] = booking.time.split(':').map(Number)
-  const start = new Date(year, month - 1, day, hour, min)
-  const end = new Date(start.getTime() + booking.duration * 60000)
-  const fmt = (d: Date) =>
-    `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}00`
-  const ics = [
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MoSaidCuts//NL',
-    'BEGIN:VEVENT',
-    `UID:${booking.code}@mosaidcuts.nl`,
-    `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`,
-    `SUMMARY:${booking.service} bij MoSaidCuts`,
-    `DESCRIPTION:Boekingscode: ${booking.code}\\nNaam: ${booking.name}`,
-    'LOCATION:MoSaidCuts Barbershop',
-    `DTSTAMP:${fmt(new Date())}`,
-    'END:VEVENT', 'END:VCALENDAR',
-  ].join('\r\n')
-  const blob = new Blob([ics], { type: 'text/calendar' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url; a.download = `mosaidcuts-${booking.code}.ics`; a.click()
-  URL.revokeObjectURL(url)
-}
 
 function googleCalLink(booking: BookingResult) {
   const [year, month, day] = booking.date.split('-').map(Number)
@@ -713,10 +689,10 @@ export default function BookingPage() {
                 ))}
               </div>
               <div className="space-y-3">
-                <button onClick={() => downloadICS(booking)}
-                  className="w-full py-3 px-4 rounded-xl border border-[#2a2a2a] text-gray-300 font-medium hover:border-[#2176d4]/50 hover:text-white transition-all">
-                  Agenda toevoegen (.ics)
-                </button>
+                <a href={`webcal://${typeof window !== 'undefined' ? window.location.host : ''}/api/calendar/${booking.code}.ics`}
+                  className="block w-full py-3 px-4 rounded-xl border border-[#2a2a2a] text-gray-300 font-medium hover:border-[#2176d4]/50 hover:text-white transition-all text-center">
+                  Agenda-abonnement (automatisch bijwerken)
+                </a>
                 <a href={googleCalLink(booking)} target="_blank" rel="noopener noreferrer"
                   className="block w-full py-3 px-4 rounded-xl border border-[#2a2a2a] text-gray-300 font-medium hover:border-[#2176d4]/50 hover:text-white transition-all text-center">
                   Google Agenda
