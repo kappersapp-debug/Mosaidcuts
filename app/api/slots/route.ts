@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
   // Generate slots
   const allSlots: string[] = []
-  for (let m = startMins; m < endMins; m += 30) {
+  for (let m = startMins; m < endMins; m += 15) {
     allSlots.push(`${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`)
   }
 

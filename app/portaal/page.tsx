@@ -87,7 +87,7 @@ function generateWorkSlots(start='09:00', end='17:00') {
   const [sh,sm] = start.split(':').map(Number)
   const [eh,em] = end.split(':').map(Number)
   const slots: string[] = []
-  for (let m = sh*60+sm; m < eh*60+em; m += 30)
+  for (let m = sh*60+sm; m < eh*60+em; m += 15)
     slots.push(`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`)
   return slots
 }
@@ -1255,9 +1255,10 @@ function CustomersView() {
 /* ─── Services ───────────────────────────────────────────── */
 interface ServiceItem { id: string; name: string; price: number; duration: number; desc: string }
 const DEFAULT_SERVICES: ServiceItem[] = [
-  {id:'knipbeurt', name:'Normale Knipbeurt', price:15, duration:30, desc:'30 minuten'},
-  {id:'baard', name:'Baard Trimmen', price:10, duration:20, desc:'20 minuten'},
-  {id:'knipbeurt-baard', name:'Knipbeurt + Baard', price:20, duration:30, desc:'30 minuten'},
+  {id:'knipbeurt', name:'Knipbeurt', price:20, duration:30, desc:'30 minuten'},
+  {id:'knipbeurt-baard', name:'Knipbeurt met baard', price:20, duration:30, desc:'30 minuten'},
+  {id:'baard-trimmen', name:'Baard trimmen', price:5, duration:15, desc:'15 minuten'},
+  {id:'contouren', name:'Contouren', price:5, duration:15, desc:'15 minuten'},
 ]
 
 function ServicesView() {

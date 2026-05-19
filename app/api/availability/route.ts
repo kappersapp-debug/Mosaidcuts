@@ -49,7 +49,7 @@ export async function GET(request: Request) {
     const [sh, sm] = dayStart.split(':').map(Number)
     const [eh, em] = dayEnd.split(':').map(Number)
     const slots: number[] = []
-    for (let m = sh * 60 + sm; m + duration <= eh * 60 + em; m += 30) slots.push(m)
+    for (let m = sh * 60 + sm; m + duration <= eh * 60 + em; m += 15) slots.push(m)
 
     const total = slots.length
     const dayBookings = (bookings ?? []).filter(b => b.date === ds)
