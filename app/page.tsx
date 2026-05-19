@@ -245,6 +245,7 @@ export default function BookingPage() {
             const saved = JSON.parse(decodeURIComponent(raw))
             if (saved.email && saved.name) {
               setContact({ name: saved.name, phone: saved.phone ?? '', email: saved.email })
+              setWaitlistForm(f => ({ ...f, name: saved.name, phone: saved.phone ?? '', email: saved.email }))
               savedEmailRef.current = saved.email
               setIsReturning(true)
             }
