@@ -472,6 +472,12 @@ export default function BookingPage() {
     if (skipVerify) {
       await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: waitlistForm.name, phone: waitlistForm.phone, email: waitlistForm.email, note: waitlistForm.note, preferred_date: date, service: service?.name ?? '' }) })
+      if (waitlistForm.email) {
+        saveCustomerCookie(waitlistForm.name, waitlistForm.phone, waitlistForm.email)
+        savedEmailRef.current = waitlistForm.email
+        setIsReturning(true)
+        setContact({ name: waitlistForm.name, phone: waitlistForm.phone, email: waitlistForm.email })
+      }
       setWaitlistLoading(false); setWaitlistDone(true); return
     }
     try {
@@ -492,9 +498,13 @@ export default function BookingPage() {
       const vr = await fetch('/api/verify/check', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: waitlistForm.email, code: waitlistCodeDigits.join('') }) })
       const vd = await vr.json()
-      if (!vr.ok || !vd.valid) { setWaitlistError(vd.error ?? 'Ongeldige code'); return }
+      if (!vr.ok || !vd.valid) { setWaitlistError(vd.error ?? 'Ongeldige code'); setWaitlistLoading(false); return }
       await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: waitlistForm.name, phone: waitlistForm.phone, email: waitlistForm.email, note: waitlistForm.note, preferred_date: date, service: service?.name ?? '' }) })
+      saveCustomerCookie(waitlistForm.name, waitlistForm.phone, waitlistForm.email)
+      savedEmailRef.current = waitlistForm.email
+      setIsReturning(true)
+      setContact({ name: waitlistForm.name, phone: waitlistForm.phone, email: waitlistForm.email })
       setWaitlistDone(true)
     } catch { setWaitlistError('Netwerkfout') }
     setWaitlistLoading(false)
