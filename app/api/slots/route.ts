@@ -69,10 +69,15 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Block slots overlapping with break time
-  if (settings.break_enabled === 'true' && settings.break_start && settings.break_end) {
-    const [bkSh, bkSm] = settings.break_start.split(':').map(Number)
-    const [bkEh, bkEm] = settings.break_end.split(':').map(Number)
+  // Block slots overlapping with break times
+  const breaks: { start: string; end: string }[] = settings.breaks
+    ? JSON.parse(settings.breaks)
+    : (settings.break_enabled === 'true' && settings.break_start && settings.break_end)
+      ? [{ start: settings.break_start, end: settings.break_end }]
+      : []
+  for (const brk of breaks) {
+    const [bkSh, bkSm] = brk.start.split(':').map(Number)
+    const [bkEh, bkEm] = brk.end.split(':').map(Number)
     const bkStart = bkSh * 60 + bkSm
     const bkEnd = bkEh * 60 + bkEm
     for (const slot of allSlots) {

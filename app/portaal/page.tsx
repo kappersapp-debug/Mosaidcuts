@@ -415,22 +415,21 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
 }
 
 /* ─── Dashboard ──────────────────────────────────────────── */
-function isBreak(slot: string, enabled: boolean, bStart: string, bEnd: string) {
-  if (!enabled) return false
+function isBreak(slot: string, breaks: {start: string; end: string}[]) {
   const [sh, sm] = slot.split(':').map(Number)
-  const [bsh, bsm] = bStart.split(':').map(Number)
-  const [beh, bem] = bEnd.split(':').map(Number)
   const sMin = sh * 60 + sm
-  return sMin >= bsh * 60 + bsm && sMin < beh * 60 + bem
+  return breaks.some(b => {
+    const [bsh, bsm] = b.start.split(':').map(Number)
+    const [beh, bem] = b.end.split(':').map(Number)
+    return sMin >= bsh * 60 + bsm && sMin < beh * 60 + bem
+  })
 }
 
 function DashboardView({ onNavigate }: { onNavigate: (view: string) => void }) {
   const [stats, setStats] = useState<{today:number;week:number;weekRevenue:number;totalCustomers:number;todayBookings:Booking[]}|null>(null)
   const [upcoming, setUpcoming] = useState<Booking[]>([])
   const [workSlots, setWorkSlots] = useState<string[]>(generateWorkSlots())
-  const [breakEnabled, setBreakEnabled] = useState(false)
-  const [breakStart, setBreakStart] = useState('12:00')
-  const [breakEnd, setBreakEnd] = useState('13:00')
+  const [breaks, setBreaks] = useState<{start: string; end: string}[]>([])
   const [waitlistCount, setWaitlistCount] = useState<number|null>(null)
   const [lastUpdated, setLastUpdated] = useState('')
 
@@ -463,9 +462,8 @@ function DashboardView({ onNavigate }: { onNavigate: (view: string) => void }) {
       } else {
         setWorkSlots(generateWorkSlots(s.work_start??'09:00', s.work_end??'17:00'))
       }
-      if (s.break_enabled) setBreakEnabled(s.break_enabled==='true')
-      if (s.break_start) setBreakStart(s.break_start)
-      if (s.break_end) setBreakEnd(s.break_end)
+      if (s.breaks) setBreaks(JSON.parse(s.breaks))
+      else if (s.break_enabled === 'true' && s.break_start && s.break_end) setBreaks([{start: s.break_start, end: s.break_end}])
     })
     const id = setInterval(loadDashboard, 60_000)
     return () => clearInterval(id)
@@ -596,7 +594,7 @@ function DashboardView({ onNavigate }: { onNavigate: (view: string) => void }) {
             {workSlots.length === 0 && <p className="text-center text-gray-600 text-sm py-10">Geen werkrooster vandaag</p>}
             {workSlots.map(slot=>{
               const b = stats?.todayBookings?.find(b=>b.time===slot)
-              const isPause = isBreak(slot, breakEnabled, breakStart, breakEnd)
+              const isPause = isBreak(slot, breaks)
               return (
                 <div key={slot} className={`flex items-center gap-3 px-4 py-2.5 border-b border-[#1a1a1a] transition-colors ${b?'bg-[#2176d4]/4 hover:bg-[#2176d4]/6':isPause?'bg-amber-900/8':'hover:bg-white/2'}`}>
                   <span className={`font-black text-[11px] w-12 text-center shrink-0 px-1.5 py-1 rounded-lg ${b?'bg-[#2176d4] text-white':isPause?'bg-amber-900/30 text-amber-500':'bg-[#1e1e1e] text-gray-500'}`}>{slot}</span>
@@ -630,9 +628,7 @@ function CalendarView() {
   const dayBookings = useMemo(() => monthBookings.filter(b => b.date === selectedDay), [selectedDay, monthBookings])
   const [schedule, setSchedule] = useState<Record<string,{open:boolean;start:string;end:string}>>(DEFAULT_SCHEDULE)
   const [blockedDates, setBlockedDates] = useState<string[]>([])
-  const [breakEnabled, setBreakEnabled] = useState(false)
-  const [breakStart, setBreakStart] = useState('12:00')
-  const [breakEnd, setBreakEnd] = useState('13:00')
+  const [breaks, setBreaks] = useState<{start: string; end: string}[]>([])
 
   const monthStr = `${viewMonth.getFullYear()}-${String(viewMonth.getMonth()+1).padStart(2,'0')}`
 
@@ -645,9 +641,8 @@ function CalendarView() {
         setSchedule(prev => { const u={...prev}; for(const k of Object.keys(u)) u[k]={...u[k],start,end}; return u })
       }
       if(s.blocked_dates) setBlockedDates(JSON.parse(s.blocked_dates))
-      if(s.break_enabled) setBreakEnabled(s.break_enabled==='true')
-      if(s.break_start) setBreakStart(s.break_start)
-      if(s.break_end) setBreakEnd(s.break_end)
+      if (s.breaks) setBreaks(JSON.parse(s.breaks))
+      else if (s.break_enabled === 'true' && s.break_start && s.break_end) setBreaks([{start: s.break_start, end: s.break_end}])
     })
   },[])
 
@@ -747,7 +742,7 @@ function CalendarView() {
             ) : null}
             {slots.map(slot=>{
               const b = dayBookings.find(b=>b.time===slot)
-              const isPause = isBreak(slot, breakEnabled, breakStart, breakEnd)
+              const isPause = isBreak(slot, breaks)
               return (
                 <div key={slot} className={`flex items-center gap-3 px-3 py-2.5 border-b border-[#1e1e1e] ${b?'bg-[#2176d4]/5':isPause?'bg-amber-900/10':'bg-[#161616]'}`}>
                   <span className={`font-black text-xs w-14 text-center shrink-0 px-2 py-1 rounded-lg ${b?'bg-[#2176d4] text-white':isPause?'bg-amber-900/30 text-amber-400':'bg-[#1e1e1e] text-[#2176d4] border border-[#2176d4]/20'}`}>{slot}</span>
@@ -1880,9 +1875,7 @@ const DEFAULT_SCHEDULE: Record<string, DayConfig> = {
 
 function SettingsView() {
   const [daySchedule, setDaySchedule] = useState<Record<string, DayConfig>>(DEFAULT_SCHEDULE)
-  const [breakEnabled, setBreakEnabled] = useState(false)
-  const [breakStart, setBreakStart] = useState('12:00')
-  const [breakEnd, setBreakEnd] = useState('13:00')
+  const [breaks, setBreaks] = useState<{start: string; end: string}[]>([])
   const [blockedDates, setBlockedDates] = useState<string[]>([])
 
   const [currentPw, setCurrentPw] = useState(''); const [newPw, setNewPw] = useState(''); const [confirmPw, setConfirmPw] = useState('')
@@ -1908,10 +1901,8 @@ function SettingsView() {
         })
       }
       if(s.blocked_dates) setBlockedDates(JSON.parse(s.blocked_dates))
-      if(s.break_enabled) setBreakEnabled(s.break_enabled==='true')
-      if(s.break_start) setBreakStart(s.break_start)
-      if(s.break_end) setBreakEnd(s.break_end)
-
+      if (s.breaks) setBreaks(JSON.parse(s.breaks))
+      else if (s.break_enabled === 'true' && s.break_start && s.break_end) setBreaks([{start: s.break_start, end: s.break_end}])
     })
   },[])
 
@@ -1984,34 +1975,38 @@ function SettingsView() {
         <div className="mt-4 pt-4 border-t border-[#1e1e1e]">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="font-semibold text-white text-sm">Pauze</p>
-              <p className="text-xs text-gray-500">Geen boekingen tijdens pauze</p>
+              <p className="font-semibold text-white text-sm">Pauzes</p>
+              <p className="text-xs text-gray-500">Geen boekingen tijdens pauzes</p>
             </div>
-            <Toggle value={breakEnabled} onChange={setBreakEnabled}/>
+            <button onClick={()=>setBreaks(prev=>[...prev,{start:'12:00',end:'13:00'}])}
+              className="flex items-center gap-1 px-3 py-1.5 bg-[#2176d4]/10 border border-[#2176d4]/20 text-[#2176d4] rounded-xl text-xs font-bold hover:bg-[#2176d4]/20 transition-colors">
+              + Pauze
+            </button>
           </div>
-          {breakEnabled && (
-            <div className="flex items-center gap-2 mt-2">
-              <select value={breakStart} onChange={e=>setBreakStart(e.target.value)}
-                className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
-                {timeOptions.map(t=><option key={t} value={t}>{t}</option>)}
-              </select>
-              <span className="text-gray-500 font-bold text-sm">→</span>
-              <select value={breakEnd} onChange={e=>setBreakEnd(e.target.value)}
-                className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
-                {timeOptions.filter(t=>t>breakStart).map(t=><option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-          )}
+          {breaks.length === 0 && <p className="text-xs text-gray-600 italic">Geen pauzes ingesteld</p>}
+          <div className="space-y-2">
+            {breaks.map((brk, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <select value={brk.start} onChange={e=>setBreaks(prev=>prev.map((b,j)=>j===i?{...b,start:e.target.value}:b))}
+                  className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
+                  {timeOptions.map(t=><option key={t} value={t}>{t}</option>)}
+                </select>
+                <span className="text-gray-500 font-bold text-sm">→</span>
+                <select value={brk.end} onChange={e=>setBreaks(prev=>prev.map((b,j)=>j===i?{...b,end:e.target.value}:b))}
+                  className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
+                  {timeOptions.filter(t=>t>brk.start).map(t=><option key={t} value={t}>{t}</option>)}
+                </select>
+                <button onClick={()=>setBreaks(prev=>prev.filter((_,j)=>j!==i))}
+                  className="w-7 h-7 flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors text-lg leading-none">×</button>
+              </div>
+            ))}
+          </div>
         </div>
         <div className="flex items-center gap-3 mt-4">
           <button onClick={async()=>{
             await Promise.all([
               save('day_schedule', JSON.stringify(daySchedule), 'schedule'),
-              save('break_enabled', String(breakEnabled), 'schedule'),
-              ...(breakEnabled ? [
-                save('break_start', breakStart, 'schedule'),
-                save('break_end', breakEnd, 'schedule'),
-              ] : []),
+              save('breaks', JSON.stringify(breaks), 'schedule'),
             ])
           }} disabled={saving.schedule}
             className="px-5 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-50 transition-all duration-200">

@@ -52,8 +52,8 @@ export async function GET(req: NextRequest) {
     'METHOD:PUBLISH',
     'X-WR-CALNAME:MoSaidCuts Afspraken',
     'X-WR-TIMEZONE:Europe/Amsterdam',
-    'REFRESH-INTERVAL;VALUE=DURATION:PT15M',
-    'X-PUBLISHED-TTL:PT15M',
+    'REFRESH-INTERVAL;VALUE=DURATION:PT1M',
+    'X-PUBLISHED-TTL:PT1M',
     ...events,
     'END:VCALENDAR',
   ].join('\r\n')
