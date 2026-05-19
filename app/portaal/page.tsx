@@ -429,7 +429,7 @@ function DashboardView({ onNavigate }: { onNavigate: (view: View) => void }) {
   const [stats, setStats] = useState<{today:number;week:number;weekRevenue:number;totalCustomers:number;todayBookings:Booking[]}|null>(null)
   const [upcoming, setUpcoming] = useState<Booking[]>([])
   const [workSlots, setWorkSlots] = useState<string[]>(generateWorkSlots())
-  const [breaks, setBreaks] = useState<{start: string; end: string}[]>([])
+  const [dayBreaks, setDayBreaks] = useState<BreakSlot[]>([])
   const [waitlistCount, setWaitlistCount] = useState<number|null>(null)
   const [lastUpdated, setLastUpdated] = useState('')
 
@@ -456,14 +456,15 @@ function DashboardView({ onNavigate }: { onNavigate: (view: View) => void }) {
       const s = d.settings??{}
       const dow = String(new Date().getDay())
       if (s.day_schedule) {
-        const sched: Record<string,{open:boolean;start:string;end:string}> = JSON.parse(s.day_schedule)
+        const sched: Record<string,DayConfig> = JSON.parse(s.day_schedule)
         const cfg = sched[dow]
         setWorkSlots(cfg?.open ? generateWorkSlots(cfg.start, cfg.end) : [])
+        setDayBreaks(cfg?.breaks ?? [])
       } else {
         setWorkSlots(generateWorkSlots(s.work_start??'09:00', s.work_end??'17:00'))
+        if (s.breaks) setDayBreaks(JSON.parse(s.breaks))
+        else if (s.break_enabled === 'true' && s.break_start && s.break_end) setDayBreaks([{start: s.break_start, end: s.break_end}])
       }
-      if (s.breaks) setBreaks(JSON.parse(s.breaks))
-      else if (s.break_enabled === 'true' && s.break_start && s.break_end) setBreaks([{start: s.break_start, end: s.break_end}])
     })
     const id = setInterval(loadDashboard, 60_000)
     return () => clearInterval(id)
@@ -594,7 +595,7 @@ function DashboardView({ onNavigate }: { onNavigate: (view: View) => void }) {
             {workSlots.length === 0 && <p className="text-center text-gray-600 text-sm py-10">Geen werkrooster vandaag</p>}
             {workSlots.map(slot=>{
               const b = stats?.todayBookings?.find(b=>b.time===slot)
-              const isPause = isBreak(slot, breaks)
+              const isPause = isBreak(slot, dayBreaks)
               return (
                 <div key={slot} className={`flex items-center gap-3 px-4 py-2.5 border-b border-[#1a1a1a] transition-colors ${b?'bg-[#2176d4]/4 hover:bg-[#2176d4]/6':isPause?'bg-amber-900/8':'hover:bg-white/2'}`}>
                   <span className={`font-black text-[11px] w-12 text-center shrink-0 px-1.5 py-1 rounded-lg ${b?'bg-[#2176d4] text-white':isPause?'bg-amber-900/30 text-amber-500':'bg-[#1e1e1e] text-gray-500'}`}>{slot}</span>
@@ -626,23 +627,24 @@ function CalendarView() {
   const [selectedDay, setSelectedDay] = useState(toDateStr(today))
   const [monthBookings, setMonthBookings] = useState<Booking[]>([])
   const dayBookings = useMemo(() => monthBookings.filter(b => b.date === selectedDay), [selectedDay, monthBookings])
-  const [schedule, setSchedule] = useState<Record<string,{open:boolean;start:string;end:string}>>(DEFAULT_SCHEDULE)
+  const [schedule, setSchedule] = useState<Record<string,DayConfig>>(DEFAULT_SCHEDULE)
   const [blockedDates, setBlockedDates] = useState<string[]>([])
-  const [breaks, setBreaks] = useState<{start: string; end: string}[]>([])
 
   const monthStr = `${viewMonth.getFullYear()}-${String(viewMonth.getMonth()+1).padStart(2,'0')}`
 
   useEffect(()=>{
     fetch('/api/portaal/settings').then(r=>r.json()).then(d=>{
       const s = d.settings??{}
-      if(s.day_schedule) setSchedule(JSON.parse(s.day_schedule))
-      else if(s.work_start || s.work_end) {
+      if(s.day_schedule) {
+        const parsed: Record<string,DayConfig> = JSON.parse(s.day_schedule)
+        for (const k of Object.keys(parsed)) parsed[k] = {...parsed[k], breaks: parsed[k].breaks ?? []}
+        setSchedule(parsed)
+      } else if(s.work_start || s.work_end) {
         const start = s.work_start ?? '09:00'; const end = s.work_end ?? '17:00'
-        setSchedule(prev => { const u={...prev}; for(const k of Object.keys(u)) u[k]={...u[k],start,end}; return u })
+        const legacyBreaks: BreakSlot[] = s.breaks ? JSON.parse(s.breaks) : (s.break_enabled==='true'&&s.break_start&&s.break_end) ? [{start:s.break_start,end:s.break_end}] : []
+        setSchedule(prev => { const u={...prev}; for(const k of Object.keys(u)) u[k]={...u[k],start,end,breaks:legacyBreaks}; return u })
       }
       if(s.blocked_dates) setBlockedDates(JSON.parse(s.blocked_dates))
-      if (s.breaks) setBreaks(JSON.parse(s.breaks))
-      else if (s.break_enabled === 'true' && s.break_start && s.break_end) setBreaks([{start: s.break_start, end: s.break_end}])
     })
   },[])
 
@@ -742,7 +744,7 @@ function CalendarView() {
             ) : null}
             {slots.map(slot=>{
               const b = dayBookings.find(b=>b.time===slot)
-              const isPause = isBreak(slot, breaks)
+              const isPause = isBreak(slot, dayCfg?.breaks ?? [])
               return (
                 <div key={slot} className={`flex items-center gap-3 px-3 py-2.5 border-b border-[#1e1e1e] ${b?'bg-[#2176d4]/5':isPause?'bg-amber-900/10':'bg-[#161616]'}`}>
                   <span className={`font-black text-xs w-14 text-center shrink-0 px-2 py-1 rounded-lg ${b?'bg-[#2176d4] text-white':isPause?'bg-amber-900/30 text-amber-400':'bg-[#1e1e1e] text-[#2176d4] border border-[#2176d4]/20'}`}>{slot}</span>
@@ -1863,20 +1865,20 @@ function Toggle({value, onChange}: {value:boolean; onChange:(v:boolean)=>void}) 
 }
 
 /* ─── Settings ───────────────────────────────────────────── */
-type DayConfig = { open: boolean; start: string; end: string }
+type BreakSlot = { start: string; end: string }
+type DayConfig = { open: boolean; start: string; end: string; breaks: BreakSlot[] }
 const DEFAULT_SCHEDULE: Record<string, DayConfig> = {
-  '0': {open:false, start:'09:00', end:'17:00'},
-  '1': {open:true,  start:'09:00', end:'17:00'},
-  '2': {open:true,  start:'09:00', end:'17:00'},
-  '3': {open:true,  start:'09:00', end:'17:00'},
-  '4': {open:true,  start:'09:00', end:'17:00'},
-  '5': {open:true,  start:'09:00', end:'17:00'},
-  '6': {open:false, start:'09:00', end:'17:00'},
+  '0': {open:false, start:'09:00', end:'17:00', breaks:[]},
+  '1': {open:true,  start:'09:00', end:'17:00', breaks:[]},
+  '2': {open:true,  start:'09:00', end:'17:00', breaks:[]},
+  '3': {open:true,  start:'09:00', end:'17:00', breaks:[]},
+  '4': {open:true,  start:'09:00', end:'17:00', breaks:[]},
+  '5': {open:true,  start:'09:00', end:'17:00', breaks:[]},
+  '6': {open:false, start:'09:00', end:'17:00', breaks:[]},
 }
 
 function SettingsView() {
   const [daySchedule, setDaySchedule] = useState<Record<string, DayConfig>>(DEFAULT_SCHEDULE)
-  const [breaks, setBreaks] = useState<{start: string; end: string}[]>([])
   const [blockedDates, setBlockedDates] = useState<string[]>([])
 
   const [currentPw, setCurrentPw] = useState(''); const [newPw, setNewPw] = useState(''); const [confirmPw, setConfirmPw] = useState('')
@@ -1887,8 +1889,14 @@ function SettingsView() {
   useEffect(()=>{
     fetch('/api/portaal/settings').then(r=>r.json()).then(d=>{
       const s = d.settings??{}
+      const legacyBreaks: BreakSlot[] = s.breaks ? JSON.parse(s.breaks) : (s.break_enabled==='true'&&s.break_start&&s.break_end) ? [{start:s.break_start,end:s.break_end}] : []
       if (s.day_schedule) {
-        setDaySchedule(JSON.parse(s.day_schedule))
+        const parsed: Record<string,DayConfig> = JSON.parse(s.day_schedule)
+        const hasPerDayBreaks = Object.values(parsed).some((d: DayConfig) => (d.breaks?.length ?? 0) > 0)
+        for (const day of Object.keys(parsed)) {
+          parsed[day] = {...parsed[day], breaks: parsed[day].breaks ?? ((!hasPerDayBreaks && parsed[day].open) ? legacyBreaks : [])}
+        }
+        setDaySchedule(parsed)
       } else {
         // backward compat: merge old availability + work_start/end into per-day schedule
         const avail = s.availability ? JSON.parse(s.availability) : {}
@@ -1897,13 +1905,11 @@ function SettingsView() {
         setDaySchedule(prev => {
           const updated = {...prev}
           for (const day of Object.keys(updated))
-            updated[day] = { open: avail[day] !== false, start, end }
+            updated[day] = { open: avail[day] !== false, start, end, breaks: (avail[day] !== false) ? legacyBreaks : [] }
           return updated
         })
       }
       if(s.blocked_dates) setBlockedDates(JSON.parse(s.blocked_dates))
-      if (s.breaks) setBreaks(JSON.parse(s.breaks))
-      else if (s.break_enabled === 'true' && s.break_start && s.break_end) setBreaks([{start: s.break_start, end: s.break_end}])
     })
   },[])
 
@@ -1931,6 +1937,15 @@ function SettingsView() {
   function updateDay(day: string, patch: Partial<DayConfig>) {
     setDaySchedule(s => ({...s, [day]: {...s[day], ...patch}}))
   }
+  function addBreak(day: string) {
+    setDaySchedule(s => ({...s, [day]: {...s[day], breaks: [...(s[day].breaks??[]), {start:'12:00', end:'13:00'}]}}))
+  }
+  function removeBreak(day: string, i: number) {
+    setDaySchedule(s => ({...s, [day]: {...s[day], breaks: (s[day].breaks??[]).filter((_,j)=>j!==i)}}))
+  }
+  function updateBreak(day: string, i: number, patch: Partial<BreakSlot>) {
+    setDaySchedule(s => ({...s, [day]: {...s[day], breaks: (s[day].breaks??[]).map((b,j)=>j===i?{...b,...patch}:b)}}))
+  }
 
   const timeOptions: string[] = []
   for(let h=6;h<=22;h++) for(let m=0;m<60;m+=30)
@@ -1949,67 +1964,60 @@ function SettingsView() {
         <div className="space-y-2 mb-4">
           {dayOrder.map(day => {
             const cfg = daySchedule[day]
+            const dayBreakList = cfg.breaks ?? []
             return (
-              <div key={day} className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-colors ${cfg.open ? 'border-[#2176d4]/20 bg-[#2176d4]/5' : 'border-[#1e1e1e] bg-[#111]'}`}>
-                <Toggle value={cfg.open} onChange={v => updateDay(day, {open: v})} />
-                <span className={`font-bold text-sm w-20 shrink-0 ${cfg.open ? 'text-white' : 'text-gray-600'}`}>{NL_DAY_LABELS[day]}</span>
-                {cfg.open ? (
-                  <div className="flex items-center gap-2 flex-1 flex-wrap">
-                    <select value={cfg.start} onChange={e => updateDay(day, {start: e.target.value})}
-                      className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
-                      {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
-                    <span className="text-gray-500 font-bold text-sm">→</span>
-                    <select value={cfg.end} onChange={e => updateDay(day, {end: e.target.value})}
-                      className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
-                      {timeOptions.filter(t => t > cfg.start).map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+              <div key={day} className={`rounded-xl border-2 transition-colors ${cfg.open ? 'border-[#2176d4]/20 bg-[#2176d4]/5' : 'border-[#1e1e1e] bg-[#111]'}`}>
+                <div className="flex items-center gap-3 p-3">
+                  <Toggle value={cfg.open} onChange={v => updateDay(day, {open: v})} />
+                  <span className={`font-bold text-sm w-20 shrink-0 ${cfg.open ? 'text-white' : 'text-gray-600'}`}>{NL_DAY_LABELS[day]}</span>
+                  {cfg.open ? (
+                    <div className="flex items-center gap-2 flex-1 flex-wrap">
+                      <select value={cfg.start} onChange={e => updateDay(day, {start: e.target.value})}
+                        className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
+                        {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                      <span className="text-gray-500 font-bold text-sm">→</span>
+                      <select value={cfg.end} onChange={e => updateDay(day, {end: e.target.value})}
+                        className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
+                        {timeOptions.filter(t => t > cfg.start).map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                  ) : (
+                    <span className="text-gray-600 text-sm font-medium italic flex-1">Gesloten</span>
+                  )}
+                  {cfg.open && (
+                    <button onClick={() => addBreak(day)}
+                      className="shrink-0 px-2.5 py-1 bg-amber-900/20 border border-amber-700/30 text-amber-400 rounded-lg text-xs font-bold hover:bg-amber-900/30 transition-colors">
+                      + Pauze
+                    </button>
+                  )}
+                </div>
+                {cfg.open && dayBreakList.length > 0 && (
+                  <div className="px-3 pb-3 space-y-2">
+                    {dayBreakList.map((brk, i) => (
+                      <div key={i} className="flex items-center gap-2 ml-7">
+                        <span className="text-amber-400/60 text-xs font-bold shrink-0">Pauze</span>
+                        <select value={brk.start} onChange={e => updateBreak(day, i, {start: e.target.value})}
+                          className="bg-[#1a1a1a] border-2 border-amber-700/30 text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-amber-500 transition-colors">
+                          {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                        <span className="text-gray-500 font-bold text-sm">→</span>
+                        <select value={brk.end} onChange={e => updateBreak(day, i, {end: e.target.value})}
+                          className="bg-[#1a1a1a] border-2 border-amber-700/30 text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-amber-500 transition-colors">
+                          {timeOptions.filter(t => t > brk.start).map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                        <button onClick={() => removeBreak(day, i)}
+                          className="w-7 h-7 flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors text-lg leading-none">×</button>
+                      </div>
+                    ))}
                   </div>
-                ) : (
-                  <span className="text-gray-600 text-sm font-medium italic flex-1">Gesloten</span>
                 )}
               </div>
             )
           })}
         </div>
-        {/* Pauze */}
-        <div className="mt-4 pt-4 border-t border-[#1e1e1e]">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="font-semibold text-white text-sm">Pauzes</p>
-              <p className="text-xs text-gray-500">Geen boekingen tijdens pauzes</p>
-            </div>
-            <button onClick={()=>setBreaks(prev=>[...prev,{start:'12:00',end:'13:00'}])}
-              className="flex items-center gap-1 px-3 py-1.5 bg-[#2176d4]/10 border border-[#2176d4]/20 text-[#2176d4] rounded-xl text-xs font-bold hover:bg-[#2176d4]/20 transition-colors">
-              + Pauze
-            </button>
-          </div>
-          {breaks.length === 0 && <p className="text-xs text-gray-600 italic">Geen pauzes ingesteld</p>}
-          <div className="space-y-2">
-            {breaks.map((brk, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <select value={brk.start} onChange={e=>setBreaks(prev=>prev.map((b,j)=>j===i?{...b,start:e.target.value}:b))}
-                  className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
-                  {timeOptions.map(t=><option key={t} value={t}>{t}</option>)}
-                </select>
-                <span className="text-gray-500 font-bold text-sm">→</span>
-                <select value={brk.end} onChange={e=>setBreaks(prev=>prev.map((b,j)=>j===i?{...b,end:e.target.value}:b))}
-                  className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
-                  {timeOptions.filter(t=>t>brk.start).map(t=><option key={t} value={t}>{t}</option>)}
-                </select>
-                <button onClick={()=>setBreaks(prev=>prev.filter((_,j)=>j!==i))}
-                  className="w-7 h-7 flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors text-lg leading-none">×</button>
-              </div>
-            ))}
-          </div>
-        </div>
         <div className="flex items-center gap-3 mt-4">
-          <button onClick={async()=>{
-            await Promise.all([
-              save('day_schedule', JSON.stringify(daySchedule), 'schedule'),
-              save('breaks', JSON.stringify(breaks), 'schedule'),
-            ])
-          }} disabled={saving.schedule}
+          <button onClick={()=>save('day_schedule', JSON.stringify(daySchedule), 'schedule')} disabled={saving.schedule}
             className="px-5 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-50 transition-all duration-200">
             {saving.schedule ? 'Opslaan...' : 'Opslaan'}
           </button>

@@ -26,13 +26,15 @@ export async function GET(request: NextRequest) {
   // Per-day schedule (new) or fall back to legacy availability + work_start/end
   let workStart = '09:00'
   let workEnd = '17:00'
+  let perDayBreaks: { start: string; end: string }[] | null = null
 
   if (settings.day_schedule) {
-    const schedule: Record<string, {open: boolean; start: string; end: string}> = JSON.parse(settings.day_schedule)
+    const schedule: Record<string, {open: boolean; start: string; end: string; breaks?: {start: string; end: string}[]}> = JSON.parse(settings.day_schedule)
     const cfg = schedule[String(dow)]
     if (!cfg || !cfg.open) return Response.json({ slots: [] })
     workStart = cfg.start
     workEnd = cfg.end
+    perDayBreaks = cfg.breaks ?? []
   } else {
     if (settings.availability) {
       const avail: Record<string, boolean> = JSON.parse(settings.availability)
@@ -71,12 +73,14 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Block slots overlapping with break times
-  const breaks: { start: string; end: string }[] = settings.breaks
-    ? JSON.parse(settings.breaks)
-    : (settings.break_enabled === 'true' && settings.break_start && settings.break_end)
-      ? [{ start: settings.break_start, end: settings.break_end }]
-      : []
+  // Block slots overlapping with break times (per-day breaks take priority over global)
+  const breaks: { start: string; end: string }[] = perDayBreaks !== null
+    ? perDayBreaks
+    : settings.breaks
+      ? JSON.parse(settings.breaks)
+      : (settings.break_enabled === 'true' && settings.break_start && settings.break_end)
+        ? [{ start: settings.break_start, end: settings.break_end }]
+        : []
   for (const brk of breaks) {
     const [bkSh, bkSm] = brk.start.split(':').map(Number)
     const [bkEh, bkEm] = brk.end.split(':').map(Number)
