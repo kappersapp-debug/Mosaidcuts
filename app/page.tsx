@@ -642,11 +642,11 @@ export default function BookingPage() {
                 <div>
                   <h2 className="text-xl font-black text-white mb-1">Kies een datum</h2>
                   <p className="text-gray-500 text-sm mb-5">Selecteer een beschikbare dag</p>
-                  <Calendar value={date} availability={availability} blockedDates={blockedDates} onChange={d => { setDate(d); setShowWaitlist(false); setWaitlistDone(false); setWaitlistStep('form'); setWaitlistCodeDigits(['','','','','','']); setWaitlistError('') }} />
+                  <Calendar value={date} availability={availability} blockedDates={blockedDates} onChange={d => { setDate(d); setTime(''); setShowWaitlist(false); setWaitlistDone(false); setWaitlistStep('form'); setWaitlistCodeDigits(['','','','','','']); setWaitlistError('') }} />
                   <div className="flex gap-3 mt-6">
                     <button onClick={() => setStep(1)}
                       className="flex-1 py-3 rounded-xl border border-[#2a2a2a] font-bold text-gray-400 hover:border-[#333] hover:text-white transition-all">‹ Terug</button>
-                    <button disabled={!date} onClick={() => { fetchSlots(date, service!.duration); setStep(3) }}
+                    <button disabled={!date} onClick={() => { setTime(''); fetchSlots(date, service!.duration); setStep(3) }}
                       className="flex-1 py-3 rounded-xl bg-[#2176d4] text-white font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-40 disabled:cursor-not-allowed transition-all">
                       Volgende ›
                     </button>
