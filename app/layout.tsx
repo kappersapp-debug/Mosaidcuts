@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="nl" className={`${nunito.variable} ${barlow.variable} ${bebasNeue.variable}`}>
-      <body className="min-h-screen bg-gray-50">{children}</body>
+      <body className="min-h-screen bg-[#0c0c0c]">{children}</body>
     </html>
   )
 }
