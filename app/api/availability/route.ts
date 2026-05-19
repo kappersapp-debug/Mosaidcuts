@@ -56,8 +56,9 @@ export async function GET(request: Request) {
 
     const [sh, sm] = dayStart.split(':').map(Number)
     const [eh, em] = dayEnd.split(':').map(Number)
+    const endM = eh === 0 && em === 0 ? 1440 : eh * 60 + em
     const slots: number[] = []
-    for (let m = sh * 60 + sm; m + duration <= eh * 60 + em; m += 15) slots.push(m)
+    for (let m = sh * 60 + sm; m + duration <= endM; m += 15) slots.push(m)
 
     const isToday = ds === todayNl
     const futureSlots = isToday ? slots.filter(s => s > nowMinsToday) : slots

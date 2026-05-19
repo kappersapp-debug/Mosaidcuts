@@ -212,7 +212,8 @@ export async function PATCH(request: Request) {
         if (!cfg?.open) return Response.json({ error: 'Dit tijdslot is al bezet' }, { status: 409 })
         workStart = cfg.start ?? '09:00'; workEnd = cfg.end ?? '17:00'
         const [wsh, wsm] = workStart.split(':').map(Number); const [weh, wem] = workEnd.split(':').map(Number)
-        if (tStart < wsh * 60 + wsm || tStart + dur > weh * 60 + wem) return Response.json({ error: 'Dit tijdslot is al bezet' }, { status: 409 })
+        const workEndMins = weh === 0 && wem === 0 ? 1440 : weh * 60 + wem
+        if (tStart < wsh * 60 + wsm || tStart + dur > workEndMins) return Response.json({ error: 'Dit tijdslot is al bezet' }, { status: 409 })
         const breaks: { start: string; end: string }[] = cfg.breaks ?? []
         for (const brk of breaks) {
           const [bs, bsm2] = brk.start.split(':').map(Number); const [be, bem2] = brk.end.split(':').map(Number)

@@ -82,7 +82,7 @@ export async function POST(request: Request) {
   const [wsH, wsM] = workStart.split(':').map(Number)
   const [weH, weM] = workEnd.split(':').map(Number)
   const workStartMins = wsH * 60 + wsM
-  const workEndMins = weH * 60 + weM
+  const workEndMins = weH === 0 && weM === 0 ? 1440 : weH * 60 + weM
   const [th2, tm2] = time.split(':').map(Number)
   const tStartCheck = th2 * 60 + tm2
   if (tStartCheck < workStartMins || tStartCheck + duration > workEndMins) {

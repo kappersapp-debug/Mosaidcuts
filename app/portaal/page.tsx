@@ -83,11 +83,16 @@ function AnimatedNumber({ value }: { value: number | string }) {
   return <>{display}</>
 }
 
+function toMins(t: string): number {
+  const [h, m] = t.split(':').map(Number)
+  return h === 0 && m === 0 ? 1440 : h * 60 + m
+}
+
 function generateWorkSlots(start='09:00', end='17:00') {
-  const [sh,sm] = start.split(':').map(Number)
-  const [eh,em] = end.split(':').map(Number)
+  const startM = toMins(start)
+  const endM = toMins(end)
   const slots: string[] = []
-  for (let m = sh*60+sm; m < eh*60+em; m += 15)
+  for (let m = startM; m < endM; m += 15)
     slots.push(`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`)
   return slots
 }
@@ -1953,10 +1958,10 @@ function SettingsView() {
   }
 
   const timeOptions: string[] = []
-  for(let h=6;h<=22;h++) for(let m=0;m<60;m+=30)
+  for(let h=6;h<=23;h++) for(let m=0;m<60;m+=30)
     timeOptions.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`)
   const timeOptions15: string[] = []
-  for(let h=6;h<=22;h++) for(let m=0;m<60;m+=15)
+  for(let h=6;h<=23;h++) for(let m=0;m<60;m+=15)
     timeOptions15.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`)
 
   const dayOrder = ['1','2','3','4','5','6','0']
@@ -1987,7 +1992,7 @@ function SettingsView() {
                       <span className="text-gray-500 font-bold text-sm">→</span>
                       <select value={cfg.end} onChange={e => updateDay(day, {end: e.target.value})}
                         className="bg-[#1a1a1a] border-2 border-[#333] text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#2176d4] transition-colors">
-                        {timeOptions.filter(t => t > cfg.start).map(t => <option key={t} value={t}>{t}</option>)}
+                        {[...timeOptions.filter(t => t > cfg.start), '00:00'].map(t => <option key={t} value={t}>{t === '00:00' ? '00:00 (middernacht)' : t}</option>)}
                       </select>
                     </div>
                   ) : (

@@ -74,7 +74,8 @@ export async function POST(request: Request) {
   const [weH, weM] = workEnd.split(':').map(Number)
   const [tH, tM] = time.split(':').map(Number)
   const tMins = tH * 60 + tM
-  if (tMins < wsH * 60 + wsM || tMins + booking.duration > weH * 60 + weM) {
+  const workEndMins = weH === 0 && weM === 0 ? 1440 : weH * 60 + weM
+  if (tMins < wsH * 60 + wsM || tMins + booking.duration > workEndMins) {
     return Response.json({ error: 'Dit tijdslot is niet beschikbaar' }, { status: 409 })
   }
 

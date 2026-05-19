@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
   const [startH, startM] = workStart.split(':').map(Number)
   const [endH, endM] = workEnd.split(':').map(Number)
   const startMins = startH * 60 + startM
-  const endMins = endH * 60 + endM
+  const endMins = endH === 0 && endM === 0 ? 1440 : endH * 60 + endM
 
   // Generate slots
   const allSlots: string[] = []
