@@ -425,7 +425,7 @@ function isBreak(slot: string, breaks: {start: string; end: string}[]) {
   })
 }
 
-function DashboardView({ onNavigate }: { onNavigate: (view: string) => void }) {
+function DashboardView({ onNavigate }: { onNavigate: (view: View) => void }) {
   const [stats, setStats] = useState<{today:number;week:number;weekRevenue:number;totalCustomers:number;todayBookings:Booking[]}|null>(null)
   const [upcoming, setUpcoming] = useState<Booking[]>([])
   const [workSlots, setWorkSlots] = useState<string[]>(generateWorkSlots())
