@@ -89,11 +89,13 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
   }
 
-  // Reject past time slots for today (server UTC+1 = NL winter time, conservative)
-  const todayServer = new Date().toISOString().split('T')[0]
+  // Reject past time slots for today (correct for both CET UTC+1 and CEST UTC+2)
+  const nowNlStr = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Amsterdam' })
+  const todayServer = nowNlStr.split(' ')[0]
   if (date === todayServer) {
-    const nowNl = new Date(Date.now() + 60 * 60 * 1000)
-    const nowNlMins = nowNl.getUTCHours() * 60 + nowNl.getUTCMinutes()
+    const [, timePart] = nowNlStr.split(' ')
+    const [nlH, nlM] = timePart.split(':').map(Number)
+    const nowNlMins = nlH * 60 + nlM
     if (tStartCheck <= nowNlMins) {
       return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
     }

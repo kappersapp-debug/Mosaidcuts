@@ -92,6 +92,7 @@ export async function POST(request: Request) {
   const rescheduleUrl = `${base}/?verzet=${booking.code}`
   try {
     await transporter.sendMail({
+      from: `MoSaidCuts ✂ <${process.env.GMAIL_USER}>`,
       to: booking.email,
       subject: `Afspraak verzet – ${booking.code}`,
       html: `
