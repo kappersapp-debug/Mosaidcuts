@@ -32,7 +32,8 @@ export async function POST(request: Request) {
       .eq('key', 'portal_password')
       .single()
 
-    const stored = plainRow?.value ?? 'admin'
+    const stored = plainRow?.value
+    if (!stored) return Response.json({ error: 'Ongeldig wachtwoord' }, { status: 401 })
     if (password !== stored) return Response.json({ error: 'Ongeldig wachtwoord' }, { status: 401 })
 
     // Migrate: hash and save, remove old row

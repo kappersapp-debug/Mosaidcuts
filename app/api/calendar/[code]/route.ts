@@ -4,6 +4,9 @@ import { NextRequest } from 'next/server'
 function fmt(d: Date) {
   return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}00`
 }
+function icsEsc(s: unknown) {
+  return String(s ?? '').replace(/[\r\n]/g, ' ').replace(/,/g, '\\,').replace(/;/g, '\\;')
+}
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ code: string }> }) {
   const { code: rawCode } = await params
@@ -34,8 +37,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ cod
     `UID:${booking.code}@mosaidcuts.nl`,
     `DTSTART;TZID=Europe/Amsterdam:${fmt(start)}`,
     `DTEND;TZID=Europe/Amsterdam:${fmt(end)}`,
-    `SUMMARY:${booking.service} bij MoSaidCuts`,
-    `DESCRIPTION:Boekingscode: ${booking.code}\\nNaam: ${booking.name}\\nPrijs: €${booking.price}`,
+    `SUMMARY:${icsEsc(booking.service)} bij MoSaidCuts`,
+    `DESCRIPTION:Boekingscode: ${booking.code}\\nNaam: ${icsEsc(booking.name)}\\nPrijs: €${booking.price}`,
     'LOCATION:MoSaidCuts Barbershop',
     `DTSTAMP:${now}Z`,
     `LAST-MODIFIED:${now}Z`,

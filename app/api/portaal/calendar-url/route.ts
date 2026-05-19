@@ -6,7 +6,9 @@ export async function GET(req: NextRequest) {
     return Response.json({ error: 'Niet ingelogd' }, { status: 401 })
   }
   const host = req.headers.get('host') ?? ''
-  const proto = host.startsWith('localhost') ? 'webcal' : 'webcal'
   const token = process.env.CRON_SECRET ?? ''
-  return Response.json({ url: `${proto}://${host}/api/portaal/calendar?token=${token}` })
+  const httpProto = host.startsWith('localhost') ? 'http' : 'https'
+  const url = `webcal://${host}/api/portaal/calendar?token=${token}`
+  const httpUrl = `${httpProto}://${host}/api/portaal/calendar?token=${token}`
+  return Response.json({ url, httpUrl })
 }

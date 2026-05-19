@@ -4,6 +4,9 @@ import { NextRequest } from 'next/server'
 function fmt(d: Date) {
   return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}00`
 }
+function icsEsc(s: unknown) {
+  return String(s ?? '').replace(/[\r\n]/g, ' ').replace(/,/g, '\\,').replace(/;/g, '\\;')
+}
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token')
@@ -38,8 +41,8 @@ export async function GET(req: NextRequest) {
       `UID:${b.code}@mosaidcuts.nl`,
       `DTSTART;TZID=Europe/Amsterdam:${fmt(start)}`,
       `DTEND;TZID=Europe/Amsterdam:${fmt(end)}`,
-      `SUMMARY:${b.name} – ${b.service}`,
-      `DESCRIPTION:Code: ${b.code}\\nDienst: ${b.service}\\nPrijs: €${b.price}\\nTel: ${b.phone}`,
+      `SUMMARY:${icsEsc(b.name)} – ${icsEsc(b.service)}`,
+      `DESCRIPTION:Code: ${b.code}\\nDienst: ${icsEsc(b.service)}\\nPrijs: €${b.price}\\nTel: ${icsEsc(b.phone)}`,
       'LOCATION:MoSaidCuts Barbershop',
       `DTSTAMP:${now}Z`,
       `LAST-MODIFIED:${now}Z`,
@@ -58,7 +61,7 @@ export async function GET(req: NextRequest) {
       `UID:${b.code}@mosaidcuts.nl`,
       `DTSTART;TZID=Europe/Amsterdam:${fmt(start)}`,
       `DTEND;TZID=Europe/Amsterdam:${fmt(end)}`,
-      `SUMMARY:❌ ${b.name} – ${b.service}`,
+      `SUMMARY:❌ ${icsEsc(b.name)} – ${icsEsc(b.service)}`,
       `DTSTAMP:${now}Z`,
       `LAST-MODIFIED:${now}Z`,
       'STATUS:CANCELLED',

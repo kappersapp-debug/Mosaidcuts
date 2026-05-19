@@ -49,25 +49,29 @@ export async function POST(request: Request) {
 
   const dow = new Date(date + 'T12:00:00').getDay()
 
-  if (settings.blocked_dates) {
-    const blocked: string[] = JSON.parse(settings.blocked_dates)
-    if (blocked.includes(date)) return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
-  }
+  try {
+    if (settings.blocked_dates) {
+      const blocked: string[] = JSON.parse(settings.blocked_dates)
+      if (blocked.includes(date)) return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
+    }
+  } catch { /* corrupt setting — skip block check */ }
 
   let workStart = '09:00'
   let workEnd = '17:00'
-  if (settings.day_schedule) {
-    const schedule: Record<string, { open: boolean; start: string; end: string }> = JSON.parse(settings.day_schedule)
-    const cfg = schedule[String(dow)]
-    if (!cfg || !cfg.open) return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
-    workStart = cfg.start
-    workEnd = cfg.end
-  } else if (settings.availability) {
-    const avail: Record<string, boolean> = JSON.parse(settings.availability)
-    if (avail[String(dow)] === false) return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
-    workStart = settings.work_start ?? '09:00'
-    workEnd = settings.work_end ?? '17:00'
-  }
+  try {
+    if (settings.day_schedule) {
+      const schedule: Record<string, { open: boolean; start: string; end: string }> = JSON.parse(settings.day_schedule)
+      const cfg = schedule[String(dow)]
+      if (!cfg || !cfg.open) return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
+      workStart = cfg.start
+      workEnd = cfg.end
+    } else if (settings.availability) {
+      const avail: Record<string, boolean> = JSON.parse(settings.availability)
+      if (avail[String(dow)] === false) return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
+      workStart = settings.work_start ?? '09:00'
+      workEnd = settings.work_end ?? '17:00'
+    }
+  } catch { /* corrupt setting — use defaults */ }
   const [wsH, wsM] = workStart.split(':').map(Number)
   const [weH, weM] = workEnd.split(':').map(Number)
   const workStartMins = wsH * 60 + wsM
