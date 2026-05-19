@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Boeking niet gevonden' }, { status: 404 })
   }
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Amsterdam' }).split(' ')[0]
   if (date < today) {
     return Response.json({ error: 'Datum is in het verleden' }, { status: 409 })
   }

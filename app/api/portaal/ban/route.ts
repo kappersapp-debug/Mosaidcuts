@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   if (!email) return Response.json({ error: 'email vereist' }, { status: 400 })
 
   const lowerEmail = email.toLowerCase()
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Amsterdam' }).split(' ')[0]
 
   const { error } = await supabaseAdmin.from('banned_emails').upsert({
     email: lowerEmail,

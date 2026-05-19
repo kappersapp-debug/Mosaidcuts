@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     return new Response('Unauthorized', { status: 401 })
   }
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Amsterdam' }).split(' ')[0]
 
   const { data: bookings } = await supabaseAdmin
     .from('bookings')

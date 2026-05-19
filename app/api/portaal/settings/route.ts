@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     const { data: existing } = await supabaseAdmin.from('settings').select('value').eq('key', 'services').single()
     if (existing?.value) {
       const oldServices: { id: string; name: string; duration: number }[] = JSON.parse(existing.value)
-      const today = new Date().toISOString().slice(0, 10)
+      const today = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Amsterdam' }).split(' ')[0]
       for (const newSvc of newServices) {
         const oldSvc = oldServices.find(s => s.id === newSvc.id)
         if (oldSvc && oldSvc.duration !== newSvc.duration) {

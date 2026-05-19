@@ -107,6 +107,20 @@ export async function POST(request: Request) {
     if (banned) return Response.json({ error: 'Boeking niet mogelijk' }, { status: 403 })
   }
 
+  // Check breaks
+  try {
+    const dayBreaks: { start: string; end: string }[] = settings.day_schedule
+      ? (JSON.parse(settings.day_schedule)[String(dow)]?.breaks ?? [])
+      : settings.breaks ? JSON.parse(settings.breaks) : []
+    for (const brk of dayBreaks) {
+      const [bsh, bsm] = brk.start.split(':').map(Number)
+      const [beh, bem] = brk.end.split(':').map(Number)
+      if ((bsh * 60 + bsm) < tStartCheck + duration && tStartCheck < (beh * 60 + bem)) {
+        return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
+      }
+    }
+  } catch { /* corrupt setting */ }
+
   // Check again if slot is still available
   const { data: existing } = await supabaseAdmin
     .from('bookings')
@@ -128,12 +142,11 @@ export async function POST(request: Request) {
 
   // Generate unique booking code
   let code = generateCode()
-  let attempt = 0
-  while (attempt < 5) {
+  for (let attempt = 0; attempt < 10; attempt++) {
     const { data: exists } = await supabaseAdmin.from('bookings').select('id').eq('code', code).single()
     if (!exists) break
+    if (attempt === 9) return Response.json({ error: 'Kon geen unieke code genereren' }, { status: 500 })
     code = generateCode()
-    attempt++
   }
 
   const { error } = await supabaseAdmin.from('bookings').insert({

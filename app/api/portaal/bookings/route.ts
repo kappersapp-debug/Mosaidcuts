@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
   const search = searchParams.get('search') ?? ''
   const month = searchParams.get('month') // YYYY-MM for calendar
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Amsterdam' }).split(' ')[0]
 
   // Polling endpoint: return new bookings + cancellations since `since`
   const since = searchParams.get('since')
@@ -192,19 +192,41 @@ export async function PATCH(request: Request) {
   const { name, phone, email, service, price, duration, date, time, notes } = body
   const normalizedEmail = email ? email.toLowerCase() : ''
 
-  // Check slot availability for new date/time (excluding current booking)
+  // Validate date/time against schedule and breaks
   if (date && time) {
-    const { data: existing } = await supabaseAdmin.from('bookings').select('time, duration').eq('date', date).neq('id', id)
+    const { data: settingsRows } = await supabaseAdmin.from('settings').select('key, value')
+    const settings: Record<string, string> = {}
+    for (const row of settingsRows ?? []) settings[row.key] = row.value
+    const dow = new Date(date + 'T12:00:00').getDay()
+    const dur = duration ?? 30
     const [th, tm] = time.split(':').map(Number)
     const tStart = th * 60 + tm
-    const tEnd = tStart + (duration ?? 30)
+
+    if (settings.blocked_dates) {
+      try { if ((JSON.parse(settings.blocked_dates) as string[]).includes(date)) return Response.json({ error: 'Dit tijdslot is al bezet' }, { status: 409 }) } catch { /* skip */ }
+    }
+    let workStart = '09:00', workEnd = '17:00'
+    if (settings.day_schedule) {
+      try {
+        const cfg = JSON.parse(settings.day_schedule)[String(dow)]
+        if (!cfg?.open) return Response.json({ error: 'Dit tijdslot is al bezet' }, { status: 409 })
+        workStart = cfg.start ?? '09:00'; workEnd = cfg.end ?? '17:00'
+        const [wsh, wsm] = workStart.split(':').map(Number); const [weh, wem] = workEnd.split(':').map(Number)
+        if (tStart < wsh * 60 + wsm || tStart + dur > weh * 60 + wem) return Response.json({ error: 'Dit tijdslot is al bezet' }, { status: 409 })
+        const breaks: { start: string; end: string }[] = cfg.breaks ?? []
+        for (const brk of breaks) {
+          const [bs, bsm2] = brk.start.split(':').map(Number); const [be, bem2] = brk.end.split(':').map(Number)
+          if ((bs * 60 + bsm2) < tStart + dur && tStart < (be * 60 + bem2)) return Response.json({ error: 'Dit tijdslot is al bezet' }, { status: 409 })
+        }
+      } catch { /* skip */ }
+    }
+
+    const { data: existing } = await supabaseAdmin.from('bookings').select('time, duration').eq('date', date).neq('id', id)
+    const tEnd = tStart + dur
     for (const b of existing ?? []) {
       const [bh, bm] = b.time.split(':').map(Number)
       const bStart = bh * 60 + bm
-      const bEnd = bStart + b.duration
-      if (bStart < tEnd && tStart < bEnd) {
-        return Response.json({ error: 'Dit tijdslot is al bezet' }, { status: 409 })
-      }
+      if (bStart < tEnd && tStart < bStart + b.duration) return Response.json({ error: 'Dit tijdslot is al bezet' }, { status: 409 })
     }
   }
 

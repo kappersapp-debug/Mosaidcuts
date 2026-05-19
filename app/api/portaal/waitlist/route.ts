@@ -27,10 +27,10 @@ export async function GET() {
     return Response.json({ error: 'Niet ingelogd' }, { status: 401 })
   }
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Amsterdam' }).split(' ')[0]
 
   // Auto-remove entries whose preferred date is more than 1 day in the past
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+  const yesterday = new Date(Date.now() - 86400000).toLocaleString('sv-SE', { timeZone: 'Europe/Amsterdam' }).split(' ')[0]
   await supabaseAdmin.from('waitlist').delete().lt('preferred_date', yesterday)
 
   const { data, error } = await supabaseAdmin

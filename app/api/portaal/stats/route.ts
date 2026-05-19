@@ -8,19 +8,18 @@ export async function GET() {
     return Response.json({ error: 'Niet ingelogd' }, { status: 401 })
   }
 
-  const today = new Date()
-  const todayStr = today.toISOString().split('T')[0]
+  const todayStr = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Amsterdam' }).split(' ')[0]
+  const [tyr, tmo, tdy] = todayStr.split('-').map(Number)
 
-  // Monday of current week
-  const day = today.getDay()
+  // Monday of current week (using NL date)
+  const todayNlDate = new Date(tyr, tmo - 1, tdy, 12, 0, 0)
+  const day = todayNlDate.getDay()
   const diffToMon = (day === 0 ? -6 : 1 - day)
-  const monday = new Date(today)
-  monday.setDate(today.getDate() + diffToMon)
-  const mondayStr = monday.toISOString().split('T')[0]
-
-  const sunday = new Date(monday)
-  sunday.setDate(monday.getDate() + 6)
-  const sundayStr = sunday.toISOString().split('T')[0]
+  const mondayNl = new Date(tyr, tmo - 1, tdy + diffToMon, 12, 0, 0)
+  const sundayNl = new Date(tyr, tmo - 1, tdy + diffToMon + 6, 12, 0, 0)
+  const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  const mondayStr = fmt(mondayNl)
+  const sundayStr = fmt(sundayNl)
 
   const [{ data: todayBookings }, { data: weekBookings }, { data: allBookings }] = await Promise.all([
     supabaseAdmin.from('bookings').select('*').eq('date', todayStr),
