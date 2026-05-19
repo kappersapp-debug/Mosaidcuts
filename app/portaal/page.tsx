@@ -401,7 +401,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
 
       <main className="flex-1 lg:ml-60 pt-14 lg:pt-0 min-h-screen pb-nav-safe">
         <div className="p-4 sm:p-6 lg:p-8 max-w-5xl">
-          {view==='dashboard' && <DashboardView />}
+          {view==='dashboard' && <DashboardView onNavigate={setView} />}
           {view==='calendar' && <CalendarView />}
           {view==='appointments' && <AppointmentsView />}
           {view==='customers' && <CustomersView />}
@@ -424,7 +424,7 @@ function isBreak(slot: string, enabled: boolean, bStart: string, bEnd: string) {
   return sMin >= bsh * 60 + bsm && sMin < beh * 60 + bem
 }
 
-function DashboardView() {
+function DashboardView({ onNavigate }: { onNavigate: (view: string) => void }) {
   const [stats, setStats] = useState<{today:number;week:number;weekRevenue:number;totalCustomers:number;todayBookings:Booking[]}|null>(null)
   const [upcoming, setUpcoming] = useState<Booking[]>([])
   const [workSlots, setWorkSlots] = useState<string[]>(generateWorkSlots())
@@ -529,10 +529,11 @@ function DashboardView() {
           {label:'Vandaag', value:stats?.today??'—', sub:'afspraken', gold:true, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>},
           {label:'Deze week', value:stats?.week??'—', sub:'afspraken', gold:false, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>},
           {label:'Klanten', value:stats?.totalCustomers??'—', sub:'uniek totaal', gold:false, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>},
-          {label:'Wachtlijst', value:waitlistCount??'—', sub:'openstaand', gold:false, amber: waitlistCount !== null && waitlistCount > 0, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 6.75h7.5M8.25 12h7.5m-7.5 5.25H12M3 3.375C3 2.339 3.84 1.5 4.875 1.5H7.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125H4.875A1.875 1.875 0 013 6.375V3.375zM3 14.625c0-1.036.84-1.875 1.875-1.875H7.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125H4.875A1.875 1.875 0 013 17.625v-3zM13.5 3.375c0-1.036.84-1.875 1.875-1.875h2.625A1.875 1.875 0 0119.875 3.375v3A1.875 1.875 0 0118 8.25h-2.625A1.875 1.875 0 0113.5 6.375v-3zM13.5 14.625c0-1.036.84-1.875 1.875-1.875h2.625A1.875 1.875 0 0119.875 14.625v3A1.875 1.875 0 0118 19.5h-2.625A1.875 1.875 0 0113.5 17.625v-3z"/></svg>},
+          {label:'Wachtlijst', value:waitlistCount??'—', sub:'openstaand', gold:false, amber: waitlistCount !== null && waitlistCount > 0, onClick:()=>onNavigate('management'), icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 6.75h7.5M8.25 12h7.5m-7.5 5.25H12M3 3.375C3 2.339 3.84 1.5 4.875 1.5H7.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125H4.875A1.875 1.875 0 013 6.375V3.375zM3 14.625c0-1.036.84-1.875 1.875-1.875H7.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125H4.875A1.875 1.875 0 013 17.625v-3zM13.5 3.375c0-1.036.84-1.875 1.875-1.875h2.625A1.875 1.875 0 0119.875 3.375v3A1.875 1.875 0 0118 8.25h-2.625A1.875 1.875 0 0113.5 6.375v-3zM13.5 14.625c0-1.036.84-1.875 1.875-1.875h2.625A1.875 1.875 0 0119.875 14.625v3A1.875 1.875 0 0118 19.5h-2.625A1.875 1.875 0 0113.5 17.625v-3z"/></svg>},
         ].map((c,i)=>(
           <div key={c.label} style={{animationDelay:`${i*60}ms`}}
-            className={`animate-fade-up rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${c.gold?'bg-gradient-to-br from-[#2176d4]/15 to-[#2176d4]/5 border-[#2176d4]/25 hover:shadow-[#2176d4]/10':(c as {amber?:boolean}).amber?'bg-amber-900/15 border-amber-800/30 hover:shadow-amber-900/20':'bg-[#141414] border-[#222] hover:border-[#2a2a2a] hover:shadow-black/40'}`}>
+            onClick={(c as {onClick?:()=>void}).onClick}
+            className={`animate-fade-up rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${(c as {onClick?:()=>void}).onClick ? 'cursor-pointer' : ''} ${c.gold?'bg-gradient-to-br from-[#2176d4]/15 to-[#2176d4]/5 border-[#2176d4]/25 hover:shadow-[#2176d4]/10':(c as {amber?:boolean}).amber?'bg-amber-900/15 border-amber-800/30 hover:shadow-amber-900/20':'bg-[#141414] border-[#222] hover:border-[#2a2a2a] hover:shadow-black/40'}`}>
             <div className="flex items-start justify-between mb-3">
               <p className={`text-[11px] font-bold uppercase tracking-widest ${c.gold?'text-[#2176d4]/60':(c as {amber?:boolean}).amber?'text-amber-500/70':'text-gray-600'}`}>{c.label}</p>
               <span className={c.gold ? 'text-[#2176d4]/40' : (c as {amber?:boolean}).amber ? 'text-amber-500/50' : 'text-gray-700'}>{c.icon}</span>
