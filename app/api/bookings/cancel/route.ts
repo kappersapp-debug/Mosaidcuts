@@ -1,6 +1,10 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { transporter } from '@/lib/mailer'
 
+function esc(s: unknown): string {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 const NL_DAYS = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag']
 const NL_MONTHS = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december']
 function fmtDate(ds: string) {
@@ -16,10 +20,10 @@ export function cancelMailHtml(b: { name: string; code: string; service: string;
       </div>
       <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;">
         <h2 style="color:#dc2626;margin-top:0;">Afspraak geannuleerd</h2>
-        <p>Hallo <strong>${b.name}</strong>, uw afspraak is geannuleerd.</p>
+        <p>Hallo <strong>${esc(b.name)}</strong>, uw afspraak is geannuleerd.</p>
         <div style="background:#fee2e2;border-radius:10px;padding:20px;margin:20px 0;">
           <p style="margin:6px 0;"><strong>Code:</strong> ${b.code}</p>
-          <p style="margin:6px 0;"><strong>Dienst:</strong> ${b.service}</p>
+          <p style="margin:6px 0;"><strong>Dienst:</strong> ${esc(b.service)}</p>
           <p style="margin:6px 0;"><strong>Datum:</strong> ${fmtDate(b.date)}</p>
           <p style="margin:6px 0;"><strong>Tijd:</strong> ${b.time}</p>
         </div>

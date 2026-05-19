@@ -2,6 +2,10 @@ import { verifyPortalAuth } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { transporter } from '@/lib/mailer'
 
+function esc(s: unknown): string {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 const NL_DAYS = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag']
 const NL_MONTHS = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december']
 function formatDateNL(dateStr: string) {
@@ -106,10 +110,10 @@ export async function POST(request: Request) {
             </div>
             <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;">
               <h2 style="color:#1d4ed8;margin-top:0;">Je bent ingepland!</h2>
-              <p>Hallo <strong>${entry.name}</strong>, goed nieuws — je staat nu ingepland.</p>
+              <p>Hallo <strong>${esc(entry.name)}</strong>, goed nieuws — je staat nu ingepland.</p>
               <div style="background:#dbeafe;border-radius:10px;padding:20px;margin:20px 0;">
                 <p style="margin:6px 0;"><strong>Boekingscode:</strong> <span style="font-size:18px;font-weight:800;color:#1d4ed8;">${code}</span></p>
-                <p style="margin:6px 0;"><strong>Dienst:</strong> ${service}</p>
+                <p style="margin:6px 0;"><strong>Dienst:</strong> ${esc(service)}</p>
                 <p style="margin:6px 0;"><strong>Datum:</strong> ${formatDateNL(date)}</p>
                 <p style="margin:6px 0;"><strong>Tijd:</strong> ${time}</p>
                 <p style="margin:6px 0;"><strong>Prijs:</strong> €${price ?? 0}</p>

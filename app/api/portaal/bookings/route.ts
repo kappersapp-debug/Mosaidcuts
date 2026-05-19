@@ -4,6 +4,10 @@ import { NextRequest } from 'next/server'
 import { transporter } from '@/lib/mailer'
 import { cancelMailHtml } from '@/app/api/bookings/cancel/route'
 
+function esc(s: unknown): string {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 const NL_DAYS = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag']
 const NL_MONTHS = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december']
 
@@ -52,8 +56,10 @@ export async function GET(request: NextRequest) {
   }
 
   if (month) {
+    const [yr, mo] = month.split('-').map(Number)
+    const lastDay = new Date(yr, mo, 0).getDate()
     const start = `${month}-01`
-    const end = `${month}-31`
+    const end = `${month}-${String(lastDay).padStart(2, '0')}`
     query = query.gte('date', start).lte('date', end)
   }
 
@@ -139,10 +145,10 @@ export async function POST(request: Request) {
             </div>
             <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;">
               <h2 style="color:#1d4ed8;margin-top:0;">Afspraak bevestigd!</h2>
-              <p>Hallo <strong>${name}</strong>, uw afspraak is bevestigd.</p>
+              <p>Hallo <strong>${esc(name)}</strong>, uw afspraak is bevestigd.</p>
               <div style="background:#dbeafe;border-radius:10px;padding:20px;margin:20px 0;">
                 <p style="margin:6px 0;"><strong>Boekingscode:</strong> <span style="font-size:18px;font-weight:800;color:#1d4ed8;">${code}</span></p>
-                <p style="margin:6px 0;"><strong>Dienst:</strong> ${service}</p>
+                <p style="margin:6px 0;"><strong>Dienst:</strong> ${esc(service)}</p>
                 <p style="margin:6px 0;"><strong>Datum:</strong> ${formatDateNL(date)}</p>
                 <p style="margin:6px 0;"><strong>Tijd:</strong> ${time}</p>
                 <p style="margin:6px 0;"><strong>Prijs:</strong> €${price ?? 0}</p>
@@ -182,6 +188,22 @@ export async function PATCH(request: Request) {
   const { name, phone, email, service, price, duration, date, time, notes } = body
   const normalizedEmail = email ? email.toLowerCase() : ''
 
+  // Check slot availability for new date/time (excluding current booking)
+  if (date && time) {
+    const { data: existing } = await supabaseAdmin.from('bookings').select('time, duration').eq('date', date).neq('id', id)
+    const [th, tm] = time.split(':').map(Number)
+    const tStart = th * 60 + tm
+    const tEnd = tStart + (duration ?? 30)
+    for (const b of existing ?? []) {
+      const [bh, bm] = b.time.split(':').map(Number)
+      const bStart = bh * 60 + bm
+      const bEnd = bStart + b.duration
+      if (bStart < tEnd && tStart < bEnd) {
+        return Response.json({ error: 'Dit tijdslot is al bezet' }, { status: 409 })
+      }
+    }
+  }
+
   const { data: updated, error } = await supabaseAdmin.from('bookings').update({
     name, phone, email: normalizedEmail, service, price, duration, date, time,
     notes: notes ?? '',
@@ -202,10 +224,10 @@ export async function PATCH(request: Request) {
             </div>
             <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;">
               <h2 style="color:#1d4ed8;margin-top:0;">Afspraak bijgewerkt</h2>
-              <p>Hallo <strong>${name}</strong>, uw afspraak is bijgewerkt.</p>
+              <p>Hallo <strong>${esc(name)}</strong>, uw afspraak is bijgewerkt.</p>
               <div style="background:#dbeafe;border-radius:10px;padding:20px;margin:20px 0;">
                 <p style="margin:6px 0;"><strong>Boekingscode:</strong> <span style="font-size:18px;font-weight:800;color:#1d4ed8;">${updated.code}</span></p>
-                <p style="margin:6px 0;"><strong>Dienst:</strong> ${service}</p>
+                <p style="margin:6px 0;"><strong>Dienst:</strong> ${esc(service)}</p>
                 <p style="margin:6px 0;"><strong>Datum:</strong> ${formatDateNL(date)}</p>
                 <p style="margin:6px 0;"><strong>Tijd:</strong> ${time}</p>
                 <p style="margin:6px 0;"><strong>Prijs:</strong> €${price ?? 0}</p>

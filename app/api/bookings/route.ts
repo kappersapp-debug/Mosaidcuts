@@ -1,6 +1,10 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { transporter } from '@/lib/mailer'
 
+function esc(s: unknown): string {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   let code = 'MSC'
@@ -68,6 +72,22 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
   }
 
+  // Reject past time slots for today (server UTC+1 = NL winter time, conservative)
+  const todayServer = new Date().toISOString().split('T')[0]
+  if (date === todayServer) {
+    const nowNl = new Date(Date.now() + 60 * 60 * 1000)
+    const nowNlMins = nowNl.getUTCHours() * 60 + nowNl.getUTCMinutes()
+    if (tStartCheck <= nowNlMins) {
+      return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
+    }
+  }
+
+  // Block banned emails
+  if (email) {
+    const { data: banned } = await supabaseAdmin.from('banned_emails').select('id').eq('email', email.toLowerCase()).single()
+    if (banned) return Response.json({ error: 'Boeking niet mogelijk' }, { status: 403 })
+  }
+
   // Check again if slot is still available
   const { data: existing } = await supabaseAdmin
     .from('bookings')
@@ -123,10 +143,10 @@ export async function POST(request: Request) {
           </div>
           <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;">
             <h2 style="color:#1d4ed8;margin-top:0;">Afspraak bevestigd!</h2>
-            <p>Hallo <strong>${name}</strong>, uw afspraak is bevestigd.</p>
+            <p>Hallo <strong>${esc(name)}</strong>, uw afspraak is bevestigd.</p>
             <div style="background:#dbeafe;border-radius:10px;padding:20px;margin:20px 0;">
               <p style="margin:6px 0;"><strong>Boekingscode:</strong> <span style="font-size:18px;font-weight:800;color:#1d4ed8;">${code}</span></p>
-              <p style="margin:6px 0;"><strong>Dienst:</strong> ${service}</p>
+              <p style="margin:6px 0;"><strong>Dienst:</strong> ${esc(service)}</p>
               <p style="margin:6px 0;"><strong>Datum:</strong> ${formatDateNL(date)}</p>
               <p style="margin:6px 0;"><strong>Tijd:</strong> ${time}</p>
               <p style="margin:6px 0;"><strong>Prijs:</strong> €${price}</p>
@@ -163,11 +183,11 @@ export async function POST(request: Request) {
               <h2 style="color:#fff;margin:0;">✂ Nieuwe afspraak</h2>
             </div>
             <div style="background:#f9fafb;padding:24px 28px;border-radius:0 0 10px 10px;border:1px solid #e5e7eb;">
-              <p style="margin:6px 0;"><strong>Naam:</strong> ${name}</p>
-              <p style="margin:6px 0;"><strong>Dienst:</strong> ${service}</p>
+              <p style="margin:6px 0;"><strong>Naam:</strong> ${esc(name)}</p>
+              <p style="margin:6px 0;"><strong>Dienst:</strong> ${esc(service)}</p>
               <p style="margin:6px 0;"><strong>Datum:</strong> ${formatDateNL(date)}</p>
               <p style="margin:6px 0;"><strong>Tijd:</strong> ${time}</p>
-              <p style="margin:6px 0;"><strong>Tel:</strong> ${phone}</p>
+              <p style="margin:6px 0;"><strong>Tel:</strong> ${esc(phone)}</p>
               <p style="margin:6px 0;"><strong>Code:</strong> ${code}</p>
             </div>
           </div>

@@ -1,6 +1,10 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { transporter } from '@/lib/mailer'
 
+function esc(s: unknown): string {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 const attempts = new Map<string, { count: number; lockedUntil: number }>()
 
 const NL_DAYS = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag']
@@ -22,6 +26,9 @@ export async function POST(request: Request) {
   const { name, phone, email, preferred_date, service, note } = await request.json()
   if (!name || !preferred_date) {
     return Response.json({ error: 'Naam en datum zijn vereist' }, { status: 400 })
+  }
+  if (String(name).length > 100 || String(note ?? '').length > 500) {
+    return Response.json({ error: 'Invoer te lang' }, { status: 400 })
   }
 
   // Validate date is not blocked and day is open
@@ -79,11 +86,11 @@ export async function POST(request: Request) {
             </div>
             <div style="background:#f9fafb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;">
               <h2 style="color:#1d4ed8;margin-top:0;">Je staat op de wachtlijst!</h2>
-              <p>Hallo <strong>${name}</strong>, je aanmelding is ontvangen.</p>
+              <p>Hallo <strong>${esc(name)}</strong>, je aanmelding is ontvangen.</p>
               <div style="background:#dbeafe;border-radius:10px;padding:20px;margin:20px 0;">
                 <p style="margin:6px 0;"><strong>Voorkeursdatum:</strong> ${formatDateNL(preferred_date)}</p>
-                ${service ? `<p style="margin:6px 0;"><strong>Dienst:</strong> ${service}</p>` : ''}
-                ${note ? `<p style="margin:6px 0;"><strong>Notitie:</strong> ${note}</p>` : ''}
+                ${service ? `<p style="margin:6px 0;"><strong>Dienst:</strong> ${esc(service)}</p>` : ''}
+                ${note ? `<p style="margin:6px 0;"><strong>Notitie:</strong> ${esc(note)}</p>` : ''}
               </div>
               <p style="color:#555;font-size:14px;">Zodra er een plek vrijkomt word je ingepland en ontvang je een bevestiging van je afspraak.</p>
               <p style="color:#888;font-size:12px;text-align:center;margin-top:24px;">MoSaidCuts — Altijd scherp</p>
