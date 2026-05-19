@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { verifyPortalAuth, makeSessionToken } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { transporter } from '@/lib/mailer'
