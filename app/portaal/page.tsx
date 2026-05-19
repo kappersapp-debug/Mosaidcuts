@@ -92,6 +92,20 @@ function generateWorkSlots(start='09:00', end='17:00') {
   return slots
 }
 
+function CalendarSubscribeButton() {
+  const [url, setUrl] = useState<string|null>(null)
+  useEffect(() => {
+    fetch('/api/portaal/calendar-url').then(r => r.json()).then(d => { if (d.url) setUrl(d.url) }).catch(()=>{})
+  }, [])
+  if (!url) return null
+  return (
+    <a href={url} title="Abonneer op agenda in Apple Agenda / Outlook"
+      className="px-4 py-2 border border-[#2a2a2a] text-gray-400 rounded-xl font-bold text-sm hover:border-[#2176d4]/50 hover:text-white transition-all">
+      📅 Agenda
+    </a>
+  )
+}
+
 /* ─── Login ──────────────────────────────────────────────── */
 function LoginScreen({onLogin}: {onLogin:()=>void}) {
   const [pw, setPw] = useState(''); const [error, setError] = useState(''); const [loading, setLoading] = useState(false); const [show, setShow] = useState(false)
@@ -1075,10 +1089,13 @@ function AppointmentsView() {
       )}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Afspraken</h1>
-        <button onClick={()=>setFormBooking({...EMPTY_FORM})}
-          className="px-4 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] transition-all duration-200">
-          + Toevoegen
-        </button>
+        <div className="flex gap-2">
+          <CalendarSubscribeButton />
+          <button onClick={()=>setFormBooking({...EMPTY_FORM})}
+            className="px-4 py-2 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] transition-all duration-200">
+            + Toevoegen
+          </button>
+        </div>
       </div>
       <div className="flex flex-col gap-3 mb-6">
         <input type="text" placeholder="Zoeken op naam, e-mail of code..." value={search} onChange={e=>setSearch(e.target.value)}
