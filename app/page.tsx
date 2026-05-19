@@ -224,6 +224,14 @@ export default function BookingPage() {
   const [waitlistResendCooldown, setWaitlistResendCooldown] = useState(0)
   const [waitlistDone, setWaitlistDone] = useState(false)
   const waitlistCodeRefs = useRef<(HTMLInputElement|null)[]>([])
+  const [showReschedule, setShowReschedule] = useState(false)
+  const [rescheduleDate, setRescheduleDate] = useState('')
+  const [rescheduleTime, setRescheduleTime] = useState('')
+  const [rescheduleSlots, setRescheduleSlots] = useState<SlotInfo[]>([])
+  const [rescheduleSlotsLoading, setRescheduleSlotsLoading] = useState(false)
+  const [rescheduleError, setRescheduleError] = useState('')
+  const [rescheduleLoading, setRescheduleLoading] = useState(false)
+  const [rescheduleDone, setRescheduleDone] = useState(false)
   const codeRefs = useRef<(HTMLInputElement | null)[]>([])
 
   function getCookie(name: string) {
@@ -566,6 +574,42 @@ export default function BookingPage() {
     if (text.length === 6) { const digits = text.split(''); setCodeDigits(digits); codeRefs.current[5]?.focus(); e.preventDefault(); setTimeout(() => handleVerify(digits), 50) }
   }
 
+  async function fetchRescheduleSlots(d: string, dur: number) {
+    setRescheduleSlotsLoading(true); setRescheduleSlots([])
+    try {
+      const r = await fetch(`/api/slots?date=${d}&duration=${dur || 30}`)
+      setRescheduleSlots((await r.json()).slots ?? [])
+    } finally { setRescheduleSlotsLoading(false) }
+  }
+
+  function openReschedule() {
+    setShowReschedule(true); setRescheduleDone(false)
+    setRescheduleDate(''); setRescheduleTime(''); setRescheduleError('')
+    if (booking) {
+      const now = new Date()
+      fetchMonthAvailability(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`, booking.duration || 30)
+    }
+  }
+
+  async function handleReschedule() {
+    if (!booking || !rescheduleDate || !rescheduleTime) return
+    const emailToUse = contact.email || cancelEmail
+    if (!emailToUse) { setRescheduleError('Vul uw e-mailadres in'); return }
+    setRescheduleLoading(true); setRescheduleError('')
+    try {
+      const r = await fetch('/api/bookings/reschedule', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: booking.code, email: emailToUse, date: rescheduleDate, time: rescheduleTime }),
+      })
+      const d = await r.json()
+      if (!r.ok) { setRescheduleError(d.error ?? 'Verzetten mislukt'); return }
+      setBooking(b => b ? { ...b, date: rescheduleDate, time: rescheduleTime } : b)
+      setRescheduleDone(true)
+      setTimeout(() => { setShowReschedule(false); setRescheduleDone(false); setRescheduleDate(''); setRescheduleTime('') }, 2500)
+    } catch { setRescheduleError('Netwerkfout, probeer opnieuw') }
+    finally { setRescheduleLoading(false) }
+  }
+
   // Auto-open waitlist when all slots on a day are full
   useEffect(() => {
     if (step === 3 && !slotsLoading && slots.length > 0 && !slots.some(s => s.available) && !waitlistDone) {
@@ -652,11 +696,68 @@ export default function BookingPage() {
                   className="block w-full py-3 px-4 rounded-xl border border-[#2a2a2a] text-gray-300 font-medium hover:border-[#2176d4]/50 hover:text-white transition-all text-center">
                   Google Agenda
                 </a>
-                {!cancelConfirm ? (
+                {showReschedule ? (
+                  rescheduleDone ? (
+                    <div className="bg-[#2176d4]/10 border border-[#2176d4]/20 rounded-xl p-5 text-center">
+                      <div className="w-10 h-10 bg-[#2176d4]/15 rounded-full flex items-center justify-center mx-auto mb-2 text-[#2176d4] font-black text-lg">✓</div>
+                      <p className="font-bold text-white">Afspraak verzet!</p>
+                      <p className="text-xs text-gray-500 mt-1">{formatDateNL(rescheduleDate)} · {rescheduleTime}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-bold text-white text-sm">Afspraak verzetten</h3>
+                        <button onClick={() => setShowReschedule(false)} className="text-gray-500 hover:text-white text-xl leading-none transition-colors">×</button>
+                      </div>
+                      {!contact.email && !cancelEmail && (
+                        <div>
+                          <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">E-mailadres</label>
+                          <input type="email" placeholder="uw@email.com" value={cancelEmail} onChange={e => setCancelEmail(e.target.value)}
+                            className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
+                        </div>
+                      )}
+                      <Calendar value={rescheduleDate} availability={availability} blockedDates={blockedDates}
+                        slotAvailability={slotAvailability}
+                        onMonthChange={m => fetchMonthAvailability(m, booking!.duration || 30)}
+                        onChange={d => { setRescheduleDate(d); setRescheduleTime(''); fetchRescheduleSlots(d, booking!.duration || 30) }}/>
+                      {rescheduleDate && (
+                        rescheduleSlotsLoading ? (
+                          <div className="flex justify-center py-3"><div className="w-6 h-6 border-4 border-[#2176d4] border-t-transparent rounded-full animate-spin"/></div>
+                        ) : (
+                          <div>
+                            <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Kies een tijdslot</p>
+                            {rescheduleSlots.filter(s => s.available).length === 0 ? (
+                              <p className="text-gray-500 text-sm text-center py-2">Geen beschikbare tijden op deze dag</p>
+                            ) : (
+                              <div className="grid grid-cols-4 gap-2">
+                                {rescheduleSlots.filter(s => s.available).map(slot => (
+                                  <button key={slot.time} onClick={() => setRescheduleTime(slot.time)}
+                                    className={`py-2.5 rounded-xl text-sm font-bold transition-all ${rescheduleTime === slot.time ? 'bg-[#2176d4] text-white shadow-[0_0_15px_rgba(33,118,212,0.3)]' : 'bg-[#1a1a1a] border border-[#2a2a2a] text-[#2176d4] hover:bg-[#2176d4] hover:text-white hover:border-[#2176d4]'}`}>
+                                    {slot.time}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      )}
+                      {rescheduleError && <p className="text-red-400 text-sm font-semibold">{rescheduleError}</p>}
+                      <button onClick={handleReschedule}
+                        disabled={!rescheduleDate || !rescheduleTime || rescheduleLoading || (!contact.email && !cancelEmail)}
+                        className="w-full py-3 rounded-xl bg-[#2176d4] text-white font-bold hover:bg-[#3080e0] disabled:opacity-40 transition-all">
+                        {rescheduleLoading ? 'Bezig...' : 'Bevestigen'}
+                      </button>
+                    </div>
+                  )
+                ) : !cancelConfirm ? (
                   <div className="space-y-1">
                     <button onClick={() => { setStep(1); setService(null); setDate(''); setTime(''); setBooking(null); setCancelConfirm(false); setCancelStatus('idle') }}
                       className="w-full py-2.5 text-[#2176d4] font-bold text-sm hover:text-white transition-colors">
                       Nieuwe afspraak maken →
+                    </button>
+                    <button onClick={openReschedule}
+                      className="w-full py-2.5 text-[#2176d4] font-semibold text-sm hover:text-white transition-colors">
+                      Afspraak verzetten →
                     </button>
                     <button onClick={() => setCancelConfirm(true)}
                       className="w-full py-2 text-red-400 font-semibold text-sm hover:text-red-300 transition-colors">
