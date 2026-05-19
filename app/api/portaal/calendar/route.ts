@@ -15,20 +15,13 @@ export async function GET(req: NextRequest) {
   }
 
   const today = new Date().toISOString().split('T')[0]
-  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-  const [{ data: bookings }, { data: cancelled }] = await Promise.all([
-    supabaseAdmin
-      .from('bookings')
-      .select('code, name, service, price, date, time, duration, phone')
-      .gte('date', today)
-      .order('date', { ascending: true })
-      .order('time', { ascending: true }),
-    supabaseAdmin
-      .from('cancelled_bookings')
-      .select('code, name, service, date, time')
-      .gte('cancelled_at', since24h),
-  ])
+  const { data: bookings } = await supabaseAdmin
+    .from('bookings')
+    .select('code, name, service, price, date, time, duration, phone')
+    .gte('date', today)
+    .order('date', { ascending: true })
+    .order('time', { ascending: true })
 
   const now = fmt(new Date())
   const events = (bookings ?? []).map(b => {
@@ -51,23 +44,6 @@ export async function GET(req: NextRequest) {
     ].join('\r\n')
   })
 
-  const cancelledEvents = (cancelled ?? []).map(b => {
-    const [yr, mo, dy] = b.date.split('-').map(Number)
-    const [hr, mn] = b.time.split(':').map(Number)
-    const start = new Date(yr, mo - 1, dy, hr, mn)
-    const end = new Date(start.getTime() + 30 * 60000)
-    return [
-      'BEGIN:VEVENT',
-      `UID:${b.code}@mosaidcuts.nl`,
-      `DTSTART;TZID=Europe/Amsterdam:${fmt(start)}`,
-      `DTEND;TZID=Europe/Amsterdam:${fmt(end)}`,
-      `SUMMARY:❌ ${icsEsc(b.name)} – ${icsEsc(b.service)}`,
-      `DTSTAMP:${now}Z`,
-      `LAST-MODIFIED:${now}Z`,
-      'STATUS:CANCELLED',
-      'END:VEVENT',
-    ].join('\r\n')
-  })
 
   const ics = [
     'BEGIN:VCALENDAR',
@@ -79,7 +55,6 @@ export async function GET(req: NextRequest) {
     'REFRESH-INTERVAL;VALUE=DURATION:PT15M',
     'X-PUBLISHED-TTL:PT15M',
     ...events,
-    ...cancelledEvents,
     'END:VCALENDAR',
   ].join('\r\n')
 
