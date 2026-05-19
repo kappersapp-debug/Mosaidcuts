@@ -9,7 +9,7 @@ export async function GET() {
   const { data, error } = await supabaseAdmin
     .from('waitlist')
     .select('*')
-    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
 
   if (error) return Response.json({ error: 'Database fout' }, { status: 500 })
   return Response.json({ waitlist: data ?? [] })
