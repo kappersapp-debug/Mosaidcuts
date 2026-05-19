@@ -38,7 +38,14 @@ export async function POST(request: Request) {
   if (name.length > 100 || phone.length > 30 || email.length > 254 || service.length > 100) {
     return Response.json({ error: 'Ongeldige invoer' }, { status: 400 })
   }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return Response.json({ error: 'Ongeldig e-mailadres' }, { status: 400 })
+  }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) {
+    return Response.json({ error: 'Ongeldige datum of tijd' }, { status: 400 })
+  }
+  const [tHour, tMin] = time.split(':').map(Number)
+  if (tHour > 23 || tMin > 59) {
     return Response.json({ error: 'Ongeldige datum of tijd' }, { status: 400 })
   }
 

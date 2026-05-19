@@ -26,6 +26,10 @@ export async function POST(request: Request) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) {
     return Response.json({ error: 'Ongeldige datum of tijd' }, { status: 400 })
   }
+  const [tHour, tMin] = time.split(':').map(Number)
+  if (tHour > 23 || tMin > 59) {
+    return Response.json({ error: 'Ongeldige datum of tijd' }, { status: 400 })
+  }
 
   const { data: booking } = await supabaseAdmin
     .from('bookings')
