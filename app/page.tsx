@@ -72,11 +72,13 @@ function googleCalLink(booking: BookingResult) {
 }
 
 /* ─── Calendar Component ─────────────────────────────────── */
-function Calendar({ value, onChange, availability, blockedDates }: {
+function Calendar({ value, onChange, availability, blockedDates, slotAvailability, onMonthChange }: {
   value: string
   onChange: (date: string) => void
   availability: Record<string, boolean>
   blockedDates: string[]
+  slotAvailability?: Record<string, { available: number; total: number }>
+  onMonthChange?: (month: string) => void
 }) {
   const today = new Date(); today.setHours(0, 0, 0, 0)
   const [viewMonth, setViewMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1))
@@ -89,8 +91,16 @@ function Calendar({ value, onChange, availability, blockedDates }: {
     cells.push(new Date(viewMonth.getFullYear(), viewMonth.getMonth(), i))
   }
 
-  const prevMonth = () => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1))
-  const nextMonth = () => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1))
+  const prevMonth = () => {
+    const m = new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1)
+    setViewMonth(m)
+    onMonthChange?.(`${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`)
+  }
+  const nextMonth = () => {
+    const m = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1)
+    setViewMonth(m)
+    onMonthChange?.(`${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`)
+  }
   const canPrev = viewMonth > new Date(today.getFullYear(), today.getMonth(), 1)
 
   return (
@@ -120,15 +130,21 @@ function Calendar({ value, onChange, availability, blockedDates }: {
           const disabled = isPast || isDayOff || isBlocked
           const selected = ds === value
           const isToday = day.getTime() === today.getTime()
+          const sa = slotAvailability?.[ds]
+          const isFull = sa && sa.total > 0 && sa.available === 0
+          const isLow = sa && sa.available > 0 && sa.available <= 2
           return (
             <button key={i} disabled={disabled} onClick={() => onChange(ds)}
               className={[
-                'aspect-square flex items-center justify-center rounded-xl text-sm font-semibold transition-all',
+                'aspect-square flex flex-col items-center justify-center rounded-xl text-sm font-semibold transition-all gap-0.5',
                 selected ? 'bg-[#2176d4] text-white shadow-[0_0_12px_rgba(33,118,212,0.35)]' : '',
                 isToday && !selected ? 'ring-1 ring-[#2176d4] text-[#2176d4] bg-[#2176d4]/10' : '',
                 disabled ? 'text-gray-700 cursor-not-allowed' : !selected ? 'hover:bg-[#2176d4]/15 text-gray-400 hover:text-white' : '',
               ].join(' ')}>
-              {day.getDate()}
+              <span className="leading-none">{day.getDate()}</span>
+              {!disabled && sa && (
+                <span className={`w-1.5 h-1.5 rounded-full ${selected ? 'bg-white/60' : isFull ? 'bg-red-400' : isLow ? 'bg-amber-400' : 'bg-green-400'}`}/>
+              )}
             </button>
           )
         })}
@@ -198,6 +214,7 @@ export default function BookingPage() {
   const [isReturning, setIsReturning] = useState(false)
   const savedEmailRef = useRef('')
   const [cookieConsent, setCookieConsent] = useState<'yes'|'no'|null>(null)
+  const [slotAvailability, setSlotAvailability] = useState<Record<string, { available: number; total: number }>>({})
   const [showWaitlist, setShowWaitlist] = useState(false)
   const [waitlistForm, setWaitlistForm] = useState({ name: '', phone: '', email: '', note: '' })
   const [waitlistStep, setWaitlistStep] = useState<'form'|'verify'>('form')
@@ -292,6 +309,15 @@ export default function BookingPage() {
     }
   }, [])
 
+  async function fetchMonthAvailability(month: string, dur: number) {
+    try {
+      const r = await fetch(`/api/availability?month=${month}&duration=${dur}`)
+      if (!r.ok) return
+      const d = await r.json()
+      setSlotAvailability(prev => ({ ...prev, ...(d.days ?? {}) }))
+    } catch { /* non-fatal */ }
+  }
+
   async function fetchSlots(d: string, dur: number) {
     setSlotsLoading(true)
     setSlots([])
@@ -368,10 +394,10 @@ export default function BookingPage() {
     }
   }
 
-  async function handleVerify() {
+  async function handleVerify(overrideDigits?: string[]) {
     setError('')
     setLoading(true)
-    const code = codeDigits.join('')
+    const code = (overrideDigits ?? codeDigits).join('')
     try {
       const vr = await fetch('/api/verify/check', {
         method: 'POST',
@@ -456,7 +482,8 @@ export default function BookingPage() {
   function handleCodeInput(i: number, val: string) {
     const digit = val.replace(/\D/g, '').slice(-1)
     const next = [...codeDigits]; next[i] = digit; setCodeDigits(next)
-    if (digit && i < 5) codeRefs.current[i + 1]?.focus()
+    if (digit && i < 5) { codeRefs.current[i + 1]?.focus() }
+    else if (digit && i === 5 && next.every(d => d !== '')) { setTimeout(() => handleVerify(next), 50) }
   }
 
   function handleCodeKey(i: number, e: React.KeyboardEvent) {
@@ -498,11 +525,27 @@ export default function BookingPage() {
     setWaitlistLoading(false)
   }
 
-  async function handleWaitlistVerify() {
+  function handleWaitlistCodeInput(i: number, val: string) {
+    const digit = val.replace(/\D/g, '').slice(-1)
+    const next = [...waitlistCodeDigits]; next[i] = digit; setWaitlistCodeDigits(next)
+    if (digit && i < 5) { waitlistCodeRefs.current[i + 1]?.focus() }
+    else if (digit && i === 5 && next.every(d => d !== '')) { setTimeout(() => handleWaitlistVerify(next), 50) }
+  }
+
+  function handleWaitlistCodeKey(i: number, e: React.KeyboardEvent) {
+    if (e.key === 'Backspace' && !waitlistCodeDigits[i] && i > 0) waitlistCodeRefs.current[i - 1]?.focus()
+  }
+
+  function handleWaitlistCodePaste(e: React.ClipboardEvent) {
+    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    if (text.length === 6) { setWaitlistCodeDigits(text.split('')); waitlistCodeRefs.current[5]?.focus(); e.preventDefault() }
+  }
+
+  async function handleWaitlistVerify(overrideDigits?: string[]) {
     setWaitlistError(''); setWaitlistLoading(true)
     try {
       const vr = await fetch('/api/verify/check', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: waitlistForm.email, code: waitlistCodeDigits.join('') }) })
+        body: JSON.stringify({ email: waitlistForm.email, code: (overrideDigits ?? waitlistCodeDigits).join('') }) })
       const vd = await vr.json()
       if (!vr.ok || !vd.valid) { setWaitlistError(vd.error ?? 'Ongeldige code'); setWaitlistLoading(false); return }
       const wr = await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -523,16 +566,29 @@ export default function BookingPage() {
     if (text.length === 6) { setCodeDigits(text.split('')); codeRefs.current[5]?.focus(); e.preventDefault() }
   }
 
+  // Auto-open waitlist when all slots on a day are full
+  useEffect(() => {
+    if (step === 3 && !slotsLoading && slots.length > 0 && !slots.some(s => s.available) && !waitlistDone) {
+      setShowWaitlist(true)
+    }
+  }, [step, slotsLoading, slots, waitlistDone])
+
   /* ── Render ── */
   return (
     <div className="min-h-screen bg-[#0c0c0c] flex flex-col font-[family-name:var(--font-barlow)]">
       <header className="bg-[#0e0e0e] border-b border-[#1e1e1e]">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
-          <Image src="/logo.jpg" alt="MoSaidCuts" width={38} height={38} className="rounded-full object-cover ring-2 ring-[#2176d4]/30 shrink-0"/>
-          <div>
-            <h1 className="text-white font-[family-name:var(--font-bebas)] tracking-widest text-xl leading-none">MoSaidCuts</h1>
-            <p className="text-gray-600 text-[10px] tracking-wider uppercase">Barbershop</p>
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Image src="/logo.jpg" alt="MoSaidCuts" width={38} height={38} className="rounded-full object-cover ring-2 ring-[#2176d4]/30 shrink-0"/>
+            <div>
+              <h1 className="text-white font-[family-name:var(--font-bebas)] tracking-widest text-xl leading-none">MoSaidCuts</h1>
+              <p className="text-gray-600 text-[10px] tracking-wider uppercase">Barbershop</p>
+            </div>
           </div>
+          <button onClick={() => setLookup(true)}
+            className="text-xs font-semibold text-gray-500 hover:text-[#2176d4] transition-colors whitespace-nowrap">
+            Afspraak opzoeken
+          </button>
         </div>
       </header>
 
@@ -597,10 +653,16 @@ export default function BookingPage() {
                   Google Agenda
                 </a>
                 {!cancelConfirm ? (
-                  <button onClick={() => setCancelConfirm(true)}
-                    className="w-full py-2 text-red-400 font-semibold text-sm hover:text-red-300 transition-colors">
-                    Afspraak annuleren
-                  </button>
+                  <div className="space-y-1">
+                    <button onClick={() => { setStep(1); setService(null); setDate(''); setTime(''); setBooking(null); setCancelConfirm(false); setCancelStatus('idle') }}
+                      className="w-full py-2.5 text-[#2176d4] font-bold text-sm hover:text-white transition-colors">
+                      Nieuwe afspraak maken →
+                    </button>
+                    <button onClick={() => setCancelConfirm(true)}
+                      className="w-full py-2 text-red-400 font-semibold text-sm hover:text-red-300 transition-colors">
+                      Afspraak annuleren
+                    </button>
+                  </div>
                 ) : (
                   <div className="bg-red-900/15 border border-red-700/30 rounded-xl p-4">
                     <p className="text-gray-300 font-semibold mb-3 text-sm text-center">Weet u zeker dat u wilt annuleren?</p>
@@ -640,7 +702,7 @@ export default function BookingPage() {
                   <p className="text-gray-500 text-sm mb-5">Selecteer de gewenste behandeling</p>
                   <div className="space-y-3">
                     {services.map(s => (
-                      <button key={s.id} onClick={() => { setService(s); setStep(2) }}
+                      <button key={s.id} onClick={() => { setService(s); setStep(2); const now = new Date(); fetchMonthAvailability(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`, s.duration) }}
                         className={['w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left',
                           service?.id === s.id
                             ? 'border-[#2176d4] bg-[#2176d4]/10'
@@ -660,14 +722,22 @@ export default function BookingPage() {
                 <div>
                   <h2 className="text-xl font-black text-white mb-1">Kies een datum</h2>
                   <p className="text-gray-500 text-sm mb-5">Selecteer een beschikbare dag</p>
-                  <Calendar value={date} availability={availability} blockedDates={blockedDates} onChange={d => { setDate(d); setTime(''); setShowWaitlist(false); setWaitlistDone(false); setWaitlistStep('form'); setWaitlistCodeDigits(['','','','','','']); setWaitlistError('') }} />
-                  <div className="flex gap-3 mt-6">
+                  <Calendar
+                    value={date}
+                    availability={availability}
+                    blockedDates={blockedDates}
+                    slotAvailability={slotAvailability}
+                    onMonthChange={m => fetchMonthAvailability(m, service!.duration)}
+                    onChange={d => {
+                      setDate(d); setTime('')
+                      setShowWaitlist(false); setWaitlistDone(false); setWaitlistStep('form')
+                      setWaitlistCodeDigits(['','','','','','']); setWaitlistError('')
+                      fetchSlots(d, service!.duration); setStep(3)
+                    }}
+                  />
+                  <div className="mt-6">
                     <button onClick={() => setStep(1)}
-                      className="flex-1 py-3 rounded-xl border border-[#2a2a2a] font-bold text-gray-400 hover:border-[#333] hover:text-white transition-all">‹ Terug</button>
-                    <button disabled={!date} onClick={() => { setTime(''); fetchSlots(date, service!.duration); setStep(3) }}
-                      className="flex-1 py-3 rounded-xl bg-[#2176d4] text-white font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-40 disabled:cursor-not-allowed transition-all">
-                      Volgende ›
-                    </button>
+                      className="w-full py-3 rounded-xl border border-[#2a2a2a] font-bold text-gray-400 hover:border-[#333] hover:text-white transition-all">‹ Terug</button>
                   </div>
                 </div>
               )}
@@ -685,30 +755,23 @@ export default function BookingPage() {
                     const waitlistUI = (
                       <div className="mt-4">
                         {!waitlistDone ? (
-                          !showWaitlist ? (
-                            <div className="text-center">
-                              <button onClick={() => setShowWaitlist(true)}
-                                className="text-sm font-bold text-[#2176d4] border border-[#2176d4]/30 px-4 py-2 rounded-xl hover:bg-[#2176d4]/10 transition-colors">
-                                Zet me op de wachtlijst →
-                              </button>
-                            </div>
-                          ) : waitlistStep === 'verify' ? (
+                          waitlistStep === 'verify' ? (
                             <div className="bg-[#141414] rounded-2xl border border-[#2a2a2a] p-5 space-y-4">
                               <div>
                                 <h3 className="font-bold text-white text-sm">Verificatie</h3>
                                 <p className="text-xs text-gray-500 mt-1">Code verstuurd naar <span className="text-white">{waitlistForm.email}</span></p>
                               </div>
                               {waitlistError && <p className="text-red-400 text-sm font-semibold">{waitlistError}</p>}
-                              <div className="flex justify-center gap-2">
+                              <div className="flex justify-center gap-2" onPaste={handleWaitlistCodePaste}>
                                 {waitlistCodeDigits.map((digit, i) => (
                                   <input key={i} ref={el => { waitlistCodeRefs.current[i] = el }}
                                     type="text" inputMode="numeric" maxLength={1} value={digit}
-                                    onChange={e => { const d = e.target.value.replace(/\D/g,'').slice(-1); const n=[...waitlistCodeDigits];n[i]=d;setWaitlistCodeDigits(n);if(d&&i<5)waitlistCodeRefs.current[i+1]?.focus() }}
-                                    onKeyDown={e => { if(e.key==='Backspace'&&!waitlistCodeDigits[i]&&i>0)waitlistCodeRefs.current[i-1]?.focus() }}
+                                    onChange={e => handleWaitlistCodeInput(i, e.target.value)}
+                                    onKeyDown={e => handleWaitlistCodeKey(i, e)}
                                     className="w-10 h-12 text-center text-xl font-black bg-[#0e0e0e] border-2 border-[#2a2a2a] text-white rounded-xl focus:outline-none focus:border-[#2176d4] transition-colors caret-transparent"/>
                                 ))}
                               </div>
-                              <button onClick={handleWaitlistVerify} disabled={waitlistCodeDigits.join('').length < 6 || waitlistLoading}
+                              <button onClick={() => handleWaitlistVerify()} disabled={waitlistCodeDigits.join('').length < 6 || waitlistLoading}
                                 className="w-full py-2.5 rounded-xl bg-[#2176d4] text-white text-sm font-bold hover:bg-[#3080e0] disabled:opacity-40 transition-all">
                                 {waitlistLoading ? 'Bevestigen...' : 'Bevestigen'}
                               </button>
@@ -738,7 +801,7 @@ export default function BookingPage() {
                                   className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
                               </div>
                               <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">E-mail <span className="text-gray-700 normal-case font-normal">(optioneel)</span></label>
+                                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">E-mail <span className="text-gray-600 normal-case font-normal text-[10px]">(aanbevolen — voor bevestiging)</span></label>
                                 <input type="email" value={waitlistForm.email} onChange={e=>setWaitlistForm(f=>({...f,email:e.target.value}))} placeholder="uw@email.com"
                                   className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white placeholder-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors"/>
                               </div>
@@ -775,7 +838,17 @@ export default function BookingPage() {
                     )
                     return (
                       <div>
-                        <div className="grid grid-cols-4 gap-2">
+                        {!hasAvailable && (
+                          <div className="bg-amber-900/20 border border-amber-700/30 rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
+                            <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                            <div>
+                              <p className="text-sm font-bold text-amber-400">Dag vol</p>
+                              <p className="text-xs text-amber-500/70">Meld je aan voor de wachtlijst hieronder</p>
+                            </div>
+                          </div>
+                        )}
+                        {!hasAvailable && waitlistUI}
+                        <div className={`grid grid-cols-4 gap-2 ${!hasAvailable ? 'mt-3 opacity-40 pointer-events-none' : ''}`}>
                           {slots.map(slot => (
                             <button key={slot.time} disabled={!slot.available}
                               onClick={() => { setTime(slot.time); setStep(4) }}
@@ -790,7 +863,6 @@ export default function BookingPage() {
                             </button>
                           ))}
                         </div>
-                        {!hasAvailable && waitlistUI}
                       </div>
                     )
                   })()}
@@ -872,7 +944,7 @@ export default function BookingPage() {
                         className="w-11 h-14 text-center text-2xl font-black bg-[#0e0e0e] border-2 border-[#2a2a2a] text-white rounded-xl focus:outline-none focus:border-[#2176d4] transition-colors caret-transparent" />
                     ))}
                   </div>
-                  <button onClick={handleVerify} disabled={codeDigits.join('').length < 6 || loading}
+                  <button onClick={() => handleVerify()} disabled={codeDigits.join('').length < 6 || loading}
                     className="w-full py-3 rounded-xl bg-[#2176d4] text-white font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-40 disabled:cursor-not-allowed transition-all mb-3">
                     {loading ? 'Bevestigen...' : 'Bevestigen'}
                   </button>
@@ -944,7 +1016,7 @@ export default function BookingPage() {
         © {new Date().getFullYear()} MoSaidCuts Barbershop
       </footer>
 
-      {cookieConsent === null && (
+      {cookieConsent === null && step === 1 && (
         <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-fade-up">
           <div className="max-w-lg mx-auto bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl p-4 shadow-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex-1 min-w-0">

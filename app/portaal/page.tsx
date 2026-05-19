@@ -142,6 +142,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifOpen, setNotifOpen] = useState(false)
   const [toast, setToast] = useState<string|null>(null)
+  const [waitlistCount, setWaitlistCount] = useState(0)
   const lastCheckedRef = useRef('')
   const notifBtnRef = useRef<HTMLButtonElement>(null)
   const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({ top: 56, right: 16 })
@@ -191,6 +192,20 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
     return () => clearInterval(id)
   }, [])
 
+  useEffect(() => {
+    const fetchWaitlistCount = async () => {
+      try {
+        const r = await fetch('/api/portaal/waitlist')
+        if (!r.ok) return
+        const d = await r.json()
+        setWaitlistCount((d.waitlist ?? []).length)
+      } catch { /* ignore */ }
+    }
+    fetchWaitlistCount()
+    const id = setInterval(fetchWaitlistCount, 60_000)
+    return () => clearInterval(id)
+  }, [])
+
   // Auto-dismiss toast after 5 seconds
   useEffect(() => {
     if (!toast) return
@@ -233,7 +248,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
           <div className="px-4 py-2.5 border-b border-[#1e1e1e] flex items-center justify-between">
             <span className="font-semibold text-white text-sm">Meldingen</span>
             {notifications.length > 0 && (
-              <button onClick={() => { setNotifications([]); setNotifOpen(false) }} className="text-xs text-[#2176d4] hover:underline">Wis alles</button>
+              <button onClick={() => { const c = notifications.length; setNotifications([]); setNotifOpen(false); setToast(`${c} melding${c===1?'':'en'} gewist`) }} className="text-xs text-[#2176d4] hover:underline">Wis alles</button>
             )}
           </div>
           {notifications.length === 0 ? (
@@ -243,7 +258,7 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
               {notifications.map(n => (
                 <div key={n.id} className={`px-4 py-3 hover:bg-white/5 border-l-2 ${(n as Booking & {_type?:string})._type==='cancelled' ? 'border-red-500' : 'border-[#2176d4]'}`}>
                   <p className="font-semibold text-sm text-white">{n.name}</p>
-                  <p className="text-xs text-gray-500">{n.service} · {n.date} · {n.time}</p>
+                  <p className="text-xs text-gray-500">{n.service} · {formatMedDate(n.date)} · {n.time}</p>
                 </div>
               ))}
             </div>
@@ -360,7 +375,10 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
         })}
         <button onClick={() => setMoreOpen(o => !o)}
           className={`flex-1 flex flex-col items-center justify-center gap-1 text-[10px] font-bold transition-colors ${moreOpen || ['services','management','settings'].includes(view) ? 'text-[#2176d4]' : 'text-gray-600 hover:text-gray-400'}`}>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+          <span className="relative">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+            {waitlistCount > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400"/>}
+          </span>
           Meer
         </button>
       </nav>
@@ -397,6 +415,8 @@ function DashboardView() {
   const [breakEnabled, setBreakEnabled] = useState(false)
   const [breakStart, setBreakStart] = useState('12:00')
   const [breakEnd, setBreakEnd] = useState('13:00')
+  const [waitlistCount, setWaitlistCount] = useState<number|null>(null)
+  const [lastUpdated, setLastUpdated] = useState('')
 
   const loadDashboard = useCallback(()=>{
     fetch('/api/portaal/stats').then(r=>r.json()).then(d=>setStats(d))
@@ -411,6 +431,8 @@ function DashboardView() {
       })
       setUpcoming(filtered.slice(0, 5))
     })
+    fetch('/api/portaal/waitlist').then(r=>r.json()).then(d=>setWaitlistCount((d.waitlist??[]).length))
+    setLastUpdated(new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}))
   },[])
 
   useEffect(()=>{
@@ -451,9 +473,12 @@ function DashboardView() {
 
   return (
     <div className="animate-fade-up">
-      <div className="mb-8">
-        <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-0.5 capitalize">{formatLongDate(today)}</p>
+      <div className="mb-8 flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-[family-name:var(--font-bebas)] tracking-widest text-white">Dashboard</h1>
+          <p className="text-gray-500 text-sm mt-0.5 capitalize">{formatLongDate(today)}</p>
+        </div>
+        {lastUpdated && <p className="text-[11px] text-gray-700 shrink-0 pb-0.5">Bijgewerkt om {lastUpdated}</p>}
       </div>
 
       {/* Volgende afspraak banner */}
@@ -483,22 +508,23 @@ function DashboardView() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           {label:'Vandaag', value:stats?.today??'—', sub:'afspraken', gold:true, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>},
           {label:'Deze week', value:stats?.week??'—', sub:'afspraken', gold:false, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>},
           {label:'Klanten', value:stats?.totalCustomers??'—', sub:'uniek totaal', gold:false, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>},
+          {label:'Wachtlijst', value:waitlistCount??'—', sub:'openstaand', gold:false, amber: waitlistCount !== null && waitlistCount > 0, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 6.75h7.5M8.25 12h7.5m-7.5 5.25H12M3 3.375C3 2.339 3.84 1.5 4.875 1.5H7.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125H4.875A1.875 1.875 0 013 6.375V3.375zM3 14.625c0-1.036.84-1.875 1.875-1.875H7.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125H4.875A1.875 1.875 0 013 17.625v-3zM13.5 3.375c0-1.036.84-1.875 1.875-1.875h2.625A1.875 1.875 0 0119.875 3.375v3A1.875 1.875 0 0118 8.25h-2.625A1.875 1.875 0 0113.5 6.375v-3zM13.5 14.625c0-1.036.84-1.875 1.875-1.875h2.625A1.875 1.875 0 0119.875 14.625v3A1.875 1.875 0 0118 19.5h-2.625A1.875 1.875 0 0113.5 17.625v-3z"/></svg>},
         ].map((c,i)=>(
           <div key={c.label} style={{animationDelay:`${i*60}ms`}}
-            className={`animate-fade-up rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${c.gold?'bg-gradient-to-br from-[#2176d4]/15 to-[#2176d4]/5 border-[#2176d4]/25 hover:shadow-[#2176d4]/10':'bg-[#141414] border-[#222] hover:border-[#2a2a2a] hover:shadow-black/40'}`}>
+            className={`animate-fade-up rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${c.gold?'bg-gradient-to-br from-[#2176d4]/15 to-[#2176d4]/5 border-[#2176d4]/25 hover:shadow-[#2176d4]/10':(c as {amber?:boolean}).amber?'bg-amber-900/15 border-amber-800/30 hover:shadow-amber-900/20':'bg-[#141414] border-[#222] hover:border-[#2a2a2a] hover:shadow-black/40'}`}>
             <div className="flex items-start justify-between mb-3">
-              <p className={`text-[11px] font-bold uppercase tracking-widest ${c.gold?'text-[#2176d4]/60':'text-gray-600'}`}>{c.label}</p>
-              <span className={c.gold ? 'text-[#2176d4]/40' : 'text-gray-700'}>{c.icon}</span>
+              <p className={`text-[11px] font-bold uppercase tracking-widest ${c.gold?'text-[#2176d4]/60':(c as {amber?:boolean}).amber?'text-amber-500/70':'text-gray-600'}`}>{c.label}</p>
+              <span className={c.gold ? 'text-[#2176d4]/40' : (c as {amber?:boolean}).amber ? 'text-amber-500/50' : 'text-gray-700'}>{c.icon}</span>
             </div>
-            <p className={`text-4xl font-black leading-none ${c.gold?'text-[#2176d4]':'text-white'}`}>
+            <p className={`text-4xl font-black leading-none ${c.gold?'text-[#2176d4]':(c as {amber?:boolean}).amber?'text-amber-400':'text-white'}`}>
               <AnimatedNumber value={c.value as number|string}/>
             </p>
-            <p className={`text-xs mt-2 ${c.gold?'text-[#2176d4]/50':'text-gray-600'}`}>{c.sub}</p>
+            <p className={`text-xs mt-2 ${c.gold?'text-[#2176d4]/50':(c as {amber?:boolean}).amber?'text-amber-500/50':'text-gray-600'}`}>{c.sub}</p>
           </div>
         ))}
       </div>
@@ -1439,6 +1465,57 @@ function ManagementView() {
   )
 }
 
+/* ─── Portal Date Picker ─────────────────────────────────── */
+function PortalDatePicker({ value, onChange }: { value: string; onChange: (date: string) => void }) {
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const [viewMonth, setViewMonth] = useState(() => {
+    if (value) { const d = new Date(value + 'T12:00:00'); return new Date(d.getFullYear(), d.getMonth(), 1) }
+    return new Date(today.getFullYear(), today.getMonth(), 1)
+  })
+  const firstDay = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1)
+  const lastDay = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0)
+  const startOffset = (firstDay.getDay() + 6) % 7
+  const cells: (Date | null)[] = Array(startOffset).fill(null)
+  for (let i = 1; i <= lastDay.getDate(); i++) cells.push(new Date(viewMonth.getFullYear(), viewMonth.getMonth(), i))
+
+  return (
+    <div className="bg-[#0e0e0e] border border-[#2a2a2a] rounded-xl p-3 select-none">
+      <div className="flex items-center justify-between mb-2">
+        <button type="button" onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1))}
+          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/5 text-gray-400 font-bold transition-colors">‹</button>
+        <span className="font-bold text-white text-xs capitalize">
+          {viewMonth.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })}
+        </span>
+        <button type="button" onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1))}
+          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/5 text-gray-400 font-bold transition-colors">›</button>
+      </div>
+      <div className="grid grid-cols-7 mb-1">
+        {NL_DAYS_SHORT.map(d => <div key={d} className="text-center text-[10px] font-bold text-gray-600 py-0.5">{d}</div>)}
+      </div>
+      <div className="grid grid-cols-7 gap-0.5">
+        {cells.map((day, i) => {
+          if (!day) return <div key={i} />
+          const ds = toDateStr(day)
+          const isPast = day < today
+          const selected = ds === value
+          const isToday = day.getTime() === today.getTime()
+          return (
+            <button key={i} type="button" disabled={isPast} onClick={() => onChange(ds)}
+              className={[
+                'aspect-square flex items-center justify-center rounded-lg text-xs font-semibold transition-all',
+                selected ? 'bg-[#2176d4] text-white' : '',
+                isToday && !selected ? 'ring-1 ring-[#2176d4] text-[#2176d4]' : '',
+                isPast ? 'text-gray-700 cursor-not-allowed' : !selected ? 'hover:bg-[#2176d4]/15 text-gray-400 hover:text-white' : '',
+              ].join(' ')}>
+              {day.getDate()}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 /* ─── Waitlist Section (used in ManagementView) ──────────── */
 function WaitlistSection() {
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([])
@@ -1653,9 +1730,7 @@ function WaitlistSection() {
                   {/* Date */}
                   <div>
                     <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Datum</label>
-                    <input type="date" value={assignDate}
-                      onChange={e=>{ setAssignDate(e.target.value); fetchAssignSlots(e.target.value, assignDuration) }}
-                      className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors [color-scheme:dark]"/>
+                    <PortalDatePicker value={assignDate} onChange={d => { setAssignDate(d); fetchAssignSlots(d, assignDuration) }} />
                   </div>
 
                   {/* Service (read-only) */}
