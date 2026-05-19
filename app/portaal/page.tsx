@@ -1530,6 +1530,21 @@ function WaitlistSection() {
 
   const availableAssignSlots = assignSlots.filter(s=>s.available)
 
+  // Derive sorted unique dates + grouped map
+  const uniqueDates = useMemo(()=>[...new Set(waitlist.map(w=>w.preferred_date))].sort(),[waitlist])
+  const grouped = useMemo(()=>{
+    const m = new Map<string, WaitlistEntry[]>()
+    for (const w of waitlist) {
+      const arr = m.get(w.preferred_date) ?? []
+      arr.push(w)
+      m.set(w.preferred_date, arr)
+    }
+    return m
+  },[waitlist])
+
+  const [filterDate, setFilterDate] = useState<string|null>(null)
+  const visibleDates = filterDate ? [filterDate] : uniqueDates
+
   return (
     <div className="mt-8">
       <div className="flex items-center justify-between mb-4">
@@ -1539,42 +1554,70 @@ function WaitlistSection() {
         </div>
         <button onClick={load} className="text-xs text-[#2176d4] hover:underline">Vernieuwen</button>
       </div>
+
+      {/* Date filter pills */}
+      {!loading && waitlist.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-3">
+          <button onClick={()=>setFilterDate(null)}
+            className={`px-3 py-1 rounded-full text-xs font-bold transition-all border ${filterDate===null ? 'bg-[#2176d4] border-[#2176d4] text-white' : 'border-[#2a2a2a] text-gray-400 hover:border-[#2176d4] hover:text-white'}`}>
+            Alle ({waitlist.length})
+          </button>
+          {uniqueDates.map(date=>(
+            <button key={date} onClick={()=>setFilterDate(date===filterDate ? null : date)}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all border ${filterDate===date ? 'bg-[#2176d4] border-[#2176d4] text-white' : 'border-[#2a2a2a] text-gray-400 hover:border-[#2176d4] hover:text-white'}`}>
+              {formatMedDate(date)} ({(grouped.get(date)?.length ?? 0)})
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-8"><div className="w-6 h-6 border-4 border-[#2176d4] border-t-transparent rounded-full animate-spin"/></div>
         ) : waitlist.length === 0 ? (
           <p className="text-center text-gray-500 font-medium py-8">Geen wachtlijst inschrijvingen</p>
         ) : (
-          <div className="divide-y divide-[#1e1e1e]">
-            {waitlist.map(w=>(
-              <div key={w.id} className="px-5 py-4 flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-white">{w.name}</p>
-                    <span className="text-xs bg-[#1e1e1e] text-gray-400 px-2 py-0.5 rounded-full">{formatShortDate(w.preferred_date)}</span>
-                    {w.service && <span className="text-xs text-gray-500">{w.service}</span>}
-                  </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
-                    {w.phone && <a href={`tel:${w.phone}`} className="text-xs text-[#2176d4] hover:underline">{w.phone}</a>}
-                    {w.email && <a href={`mailto:${w.email}`} className="text-xs text-[#2176d4] hover:underline">{w.email}</a>}
-                  </div>
-                  {w.note && <p className="text-xs text-gray-500 italic mt-1">{w.note}</p>}
+          <div>
+            {visibleDates.map(date=>(
+              <div key={date}>
+                {/* Date group header */}
+                <div className="px-5 py-2.5 bg-[#0e0e0e] border-b border-[#1e1e1e] flex items-center gap-2">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{formatLongDate(date)}</span>
+                  <span className="text-xs text-gray-600">· {grouped.get(date)?.length ?? 0} {(grouped.get(date)?.length??0)===1?'persoon':'personen'}</span>
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <button onClick={()=>openAssign(w)}
-                    className="px-3 py-1.5 bg-[#2176d4] text-white rounded-lg text-xs font-bold hover:bg-[#3080e0] transition-colors">
-                    Inplannen
-                  </button>
-                  {confirmRemove===w.id ? (
-                    <div className="flex gap-1">
-                      <button onClick={()=>remove(w.id)} disabled={removing===w.id} className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg font-bold disabled:opacity-50">{removing===w.id?'...':'Ja'}</button>
-                      <button onClick={()=>setConfirmRemove(null)} className="text-xs border border-[#333] text-gray-400 px-2 py-1 rounded-lg font-bold">Nee</button>
+                {/* Entries for this date */}
+                <div className="divide-y divide-[#1e1e1e]">
+                  {(grouped.get(date)??[]).map(w=>(
+                    <div key={w.id} className="px-5 py-4 flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-white">{w.name}</p>
+                          {w.service && <span className="text-xs bg-[#1e1e1e] text-gray-400 px-2 py-0.5 rounded-full">{w.service}</span>}
+                        </div>
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
+                          {w.phone && <a href={`tel:${w.phone}`} className="text-xs text-[#2176d4] hover:underline">{w.phone}</a>}
+                          {w.email && <a href={`mailto:${w.email}`} className="text-xs text-[#2176d4] hover:underline">{w.email}</a>}
+                        </div>
+                        {w.note && <p className="text-xs text-gray-500 italic mt-1">{w.note}</p>}
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <button onClick={()=>openAssign(w)}
+                          className="px-3 py-1.5 bg-[#2176d4] text-white rounded-lg text-xs font-bold hover:bg-[#3080e0] transition-colors">
+                          Inplannen
+                        </button>
+                        {confirmRemove===w.id ? (
+                          <div className="flex gap-1">
+                            <button onClick={()=>remove(w.id)} disabled={removing===w.id} className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg font-bold disabled:opacity-50">{removing===w.id?'...':'Ja'}</button>
+                            <button onClick={()=>setConfirmRemove(null)} className="text-xs border border-[#333] text-gray-400 px-2 py-1 rounded-lg font-bold">Nee</button>
+                          </div>
+                        ) : (
+                          <button onClick={()=>setConfirmRemove(w.id)} className="px-3 py-1.5 border border-[#2a2a2a] text-gray-400 rounded-lg text-xs font-medium hover:bg-white/5 transition-colors">
+                            Verwijder
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  ) : (
-                    <button onClick={()=>setConfirmRemove(w.id)} className="px-3 py-1.5 border border-[#2a2a2a] text-gray-400 rounded-lg text-xs font-medium hover:bg-white/5 transition-colors">
-                      Verwijder
-                    </button>
-                  )}
+                  ))}
                 </div>
               </div>
             ))}
