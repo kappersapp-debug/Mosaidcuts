@@ -1446,6 +1446,20 @@ function WaitlistSection() {
   const [removing, setRemoving] = useState<string|null>(null)
   const [confirmRemove, setConfirmRemove] = useState<string|null>(null)
 
+  // Assign modal state
+  const [assignEntry, setAssignEntry] = useState<WaitlistEntry|null>(null)
+  const [services, setServices] = useState<{id:string;name:string;price:number;duration:number}[]>([])
+  const [assignDate, setAssignDate] = useState('')
+  const [assignService, setAssignService] = useState('')
+  const [assignPrice, setAssignPrice] = useState(0)
+  const [assignDuration, setAssignDuration] = useState(30)
+  const [assignTime, setAssignTime] = useState('')
+  const [assignSlots, setAssignSlots] = useState<{time:string;available:boolean}[]>([])
+  const [assignSlotsLoading, setAssignSlotsLoading] = useState(false)
+  const [assignLoading, setAssignLoading] = useState(false)
+  const [assignError, setAssignError] = useState('')
+  const [assignDone, setAssignDone] = useState(false)
+
   async function load() {
     const r = await fetch('/api/portaal/waitlist')
     const d = await r.json()
@@ -1454,12 +1468,67 @@ function WaitlistSection() {
   }
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(()=>{ load() },[])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(()=>{
+    fetch('/api/portaal/settings').then(r=>r.json()).then(d=>{
+      if (d.settings?.services) setServices(JSON.parse(d.settings.services))
+    })
+  },[])
+
+  async function fetchAssignSlots(date: string, dur: number) {
+    if (!date) { setAssignSlots([]); return }
+    setAssignSlotsLoading(true)
+    setAssignTime('')
+    const r = await fetch(`/api/slots?date=${date}&duration=${dur}`)
+    const d = await r.json()
+    setAssignSlots(d.slots ?? [])
+    setAssignSlotsLoading(false)
+  }
+
+  function openAssign(w: WaitlistEntry) {
+    const svc = services.find(s=>s.name===w.service) ?? services[0]
+    setAssignEntry(w)
+    setAssignDate(w.preferred_date)
+    setAssignService(svc?.name ?? '')
+    setAssignPrice(svc?.price ?? 0)
+    setAssignDuration(svc?.duration ?? 30)
+    setAssignTime('')
+    setAssignError('')
+    setAssignDone(false)
+    fetchAssignSlots(w.preferred_date, svc?.duration ?? 30)
+  }
+
+  function pickAssignService(name: string) {
+    const s = services.find(s=>s.name===name)
+    if (!s) return
+    setAssignService(s.name); setAssignPrice(s.price); setAssignDuration(s.duration)
+    fetchAssignSlots(assignDate, s.duration)
+  }
 
   async function remove(id: string) {
     setRemoving(id)
     await fetch('/api/portaal/waitlist',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})})
     setRemoving(null); setConfirmRemove(null); load()
   }
+
+  async function assign() {
+    if (!assignEntry || !assignDate || !assignTime || !assignService) {
+      setAssignError('Kies een datum, dienst en tijdslot'); return
+    }
+    setAssignLoading(true); setAssignError('')
+    const r = await fetch('/api/portaal/waitlist', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ waitlist_id: assignEntry.id, date: assignDate, time: assignTime, service: assignService, price: assignPrice, duration: assignDuration }),
+    })
+    const d = await r.json()
+    setAssignLoading(false)
+    if (!r.ok) { setAssignError(d.error ?? 'Fout bij inplannen'); return }
+    setAssignDone(true)
+    setTimeout(()=>{ setAssignEntry(null); setAssignDone(false); load() }, 2000)
+  }
+
+  const availableAssignSlots = assignSlots.filter(s=>s.available)
 
   return (
     <div className="mt-8">
@@ -1478,7 +1547,7 @@ function WaitlistSection() {
         ) : (
           <div className="divide-y divide-[#1e1e1e]">
             {waitlist.map(w=>(
-              <div key={w.id} className="px-5 py-4 flex items-start justify-between gap-4">
+              <div key={w.id} className="px-5 py-4 flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-semibold text-white">{w.name}</p>
@@ -1491,21 +1560,108 @@ function WaitlistSection() {
                   </div>
                   {w.note && <p className="text-xs text-gray-500 italic mt-1">{w.note}</p>}
                 </div>
-                {confirmRemove===w.id ? (
-                  <div className="flex gap-1 shrink-0">
-                    <button onClick={()=>remove(w.id)} disabled={removing===w.id} className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg font-bold disabled:opacity-50">{removing===w.id?'...':'Ja'}</button>
-                    <button onClick={()=>setConfirmRemove(null)} className="text-xs border border-[#333] text-gray-400 px-2 py-1 rounded-lg font-bold">Nee</button>
-                  </div>
-                ) : (
-                  <button onClick={()=>setConfirmRemove(w.id)} className="shrink-0 px-3 py-1.5 border border-[#2a2a2a] text-gray-400 rounded-lg text-xs font-medium hover:bg-white/5 transition-colors">
-                    Verwijder
+                <div className="flex gap-2 shrink-0">
+                  <button onClick={()=>openAssign(w)}
+                    className="px-3 py-1.5 bg-[#2176d4] text-white rounded-lg text-xs font-bold hover:bg-[#3080e0] transition-colors">
+                    Inplannen
                   </button>
-                )}
+                  {confirmRemove===w.id ? (
+                    <div className="flex gap-1">
+                      <button onClick={()=>remove(w.id)} disabled={removing===w.id} className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg font-bold disabled:opacity-50">{removing===w.id?'...':'Ja'}</button>
+                      <button onClick={()=>setConfirmRemove(null)} className="text-xs border border-[#333] text-gray-400 px-2 py-1 rounded-lg font-bold">Nee</button>
+                    </div>
+                  ) : (
+                    <button onClick={()=>setConfirmRemove(w.id)} className="px-3 py-1.5 border border-[#2a2a2a] text-gray-400 rounded-lg text-xs font-medium hover:bg-white/5 transition-colors">
+                      Verwijder
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Assign modal */}
+      {assignEntry && (
+        <div className="fixed inset-0 z-50 bg-black/75 flex items-end sm:items-center justify-center sm:p-4 animate-fade-in" onClick={()=>{ if(!assignLoading) setAssignEntry(null) }}>
+          <div className="bg-[#141414] rounded-t-2xl sm:rounded-2xl border-t sm:border border-[#2a2a2a] w-full sm:max-w-md shadow-2xl max-h-[92vh] overflow-y-auto" onClick={e=>e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-[#1e1e1e] flex items-center justify-between sticky top-0 bg-[#141414] z-10">
+              <div>
+                <h2 className="font-bold text-white text-base">Inplannen</h2>
+                <p className="text-xs text-gray-500 mt-0.5">{assignEntry.name} · voorkeur {formatShortDate(assignEntry.preferred_date)}</p>
+              </div>
+              <button onClick={()=>setAssignEntry(null)} disabled={assignLoading}
+                className="w-8 h-8 rounded-lg bg-[#1e1e1e] text-gray-400 hover:text-white hover:bg-[#2a2a2a] transition-all flex items-center justify-center text-lg leading-none">×</button>
+            </div>
+            <div className="p-6 space-y-5">
+              {assignDone ? (
+                <div className="text-center py-6">
+                  <div className="w-14 h-14 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-7 h-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <p className="font-bold text-white text-lg">Ingepland!</p>
+                  <p className="text-sm text-gray-400 mt-1">{assignEntry.email ? 'Bevestigingsmail verstuurd' : 'Afspraak aangemaakt'}</p>
+                </div>
+              ) : (
+                <>
+                  {assignError && <div className="bg-red-900/30 border border-red-700/40 text-red-400 text-sm px-4 py-3 rounded-xl">{assignError}</div>}
+
+                  {/* Date */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Datum</label>
+                    <input type="date" value={assignDate}
+                      onChange={e=>{ setAssignDate(e.target.value); fetchAssignSlots(e.target.value, assignDuration) }}
+                      className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors [color-scheme:dark]"/>
+                  </div>
+
+                  {/* Service */}
+                  {services.length > 0 && (
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Dienst</label>
+                      <div className="grid gap-2">
+                        {services.map(s=>(
+                          <button key={s.id} type="button" onClick={()=>pickAssignService(s.name)}
+                            className={`flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all ${assignService===s.name ? 'border-[#2176d4] bg-[#2176d4]/10 text-white' : 'border-[#2a2a2a] bg-[#0e0e0e] text-gray-400 hover:border-[#333] hover:text-white'}`}>
+                            <span>{s.name}</span>
+                            <span className={`font-black ${assignService===s.name?'text-[#2176d4]':'text-gray-600'}`}>€{s.price} · {s.duration}min</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Slots */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Tijdslot</label>
+                    {assignSlotsLoading ? (
+                      <div className="flex justify-center py-4"><div className="w-5 h-5 border-4 border-[#2176d4] border-t-transparent rounded-full animate-spin"/></div>
+                    ) : !assignDate ? (
+                      <p className="text-xs text-gray-600 py-2">Kies eerst een datum</p>
+                    ) : availableAssignSlots.length === 0 ? (
+                      <p className="text-xs text-orange-400 py-2">Geen beschikbare slots op deze dag</p>
+                    ) : (
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {availableAssignSlots.map(s=>(
+                          <button key={s.time} type="button" onClick={()=>setAssignTime(s.time)}
+                            className={`py-2 rounded-lg text-sm font-bold transition-all border ${assignTime===s.time ? 'bg-[#2176d4] border-[#2176d4] text-white' : 'border-[#2a2a2a] text-gray-400 hover:border-[#2176d4] hover:text-white'}`}>
+                            {s.time}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <button onClick={assign} disabled={assignLoading || !assignTime || !assignDate || !assignService}
+                    className="w-full py-3 bg-[#2176d4] text-white rounded-xl font-bold text-sm hover:bg-[#3080e0] disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    {assignLoading ? 'Bezig...' : 'Inplannen & bevestiging sturen'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
