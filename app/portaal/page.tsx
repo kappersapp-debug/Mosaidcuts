@@ -1103,44 +1103,46 @@ function AppointmentsView() {
           {bookings.map(b=>{
             const status = getStatus(b.date)
             return (
-              <div key={b.id} className="bg-[#141414] rounded-2xl border border-[#222] p-4 flex items-center gap-4 transition-all duration-200 hover:border-[#2a2a2a] hover:-translate-y-px hover:shadow-md hover:shadow-black/30">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2176d4]/20 to-[#2176d4]/5 flex items-center justify-center text-xs font-black text-[#2176d4] shrink-0 border border-[#2176d4]/10">
-                  {serviceInitial(b.service)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2 flex-wrap">
-                    <div className="min-w-0">
-                      <p className="font-black text-white truncate">{b.name}</p>
-                      <p className="text-sm text-gray-400 truncate">{b.service} · {formatMedDate(b.date)} · {b.time}</p>
-                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
-                        <a href={`tel:${b.phone}`} className="text-xs text-[#2176d4] hover:underline">{b.phone}</a>
-                        <a href={`mailto:${b.email}`} className="text-xs text-[#2176d4] hover:underline truncate">{b.email}</a>
-                      </div>
-                      {b.notes && <p className="text-xs text-gray-500 italic mt-1 truncate">📝 {b.notes}</p>}
-                      <div className="mt-1 flex flex-wrap gap-1">
-                        {b.no_show ? noShowBadge : statusBadge[status]}
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="font-black text-white">€{b.price}</p>
-                      <p className="text-xs text-gray-500 font-mono">{b.code}</p>
-                      {confirmDel===b.id ? (
-                        <div className="flex gap-1 mt-1">
-                          <button onClick={()=>del(b.id)} disabled={deleting===b.id} className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-lg font-bold disabled:opacity-50">{deleting===b.id?'...':'Ja'}</button>
-                          <button onClick={()=>setConfirmDel(null)} className="text-xs border border-[#333] text-gray-400 px-2 py-0.5 rounded-lg font-bold">Nee</button>
+              <div key={b.id} className="bg-[#141414] rounded-2xl border border-[#222] overflow-hidden transition-all duration-200 hover:border-[#2a2a2a] hover:-translate-y-px hover:shadow-md hover:shadow-black/30">
+                <div className="p-4 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2176d4]/20 to-[#2176d4]/5 flex items-center justify-center text-xs font-black text-[#2176d4] shrink-0 border border-[#2176d4]/10">
+                    {serviceInitial(b.service)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-black text-white truncate">{b.name}</p>
+                        <p className="text-sm text-gray-400 truncate">{b.service} · {formatMedDate(b.date)} · {b.time}</p>
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
+                          <a href={`tel:${b.phone}`} className="text-xs text-[#2176d4] hover:underline">{b.phone}</a>
+                          <a href={`mailto:${b.email}`} className="text-xs text-[#2176d4] hover:underline truncate">{b.email}</a>
                         </div>
-                      ) : (
-                        <div className="flex gap-2 mt-1 justify-end">
-                          <button onClick={()=>setFormBooking({id:b.id,name:b.name,phone:b.phone,email:b.email,service:b.service,price:b.price,duration:b.duration,date:b.date,time:b.time,notes:b.notes??''})} className="text-xs text-[#2176d4] hover:underline">Bewerken</button>
-                          <button onClick={()=>toggleNoShow(b.id, !!b.no_show)} disabled={noShowLoading===b.id} className={`text-xs hover:underline disabled:opacity-50 ${b.no_show ? 'text-gray-500' : 'text-orange-400 hover:text-orange-300'}`}>
-                            {noShowLoading===b.id ? '...' : b.no_show ? 'Herstel' : 'No-show'}
-                          </button>
-                          <button onClick={()=>setConfirmDel(b.id)} className="text-xs text-red-400 hover:text-red-500">Verwijder</button>
+                        {b.notes && <p className="text-xs text-gray-500 italic mt-1 truncate">📝 {b.notes}</p>}
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {b.no_show ? noShowBadge : statusBadge[status]}
                         </div>
-                      )}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-black text-white">€{b.price}</p>
+                        <p className="text-xs text-gray-500 font-mono">{b.code}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
+                {confirmDel===b.id ? (
+                  <div className="border-t border-[#1e1e1e] px-4 py-3 flex gap-2">
+                    <button onClick={()=>del(b.id)} disabled={deleting===b.id} className="flex-1 py-2.5 rounded-xl bg-red-600 text-white font-bold text-sm disabled:opacity-50 active:scale-95 transition-transform">{deleting===b.id?'…':'Ja, verwijder'}</button>
+                    <button onClick={()=>setConfirmDel(null)} className="flex-1 py-2.5 rounded-xl border border-[#333] text-gray-400 font-bold text-sm active:scale-95 transition-transform">Annuleren</button>
+                  </div>
+                ) : (
+                  <div className="border-t border-[#1e1e1e] grid grid-cols-3 divide-x divide-[#1e1e1e]">
+                    <button onClick={()=>setFormBooking({id:b.id,name:b.name,phone:b.phone,email:b.email,service:b.service,price:b.price,duration:b.duration,date:b.date,time:b.time,notes:b.notes??''})} className="py-3 text-sm font-bold text-[#2176d4] hover:bg-[#2176d4]/5 active:bg-[#2176d4]/10 transition-colors">Bewerken</button>
+                    <button onClick={()=>toggleNoShow(b.id, !!b.no_show)} disabled={noShowLoading===b.id} className={`py-3 text-sm font-bold transition-colors disabled:opacity-50 hover:bg-white/5 active:bg-white/10 ${b.no_show ? 'text-gray-500' : 'text-orange-400'}`}>
+                      {noShowLoading===b.id ? '…' : b.no_show ? 'Herstel' : 'No-show'}
+                    </button>
+                    <button onClick={()=>setConfirmDel(b.id)} className="py-3 text-sm font-bold text-red-400 hover:bg-red-500/5 active:bg-red-500/10 transition-colors">Verwijder</button>
+                  </div>
+                )}
               </div>
             )
           })}
