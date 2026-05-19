@@ -44,6 +44,7 @@ export async function POST(request: Request) {
         for (const booking of affected) {
           try {
             await transporter.sendMail({
+              from: `MoSaidCuts ✂ <${process.env.GMAIL_USER}>`,
               to: booking.email,
               subject: `Afspraak geannuleerd – ${booking.code}`,
               html: cancelMailHtml(booking),

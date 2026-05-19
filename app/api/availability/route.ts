@@ -27,6 +27,10 @@ export async function GET(request: Request) {
   const blockedDates: string[] = settings.blocked_dates ? JSON.parse(settings.blocked_dates) : []
   const result: Record<string, { available: number; total: number }> = {}
 
+  const nowNlStr = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Amsterdam' })
+  const todayNl = nowNlStr.split(' ')[0]
+  const nowMinsToday = (() => { const [, t] = nowNlStr.split(' '); const [h, m] = t.split(':').map(Number); return h * 60 + m })()
+
   for (let d = 1; d <= lastDayNum; d++) {
     const ds = `${month}-${String(d).padStart(2, '0')}`
     const dow = new Date(ds + 'T12:00:00').getDay()
@@ -55,11 +59,13 @@ export async function GET(request: Request) {
     const slots: number[] = []
     for (let m = sh * 60 + sm; m + duration <= eh * 60 + em; m += 15) slots.push(m)
 
-    const total = slots.length
+    const isToday = ds === todayNl
+    const futureSlots = isToday ? slots.filter(s => s > nowMinsToday) : slots
+    const total = futureSlots.length
     const dayBookings = (bookings ?? []).filter(b => b.date === ds)
 
     let available = 0
-    for (const slotMin of slots) {
+    for (const slotMin of futureSlots) {
       const slotEnd = slotMin + duration
       const occupied = dayBookings.some(b => {
         const [bh, bm] = b.time.split(':').map(Number)

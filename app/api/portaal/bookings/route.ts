@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
   if (filter === 'today') {
     query = query.eq('date', today)
   } else if (filter === 'upcoming') {
-    query = query.gte('date', today)
+    query = query.gte('date', today).limit(50)
   } else if (filter === 'past') {
     query = query.lt('date', today)
   }
@@ -95,9 +95,10 @@ export async function DELETE(request: Request) {
   const { error } = await supabaseAdmin.from('bookings').delete().eq('id', id)
   if (error) return Response.json({ error: 'Fout bij verwijderen' }, { status: 500 })
 
-  if (booking) {
+  if (booking?.email) {
     try {
       await transporter.sendMail({
+        from: `MoSaidCuts ✂ <${process.env.GMAIL_USER}>`,
         to: booking.email,
         subject: `Afspraak geannuleerd – ${booking.code}`,
         html: cancelMailHtml(booking),
@@ -118,9 +119,10 @@ export async function POST(request: Request) {
   }
 
   let code = generateCode()
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     const { data } = await supabaseAdmin.from('bookings').select('id').eq('code', code).single()
     if (!data) break
+    if (i === 9) return Response.json({ error: 'Kon geen unieke code genereren' }, { status: 500 })
     code = generateCode()
   }
 
