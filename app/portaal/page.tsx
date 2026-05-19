@@ -1434,6 +1434,7 @@ function ManagementView() {
           </div>
         )}
       </div>
+      <WaitlistSection />
     </div>
   )
 }
@@ -1505,7 +1506,6 @@ function WaitlistSection() {
           </div>
         )}
       </div>
-      <WaitlistSection />
     </div>
   )
 }
