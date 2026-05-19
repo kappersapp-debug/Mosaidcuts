@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { verifyPortalAuth } from '@/lib/auth'
 import { NextRequest } from 'next/server'
 
