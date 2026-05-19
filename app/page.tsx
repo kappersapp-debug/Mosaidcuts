@@ -173,7 +173,7 @@ function Progress({ step }: { step: number }) {
             ].join(' ')}>
               {done ? '✓' : n}
             </div>
-            <span className={`text-xs font-semibold ${active || done ? 'text-[#2176d4]' : 'text-gray-600'}`}>{label}</span>
+            <span className={`text-[9px] sm:text-xs font-semibold ${active || done ? 'text-[#2176d4]' : 'text-gray-600'}`}>{label}</span>
           </div>
         )
       })}
@@ -538,7 +538,7 @@ export default function BookingPage() {
 
   function handleWaitlistCodePaste(e: React.ClipboardEvent) {
     const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
-    if (text.length === 6) { setWaitlistCodeDigits(text.split('')); waitlistCodeRefs.current[5]?.focus(); e.preventDefault() }
+    if (text.length === 6) { const digits = text.split(''); setWaitlistCodeDigits(digits); waitlistCodeRefs.current[5]?.focus(); e.preventDefault(); setTimeout(() => handleWaitlistVerify(digits), 50) }
   }
 
   async function handleWaitlistVerify(overrideDigits?: string[]) {
@@ -563,7 +563,7 @@ export default function BookingPage() {
 
   function handleCodePaste(e: React.ClipboardEvent) {
     const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
-    if (text.length === 6) { setCodeDigits(text.split('')); codeRefs.current[5]?.focus(); e.preventDefault() }
+    if (text.length === 6) { const digits = text.split(''); setCodeDigits(digits); codeRefs.current[5]?.focus(); e.preventDefault(); setTimeout(() => handleVerify(digits), 50) }
   }
 
   // Auto-open waitlist when all slots on a day are full
@@ -867,7 +867,7 @@ export default function BookingPage() {
                     )
                   })()}
                   <div className="flex gap-3 mt-6">
-                    <button onClick={() => setStep(2)}
+                    <button onClick={() => { setStep(2); setShowWaitlist(false); setWaitlistDone(false); setWaitlistStep('form'); setWaitlistError(''); setWaitlistCodeDigits(['','','','','','']) }}
                       className="flex-1 py-3 rounded-xl border border-[#2a2a2a] font-bold text-gray-400 hover:border-[#333] hover:text-white transition-all">‹ Terug</button>
                     <button disabled={!time} onClick={() => setStep(4)}
                       className="flex-1 py-3 rounded-xl bg-[#2176d4] text-white font-bold hover:bg-[#3080e0] hover:shadow-[0_0_20px_rgba(33,118,212,0.3)] disabled:opacity-40 disabled:cursor-not-allowed transition-all">
@@ -895,7 +895,10 @@ export default function BookingPage() {
                       { label: 'E-mailadres', key: 'email', type: 'email', placeholder: 'uw@email.com', autoComplete: 'email' },
                     ].map(f => (
                       <div key={f.key}>
-                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">{f.label}</label>
+                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">
+                          {f.label}
+                          {f.key === 'email' && !isReturning && <span className="normal-case font-normal text-[10px] ml-1 text-gray-600">(voor verificatie)</span>}
+                        </label>
                         <input type={f.type} placeholder={f.placeholder} autoComplete={f.autoComplete}
                           value={contact[f.key as keyof typeof contact]}
                           onChange={e => { setContact(c => ({ ...c, [f.key]: e.target.value })); setFieldErrors(fe => ({ ...fe, [f.key]: '' })) }}
@@ -1012,12 +1015,12 @@ export default function BookingPage() {
         )}
       </div>
 
-      <footer className="text-center text-gray-700 text-xs py-4 pb-8">
+      <footer className="text-center text-gray-700 text-xs py-4" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 0px))' }}>
         © {new Date().getFullYear()} MoSaidCuts Barbershop
       </footer>
 
       {cookieConsent === null && step === 1 && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-fade-up">
+        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-fade-up" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}>
           <div className="max-w-lg mx-auto bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl p-4 shadow-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-semibold mb-0.5">Cookies</p>

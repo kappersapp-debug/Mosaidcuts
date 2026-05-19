@@ -21,6 +21,10 @@
 .animate-fade-in   { animation: fade-in  0.25s ease both; }
 .animate-pulse-ring { animation: pulse-ring 1.4s ease-out infinite; }
 
+/* Portal mobile bottom-nav safe area (iPhone X+) */
+.pb-nav-safe { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 1024px) { .pb-nav-safe { padding-bottom: 0; } }
+
 .skeleton {
   background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
   background-size: 800px 100%;

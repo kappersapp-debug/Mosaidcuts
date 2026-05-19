@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Nunito, Barlow, Bebas_Neue } from 'next/font/google'
 import './globals.css'
 
@@ -23,6 +23,10 @@ const bebasNeue = Bebas_Neue({
 export const metadata: Metadata = {
   title: 'MoSaidCuts – Barbershop',
   description: 'Boek uw afspraak bij MoSaidCuts Barbershop',
+}
+
+export const viewport: Viewport = {
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

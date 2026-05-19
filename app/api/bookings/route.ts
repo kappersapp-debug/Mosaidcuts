@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { transporter } from '@/lib/mailer'
+import { rateLimit } from '@/lib/rate-limit'
 
 function esc(s: unknown): string {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -23,6 +24,11 @@ function formatDateNL(dateStr: string): string {
 }
 
 export async function POST(request: Request) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+  if (!rateLimit(`booking:${ip}`, 10, 15 * 60 * 1000)) {
+    return Response.json({ error: 'Te veel verzoeken. Probeer later opnieuw.' }, { status: 429 })
+  }
+
   const body = await request.json()
   const { name, phone, email, service, price, duration, date, time } = body
 

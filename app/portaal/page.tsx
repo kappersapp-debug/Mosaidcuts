@@ -361,7 +361,8 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
       )}
 
       {/* Mobile bottom nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0e0e0e] border-t border-[#1e1e1e] flex h-16">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0e0e0e] border-t border-[#1e1e1e] flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="flex h-16">
         {(['dashboard','calendar','appointments','customers'] as View[]).map(id => {
           const n = NAV.find(n => n.id === id)!
           const active = view === id
@@ -381,9 +382,10 @@ function PortalShell({onLogout}: {onLogout:()=>void}) {
           </span>
           Meer
         </button>
+        </div>
       </nav>
 
-      <main className="flex-1 lg:ml-60 pt-14 lg:pt-0 pb-20 lg:pb-0 min-h-screen">
+      <main className="flex-1 lg:ml-60 pt-14 lg:pt-0 min-h-screen pb-nav-safe">
         <div className="p-4 sm:p-6 lg:p-8 max-w-5xl">
           {view==='dashboard' && <DashboardView />}
           {view==='calendar' && <CalendarView />}
