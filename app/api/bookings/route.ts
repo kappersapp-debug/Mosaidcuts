@@ -32,6 +32,42 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Ongeldige datum of tijd' }, { status: 400 })
   }
 
+  // Validate against opening hours + blocked dates server-side
+  const { data: settingsRows } = await supabaseAdmin.from('settings').select('key, value')
+  const settings: Record<string, string> = {}
+  for (const row of settingsRows ?? []) settings[row.key] = row.value
+
+  const dow = new Date(date + 'T12:00:00').getDay()
+
+  if (settings.blocked_dates) {
+    const blocked: string[] = JSON.parse(settings.blocked_dates)
+    if (blocked.includes(date)) return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
+  }
+
+  let workStart = '09:00'
+  let workEnd = '17:00'
+  if (settings.day_schedule) {
+    const schedule: Record<string, { open: boolean; start: string; end: string }> = JSON.parse(settings.day_schedule)
+    const cfg = schedule[String(dow)]
+    if (!cfg || !cfg.open) return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
+    workStart = cfg.start
+    workEnd = cfg.end
+  } else if (settings.availability) {
+    const avail: Record<string, boolean> = JSON.parse(settings.availability)
+    if (avail[String(dow)] === false) return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
+    workStart = settings.work_start ?? '09:00'
+    workEnd = settings.work_end ?? '17:00'
+  }
+  const [wsH, wsM] = workStart.split(':').map(Number)
+  const [weH, weM] = workEnd.split(':').map(Number)
+  const workStartMins = wsH * 60 + wsM
+  const workEndMins = weH * 60 + weM
+  const [th2, tm2] = time.split(':').map(Number)
+  const tStartCheck = th2 * 60 + tm2
+  if (tStartCheck < workStartMins || tStartCheck + duration > workEndMins) {
+    return Response.json({ error: 'Dit tijdslot is niet meer beschikbaar' }, { status: 409 })
+  }
+
   // Check again if slot is still available
   const { data: existing } = await supabaseAdmin
     .from('bookings')
