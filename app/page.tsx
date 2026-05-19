@@ -751,13 +751,19 @@ export default function BookingPage() {
                         ) : (
                           <div>
                             <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Kies een tijdslot</p>
-                            {rescheduleSlots.filter(s => s.available).length === 0 ? (
-                              <p className="text-gray-500 text-sm text-center py-2">Geen beschikbare tijden op deze dag</p>
+                            {rescheduleSlots.length === 0 ? (
+                              <p className="text-gray-500 text-sm text-center py-2">Geen tijden beschikbaar op deze dag</p>
                             ) : (
                               <div className="grid grid-cols-4 gap-2">
-                                {rescheduleSlots.filter(s => s.available).map(slot => (
-                                  <button key={slot.time} onClick={() => setRescheduleTime(slot.time)}
-                                    className={`py-2.5 rounded-xl text-sm font-bold transition-all ${rescheduleTime === slot.time ? 'bg-[#2176d4] text-white shadow-[0_0_15px_rgba(33,118,212,0.3)]' : 'bg-[#1a1a1a] border border-[#2a2a2a] text-[#2176d4] hover:bg-[#2176d4] hover:text-white hover:border-[#2176d4]'}`}>
+                                {rescheduleSlots.map(slot => (
+                                  <button key={slot.time} disabled={!slot.available} onClick={() => slot.available && setRescheduleTime(slot.time)}
+                                    className={['py-2.5 rounded-xl text-sm font-bold transition-all',
+                                      slot.available
+                                        ? rescheduleTime === slot.time
+                                          ? 'bg-[#2176d4] text-white shadow-[0_0_15px_rgba(33,118,212,0.3)]'
+                                          : 'bg-[#1a1a1a] border border-[#2a2a2a] text-[#2176d4] hover:bg-[#2176d4] hover:text-white hover:border-[#2176d4]'
+                                        : 'bg-[#161616] border border-[#1e1e1e] text-gray-700 cursor-not-allowed',
+                                    ].join(' ')}>
                                     {slot.time}
                                   </button>
                                 ))}
