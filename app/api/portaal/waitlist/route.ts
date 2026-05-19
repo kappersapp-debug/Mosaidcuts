@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { verifyPortalAuth } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { transporter } from '@/lib/mailer'
@@ -27,8 +29,9 @@ export async function GET() {
 
   const today = new Date().toISOString().split('T')[0]
 
-  // Auto-remove entries whose preferred date has passed
-  await supabaseAdmin.from('waitlist').delete().lt('preferred_date', today)
+  // Auto-remove entries whose preferred date is more than 1 day in the past
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+  await supabaseAdmin.from('waitlist').delete().lt('preferred_date', yesterday)
 
   const { data, error } = await supabaseAdmin
     .from('waitlist')

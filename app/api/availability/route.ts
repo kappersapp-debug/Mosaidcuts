@@ -34,14 +34,18 @@ export async function GET(request: Request) {
     if (blockedDates.includes(ds)) { result[ds] = { available: 0, total: 0 }; continue }
 
     let dayStart = '09:00', dayEnd = '17:00', isOpen = true
+    let dayBreaks: { start: string; end: string }[] = []
     if (settings.day_schedule) {
-      const sched: Record<string, { open: boolean; start: string; end: string }> = JSON.parse(settings.day_schedule)
+      const sched: Record<string, { open: boolean; start: string; end: string; breaks?: { start: string; end: string }[] }> = JSON.parse(settings.day_schedule)
       const cfg = sched[String(dow)]
       if (!cfg?.open) { isOpen = false }
-      else { dayStart = cfg.start ?? '09:00'; dayEnd = cfg.end ?? '17:00' }
+      else { dayStart = cfg.start ?? '09:00'; dayEnd = cfg.end ?? '17:00'; dayBreaks = cfg.breaks ?? [] }
     } else if (settings.availability) {
       const avail: Record<string, boolean> = JSON.parse(settings.availability)
       if (avail[String(dow)] === false) { isOpen = false }
+      else if (settings.breaks) dayBreaks = JSON.parse(settings.breaks)
+    } else if (settings.breaks) {
+      dayBreaks = JSON.parse(settings.breaks)
     }
 
     if (!isOpen) { result[ds] = { available: 0, total: 0 }; continue }
@@ -62,7 +66,14 @@ export async function GET(request: Request) {
         const bStart = bh * 60 + bm
         return bStart < slotEnd && slotMin < bStart + b.duration
       })
-      if (!occupied) available++
+      const inBreak = dayBreaks.some(brk => {
+        const [bsh, bsm] = brk.start.split(':').map(Number)
+        const [beh, bem] = brk.end.split(':').map(Number)
+        const brkStart = bsh * 60 + bsm
+        const brkEnd = beh * 60 + bem
+        return brkStart < slotEnd && slotMin < brkEnd
+      })
+      if (!occupied && !inBreak) available++
     }
 
     result[ds] = { available, total }

@@ -59,12 +59,23 @@ export async function POST(request: Request) {
     const blocked: string[] = JSON.parse(settings.blocked_dates)
     if (blocked.includes(date)) return Response.json({ error: 'Dit tijdslot is niet beschikbaar' }, { status: 409 })
   }
+  let workStart = '09:00', workEnd = '17:00'
   if (settings.day_schedule) {
-    const sched: Record<string, { open: boolean }> = JSON.parse(settings.day_schedule)
-    if (!sched[String(dow)]?.open) return Response.json({ error: 'Dit tijdslot is niet beschikbaar' }, { status: 409 })
+    const sched: Record<string, { open: boolean; start: string; end: string }> = JSON.parse(settings.day_schedule)
+    const cfg = sched[String(dow)]
+    if (!cfg?.open) return Response.json({ error: 'Dit tijdslot is niet beschikbaar' }, { status: 409 })
+    workStart = cfg.start ?? '09:00'; workEnd = cfg.end ?? '17:00'
   } else if (settings.availability) {
     const avail: Record<string, boolean> = JSON.parse(settings.availability)
     if (avail[String(dow)] === false) return Response.json({ error: 'Dit tijdslot is niet beschikbaar' }, { status: 409 })
+    workStart = settings.work_start ?? '09:00'; workEnd = settings.work_end ?? '17:00'
+  }
+  const [wsH, wsM] = workStart.split(':').map(Number)
+  const [weH, weM] = workEnd.split(':').map(Number)
+  const [tH, tM] = time.split(':').map(Number)
+  const tMins = tH * 60 + tM
+  if (tMins < wsH * 60 + wsM || tMins + booking.duration > weH * 60 + weM) {
+    return Response.json({ error: 'Dit tijdslot is niet beschikbaar' }, { status: 409 })
   }
 
   // Check new slot is free (exclude current booking)

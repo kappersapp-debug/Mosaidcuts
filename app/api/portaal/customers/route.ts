@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { verifyPortalAuth } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 

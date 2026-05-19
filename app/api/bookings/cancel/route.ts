@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       subject: `Afspraak geannuleerd – ${booking.code}`,
       html: cancelMailHtml(booking),
     })
-  } catch { /* non-fatal */ }
+  } catch (err) { console.warn('[MoSaidCuts] Cancel mail failed:', err) }
 
   return Response.json({ success: true })
 }
