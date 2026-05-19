@@ -1615,18 +1615,13 @@ function WaitlistSection() {
                       className="w-full bg-[#0e0e0e] border border-[#2a2a2a] text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#2176d4] transition-colors [color-scheme:dark]"/>
                   </div>
 
-                  {/* Service */}
-                  {services.length > 0 && (
+                  {/* Service (read-only) */}
+                  {assignService && (
                     <div>
                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Dienst</label>
-                      <div className="grid gap-2">
-                        {services.map(s=>(
-                          <button key={s.id} type="button" onClick={()=>pickAssignService(s.name)}
-                            className={`flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all ${assignService===s.name ? 'border-[#2176d4] bg-[#2176d4]/10 text-white' : 'border-[#2a2a2a] bg-[#0e0e0e] text-gray-400 hover:border-[#333] hover:text-white'}`}>
-                            <span>{s.name}</span>
-                            <span className={`font-black ${assignService===s.name?'text-[#2176d4]':'text-gray-600'}`}>€{s.price} · {s.duration}min</span>
-                          </button>
-                        ))}
+                      <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-[#2a2a2a] bg-[#0e0e0e]">
+                        <span className="text-sm text-white font-medium">{assignService}</span>
+                        <span className="text-sm font-black text-[#2176d4]">€{assignPrice} · {assignDuration}min</span>
                       </div>
                     </div>
                   )}
