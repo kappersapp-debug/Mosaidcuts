@@ -21,10 +21,16 @@ export async function GET() {
     return Response.json({ error: 'Niet ingelogd' }, { status: 401 })
   }
 
+  const today = new Date().toISOString().split('T')[0]
+
+  // Auto-remove entries whose preferred date has passed
+  await supabaseAdmin.from('waitlist').delete().lt('preferred_date', today)
+
   const { data, error } = await supabaseAdmin
     .from('waitlist')
     .select('*')
-    .order('id', { ascending: false })
+    .order('preferred_date', { ascending: true })
+    .order('id', { ascending: true })
 
   if (error) return Response.json({ error: 'Database fout' }, { status: 500 })
   return Response.json({ waitlist: data ?? [] })
