@@ -844,12 +844,14 @@ function DatePicker({ value, onChange }: { value: string; onChange: (d: string) 
               const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
               const isSelected = dayStr === value
               const isToday = dayStr === todayStr
+              const isPast = dayStr < todayStr
               return (
-                <button key={i} type="button" onClick={() => selectDay(day)}
+                <button key={i} type="button" onClick={() => !isPast && selectDay(day)} disabled={isPast}
                   className={`aspect-square rounded-lg text-sm font-medium transition-all flex items-center justify-center
-                    ${isSelected ? 'bg-[#2176d4] text-white shadow-[0_0_12px_rgba(33,118,212,0.35)]' : ''}
+                    ${isPast ? 'text-gray-700 cursor-not-allowed' : ''}
+                    ${isSelected && !isPast ? 'bg-[#2176d4] text-white shadow-[0_0_12px_rgba(33,118,212,0.35)]' : ''}
                     ${isToday && !isSelected ? 'bg-[#2176d4]/15 text-[#2176d4] font-bold ring-1 ring-[#2176d4]/30' : ''}
-                    ${!isSelected && !isToday ? 'text-gray-400 hover:bg-[#1e1e1e] hover:text-white' : ''}
+                    ${!isSelected && !isToday && !isPast ? 'text-gray-400 hover:bg-[#1e1e1e] hover:text-white' : ''}
                   `}>
                   {day}
                 </button>
@@ -888,7 +890,10 @@ function BookingFormModal({ initial, onClose, onSaved }: { initial: BookingForm;
   useEffect(()=>{
     if (!form.date) { setSlots([]); return }
     setLoadingSlots(true)
-    fetch(`/api/slots?date=${form.date}&duration=${form.duration||30}`)
+    const _now = new Date()
+    const _todayStr = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`
+    const _nowParam = form.date === _todayStr ? `&now=${String(_now.getHours()).padStart(2,'0')}:${String(_now.getMinutes()).padStart(2,'0')}` : ''
+    fetch(`/api/slots?date=${form.date}&duration=${form.duration||30}${_nowParam}`)
       .then(r=>r.json())
       .then(d=>{
         const fetchedSlots: {time:string;available:boolean}[] = d.slots ?? []
