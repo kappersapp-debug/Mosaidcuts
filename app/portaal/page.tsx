@@ -428,8 +428,6 @@ function isBreak(slot: string, breaks: {start: string; end: string}[]) {
 function DashboardView({ onNavigate }: { onNavigate: (view: View) => void }) {
   const [stats, setStats] = useState<{today:number;week:number;weekRevenue:number;totalCustomers:number;todayBookings:Booking[]}|null>(null)
   const [upcoming, setUpcoming] = useState<Booking[]>([])
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [expandedUpcoming, setExpandedUpcoming] = useState<string|null>(null)
   const [workSlots, setWorkSlots] = useState<string[]>(generateWorkSlots())
   const [dayBreaks, setDayBreaks] = useState<BreakSlot[]>([])
   const [waitlistCount, setWaitlistCount] = useState<number|null>(null)
@@ -454,7 +452,6 @@ function DashboardView({ onNavigate }: { onNavigate: (view: View) => void }) {
 
   useEffect(()=>{
     loadDashboard()
-    fetch('/api/portaal/customers').then(r=>r.json()).then(d=>setCustomers(d.customers??[]))
     fetch('/api/portaal/settings').then(r=>r.json()).then(d=>{
       const s = d.settings??{}
       const dow = String(new Date().getDay())
@@ -566,61 +563,19 @@ function DashboardView({ onNavigate }: { onNavigate: (view: View) => void }) {
             </div>
           ) : (
             <div className="divide-y divide-[#1a1a1a]">
-              {upcoming.map(b=>{
-                const cust = customers.find(c=>c.email===b.email?.toLowerCase())
-                const isOpen = expandedUpcoming === b.id
-                return (
-                  <div key={b.id} className="overflow-hidden">
-                    <button onClick={()=>setExpandedUpcoming(isOpen ? null : b.id)}
-                      className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-white/2 transition-colors text-left">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2176d4]/20 to-[#2176d4]/5 flex items-center justify-center text-sm font-black text-[#2176d4] shrink-0 border border-[#2176d4]/10">
-                        {b.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-white text-sm truncate">{b.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{b.service} · {formatShortDate(b.date)} · {b.time}</p>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        {cust && <span className="text-xs font-bold text-[#2176d4]/60 hidden sm:block">{cust.visits}×</span>}
-                        <span className="bg-[#2176d4]/10 text-[#2176d4] font-black text-xs px-2 py-0.5 rounded-lg">€{b.price}</span>
-                        <svg className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${isOpen?'rotate-180':''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
-                      </div>
-                    </button>
-                    {isOpen && (
-                      <div className="border-t border-[#1a1a1a]">
-                        <div className="px-5 py-3 flex gap-6 bg-[#111]">
-                          {b.email && <div><p className="text-xs text-gray-600">e-mail</p><p className="text-xs text-white font-medium">{b.email}</p></div>}
-                          {b.phone && <div><p className="text-xs text-gray-600">telefoon</p><p className="text-xs text-white font-medium">{b.phone}</p></div>}
-                          {cust && <div><p className="text-xs text-gray-600">bezoeken</p><p className="text-xs font-black text-white">{cust.visits}</p></div>}
-                          {cust && <div><p className="text-xs text-gray-600">totaal</p><p className="text-xs font-black text-white">€{cust.totalSpent}</p></div>}
-                        </div>
-                        {cust && cust.bookings.length > 0 && (
-                          <div className="divide-y divide-[#1a1a1a]">
-                            {cust.bookings.map((bk,i)=>(
-                              <div key={i} className={`flex items-center gap-3 px-5 py-2.5 transition-colors ${bk.code===b.code?'bg-[#2176d4]/8':'hover:bg-white/2'}`}>
-                                <div className="w-7 h-7 rounded-lg bg-[#1e1e1e] flex items-center justify-center text-[10px] font-black text-gray-500 shrink-0">
-                                  {serviceInitial(bk.service)}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-white truncate">{bk.service}</p>
-                                  <p className="text-xs text-gray-500">{formatMedDate(bk.date)} · {bk.time}</p>
-                                </div>
-                                <p className="text-[10px] text-gray-600 font-mono shrink-0">{bk.code}</p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {b.notes && (
-                          <div className="px-5 py-3 border-t border-[#1a1a1a] bg-[#111]">
-                            <p className="text-xs text-gray-600 mb-1">notitie</p>
-                            <p className="text-xs text-gray-400">{b.notes}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
+              {upcoming.map(b=>(
+                <div key={b.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-white/2 transition-colors">
+                  <div className="shrink-0 w-10 h-10 rounded-xl bg-[#2176d4]/10 flex flex-col items-center justify-center">
+                    <p className="text-[9px] font-bold text-[#2176d4]/70 uppercase leading-none">{formatShortDate(b.date).split(' ')[0]}</p>
+                    <p className="text-sm font-black text-[#2176d4] leading-none mt-0.5">{b.time}</p>
                   </div>
-                )
-              })}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-white text-sm truncate">{b.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{b.service}</p>
+                  </div>
+                  <p className="text-xs text-gray-600 shrink-0">{formatShortDate(b.date)}</p>
+                </div>
+              ))}
             </div>
           )}
         </div>
