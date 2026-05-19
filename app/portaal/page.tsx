@@ -1995,6 +1995,9 @@ function SettingsView() {
   const timeOptions: string[] = []
   for(let h=6;h<=22;h++) for(let m=0;m<60;m+=30)
     timeOptions.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`)
+  const timeOptions15: string[] = []
+  for(let h=6;h<=22;h++) for(let m=0;m<60;m+=15)
+    timeOptions15.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`)
 
   const dayOrder = ['1','2','3','4','5','6','0']
 
@@ -2044,12 +2047,12 @@ function SettingsView() {
                         <span className="text-amber-400/60 text-xs font-bold shrink-0">Pauze</span>
                         <select value={brk.start} onChange={e => updateBreak(day, i, {start: e.target.value})}
                           className="bg-[#1a1a1a] border-2 border-amber-700/30 text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-amber-500 transition-colors">
-                          {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                          {timeOptions15.map(t => <option key={t} value={t}>{t}</option>)}
                         </select>
                         <span className="text-gray-500 font-bold text-sm">→</span>
                         <select value={brk.end} onChange={e => updateBreak(day, i, {end: e.target.value})}
                           className="bg-[#1a1a1a] border-2 border-amber-700/30 text-white rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-amber-500 transition-colors">
-                          {timeOptions.filter(t => t > brk.start).map(t => <option key={t} value={t}>{t}</option>)}
+                          {timeOptions15.filter(t => t > brk.start).map(t => <option key={t} value={t}>{t}</option>)}
                         </select>
                         <button onClick={() => removeBreak(day, i)}
                           className="w-7 h-7 flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors text-lg leading-none">×</button>
