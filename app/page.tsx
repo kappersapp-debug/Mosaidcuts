@@ -393,6 +393,8 @@ export default function BookingPage() {
       const bd = await br.json()
       if (!br.ok) { setError(bd.error ?? 'Boeking mislukt'); return }
       saveCustomerCookie(contact.name, contact.phone, contact.email)
+      savedEmailRef.current = contact.email
+      setIsReturning(true)
       setBooking(bd)
       setStep('confirmation')
     } catch {
@@ -470,8 +472,12 @@ export default function BookingPage() {
     setWaitlistLoading(true)
     const skipVerify = !waitlistForm.email || (isReturning && waitlistForm.email.toLowerCase() === savedEmailRef.current.toLowerCase())
     if (skipVerify) {
-      await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: waitlistForm.name, phone: waitlistForm.phone, email: waitlistForm.email, note: waitlistForm.note, preferred_date: date, service: service?.name ?? '' }) })
+      try {
+        const wr = await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: waitlistForm.name, phone: waitlistForm.phone, email: waitlistForm.email, note: waitlistForm.note, preferred_date: date, service: service?.name ?? '' }) })
+        const wd = await wr.json()
+        if (!wr.ok) { setWaitlistError(wd.error ?? 'Aanmelding mislukt'); setWaitlistLoading(false); return }
+      } catch { setWaitlistError('Netwerkfout'); setWaitlistLoading(false); return }
       if (waitlistForm.email) {
         saveCustomerCookie(waitlistForm.name, waitlistForm.phone, waitlistForm.email)
         savedEmailRef.current = waitlistForm.email
@@ -499,8 +505,10 @@ export default function BookingPage() {
         body: JSON.stringify({ email: waitlistForm.email, code: waitlistCodeDigits.join('') }) })
       const vd = await vr.json()
       if (!vr.ok || !vd.valid) { setWaitlistError(vd.error ?? 'Ongeldige code'); setWaitlistLoading(false); return }
-      await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const wr = await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: waitlistForm.name, phone: waitlistForm.phone, email: waitlistForm.email, note: waitlistForm.note, preferred_date: date, service: service?.name ?? '' }) })
+      const wd = await wr.json()
+      if (!wr.ok) { setWaitlistError(wd.error ?? 'Aanmelding mislukt'); setWaitlistLoading(false); return }
       saveCustomerCookie(waitlistForm.name, waitlistForm.phone, waitlistForm.email)
       savedEmailRef.current = waitlistForm.email
       setIsReturning(true)
