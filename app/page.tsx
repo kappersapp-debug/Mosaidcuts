@@ -763,7 +763,6 @@ export default function BookingPage() {
                     if (slots.length === 0) return (
                       <div className="py-2">
                         <p className="text-center text-gray-500 py-4 font-medium">Geen beschikbare tijden op deze dag</p>
-                        {waitlistUI}
                       </div>
                     )
                     return (

@@ -24,6 +24,31 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Naam en datum zijn vereist' }, { status: 400 })
   }
 
+  // Validate date is not blocked and day is open
+  const { data: settingsRows } = await supabaseAdmin.from('settings').select('key, value')
+  const settings: Record<string, string> = {}
+  for (const row of settingsRows ?? []) settings[row.key] = row.value
+
+  if (settings.blocked_dates) {
+    const blocked: string[] = JSON.parse(settings.blocked_dates)
+    if (blocked.includes(preferred_date)) {
+      return Response.json({ error: 'Deze dag is niet beschikbaar' }, { status: 409 })
+    }
+  }
+
+  const dow = new Date(preferred_date + 'T12:00:00').getDay()
+  if (settings.day_schedule) {
+    const schedule: Record<string, { open: boolean }> = JSON.parse(settings.day_schedule)
+    if (!schedule[String(dow)]?.open) {
+      return Response.json({ error: 'Deze dag is niet beschikbaar' }, { status: 409 })
+    }
+  } else if (settings.availability) {
+    const avail: Record<string, boolean> = JSON.parse(settings.availability)
+    if (avail[String(dow)] === false) {
+      return Response.json({ error: 'Deze dag is niet beschikbaar' }, { status: 409 })
+    }
+  }
+
   entry.count += 1
   if (entry.count >= 10) {
     entry.lockedUntil = now + 15 * 60 * 1000
