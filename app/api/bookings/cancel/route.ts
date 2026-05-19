@@ -39,8 +39,8 @@ export async function GET(request: Request) {
   if (!code) return Response.json({ status: 'not_found' })
 
   const { data: active } = await supabaseAdmin
-    .from('bookings').select('id').eq('code', code).single()
-  if (active) return Response.json({ status: 'active' })
+    .from('bookings').select('id, name, service, price, duration, date, time').eq('code', code).single()
+  if (active) return Response.json({ status: 'active', name: active.name, service: active.service, price: active.price, duration: active.duration, date: active.date, time: active.time })
 
   const { data: cancelled } = await supabaseAdmin
     .from('cancelled_bookings').select('code').eq('code', code).single()

@@ -315,6 +315,31 @@ export default function BookingPage() {
         })
         .catch(() => setCancelStatus('active'))
     }
+
+    // Handle reschedule link from email (?verzet=MSCXXXXX)
+    const rescheduleCode = params.get('verzet')
+    if (rescheduleCode) {
+      const code = rescheduleCode.toUpperCase()
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setBooking({ code, service: '', price: 0, duration: 0, date: '', time: '', name: '' })
+      setStep('confirmation')
+      setCancelStatus('active')
+      setShowReschedule(true)
+      fetch(`/api/bookings/cancel?code=${encodeURIComponent(code)}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.status === 'active' && d.duration) {
+            setBooking({ code, service: d.service ?? '', price: d.price ?? 0, duration: d.duration, date: d.date ?? '', time: d.time ?? '', name: d.name ?? '' })
+            const today = new Date()
+            const m = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`
+            fetchMonthAvailability(m, d.duration)
+          } else {
+            setCancelStatus(d.status ?? 'not_found')
+            setShowReschedule(false)
+          }
+        })
+        .catch(() => {})
+    }
   }, [])
 
   async function fetchMonthAvailability(month: string, dur: number) {

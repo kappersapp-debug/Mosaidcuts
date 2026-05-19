@@ -135,7 +135,9 @@ export async function POST(request: Request) {
   if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_BASE_URL) {
     console.warn('[MoSaidCuts] NEXT_PUBLIC_BASE_URL is niet ingesteld in productie — annuleerlinks wijzen naar localhost')
   }
-  const cancelUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'}/?annuleer=${code}`
+  const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'
+  const cancelUrl = `${base}/?annuleer=${code}`
+  const rescheduleUrl = `${base}/?verzet=${code}`
 
   try {
     await transporter.sendMail({
@@ -158,10 +160,8 @@ export async function POST(request: Request) {
               <p style="margin:6px 0;"><strong>Prijs:</strong> €${price}</p>
             </div>
             <div style="text-align:center;margin:24px 0;">
-              <a href="${cancelUrl}"
-                style="display:inline-block;background:#dc2626;color:#fff;font-weight:700;padding:12px 28px;border-radius:10px;text-decoration:none;font-size:15px;">
-                Afspraak annuleren
-              </a>
+              <a href="${rescheduleUrl}" style="display:inline-block;background:#1d4ed8;color:#fff;font-weight:700;padding:12px 22px;border-radius:10px;text-decoration:none;font-size:14px;margin-right:8px;">Afspraak verzetten</a>
+              <a href="${cancelUrl}" style="display:inline-block;background:#dc2626;color:#fff;font-weight:700;padding:12px 22px;border-radius:10px;text-decoration:none;font-size:14px;">Afspraak annuleren</a>
             </div>
             <p style="color:#888;font-size:12px;text-align:center;">Of gebruik boekingscode <strong>${code}</strong> op de website.</p>
           </div>
