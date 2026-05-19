@@ -160,8 +160,8 @@ export async function POST(request: Request) {
               <p style="margin:6px 0;"><strong>Prijs:</strong> €${price}</p>
             </div>
             <div style="text-align:center;margin:24px 0;">
-              <a href="${rescheduleUrl}" style="display:inline-block;background:#1d4ed8;color:#fff;font-weight:700;padding:12px 22px;border-radius:10px;text-decoration:none;font-size:14px;margin-right:8px;">Afspraak verzetten</a>
-              <a href="${cancelUrl}" style="display:inline-block;background:#dc2626;color:#fff;font-weight:700;padding:12px 22px;border-radius:10px;text-decoration:none;font-size:14px;">Afspraak annuleren</a>
+              <a href="${rescheduleUrl}" style="display:block;background:#1d4ed8;color:#fff;font-weight:700;padding:13px 22px;border-radius:10px;text-decoration:none;font-size:15px;margin-bottom:10px;">Afspraak verzetten</a>
+              <a href="${cancelUrl}" style="display:block;background:#dc2626;color:#fff;font-weight:700;padding:13px 22px;border-radius:10px;text-decoration:none;font-size:15px;">Afspraak annuleren</a>
             </div>
             <p style="color:#888;font-size:12px;text-align:center;">Of gebruik boekingscode <strong>${code}</strong> op de website.</p>
           </div>
