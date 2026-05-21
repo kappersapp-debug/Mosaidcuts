@@ -21,20 +21,22 @@ export async function GET() {
   const mondayStr = fmt(mondayNl)
   const sundayStr = fmt(sundayNl)
 
-  const [{ data: todayBookings }, { data: weekBookings }, { data: allBookings }] = await Promise.all([
+  const monthStart = `${tyr}-${String(tmo).padStart(2,'0')}-01`
+  const monthEnd = `${tyr}-${String(tmo).padStart(2,'0')}-${String(new Date(tyr, tmo, 0).getDate()).padStart(2,'0')}`
+
+  const [{ data: todayBookings }, { data: weekBookings }, { data: monthBookings }] = await Promise.all([
     supabaseAdmin.from('bookings').select('*').eq('date', todayStr),
     supabaseAdmin.from('bookings').select('price').gte('date', mondayStr).lte('date', sundayStr),
-    supabaseAdmin.from('bookings').select('email'),
+    supabaseAdmin.from('bookings').select('id').gte('date', monthStart).lte('date', monthEnd),
   ])
 
   const weekRevenue = (weekBookings ?? []).reduce((sum, b) => sum + (b.price ?? 0), 0)
-  const uniqueEmails = new Set((allBookings ?? []).map(b => b.email).filter(Boolean)).size
 
   return Response.json({
     today: (todayBookings ?? []).length,
     week: (weekBookings ?? []).length,
     weekRevenue,
-    totalCustomers: uniqueEmails,
+    monthCustomers: (monthBookings ?? []).length,
     todayBookings: todayBookings ?? [],
   })
 }

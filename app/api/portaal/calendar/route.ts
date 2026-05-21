@@ -21,7 +21,6 @@ export async function GET(req: NextRequest) {
   const { data: bookings } = await supabaseAdmin
     .from('bookings')
     .select('code, name, service, price, date, time, duration, phone')
-    .gte('date', today)
     .order('date', { ascending: true })
     .order('time', { ascending: true })
 

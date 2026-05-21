@@ -431,7 +431,7 @@ function isBreak(slot: string, breaks: {start: string; end: string}[]) {
 }
 
 function DashboardView({ onNavigate }: { onNavigate: (view: View) => void }) {
-  const [stats, setStats] = useState<{today:number;week:number;weekRevenue:number;totalCustomers:number;todayBookings:Booking[]}|null>(null)
+  const [stats, setStats] = useState<{today:number;week:number;weekRevenue:number;monthCustomers:number;todayBookings:Booking[]}|null>(null)
   const [upcoming, setUpcoming] = useState<Booking[]>([])
   const [workSlots, setWorkSlots] = useState<string[]>(generateWorkSlots())
   const [dayBreaks, setDayBreaks] = useState<BreakSlot[]>([])
@@ -528,11 +528,11 @@ function DashboardView({ onNavigate }: { onNavigate: (view: View) => void }) {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           {label:'Vandaag', value:stats?.today??'—', sub:'afspraken', gold:true, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>},
           {label:'Deze week', value:stats?.week??'—', sub:'afspraken', gold:false, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>},
-
+          {label:'Klanten deze maand', value:stats?.monthCustomers??'—', sub:'afspraken', gold:false, icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>},
           {label:'Wachtlijst', value:waitlistCount??'—', sub:'openstaand', gold:false, amber: waitlistCount !== null && waitlistCount > 0, onClick:()=>onNavigate('management'), icon:<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 6.75h7.5M8.25 12h7.5m-7.5 5.25H12M3 3.375C3 2.339 3.84 1.5 4.875 1.5H7.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125H4.875A1.875 1.875 0 013 6.375V3.375zM3 14.625c0-1.036.84-1.875 1.875-1.875H7.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125H4.875A1.875 1.875 0 013 17.625v-3zM13.5 3.375c0-1.036.84-1.875 1.875-1.875h2.625A1.875 1.875 0 0119.875 3.375v3A1.875 1.875 0 0118 8.25h-2.625A1.875 1.875 0 0113.5 6.375v-3zM13.5 14.625c0-1.036.84-1.875 1.875-1.875h2.625A1.875 1.875 0 0119.875 14.625v3A1.875 1.875 0 0118 19.5h-2.625A1.875 1.875 0 0113.5 17.625v-3z"/></svg>},
         ].map((c,i)=>(
           <div key={c.label} style={{animationDelay:`${i*60}ms`}}
